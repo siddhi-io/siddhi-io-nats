@@ -45,6 +45,9 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Contains test cases for NATS source.
+ */
 public class NATSSourceTestCase {
 
     private Logger log = Logger.getLogger(NATSSourceTestCase.class);

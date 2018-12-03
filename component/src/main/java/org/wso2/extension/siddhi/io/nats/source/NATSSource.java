@@ -330,7 +330,6 @@ public class NATSSource extends Source {
             this.sequenceNumber = optionHolder.validateAndGetStaticValue(NATSConstants.SUBSCRIPTION_SEQUENCE);
         }
         NATSUtils.validateNatsUrl(natsUrl, sourceEventListener.getStreamDefinition().getId());
-
     }
 }
 

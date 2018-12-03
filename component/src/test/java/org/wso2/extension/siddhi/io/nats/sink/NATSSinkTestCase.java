@@ -36,6 +36,9 @@ import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * Contains test cases for NATS sink.
+ */
 public class NATSSinkTestCase {
     private Logger log = Logger.getLogger(NATSSinkTestCase.class);
     private int port;
