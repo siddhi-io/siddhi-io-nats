@@ -91,7 +91,7 @@ public class NATSSinkTestCase {
      * if a property missing from the siddhi stan sink which defined as mandatory in the extension definition, then
      * {@link SiddhiAppValidationException} will be thrown.
      */
-    @Test
+    @Test(expectedExceptions = SiddhiAppValidationException.class, dependsOnMethods = "natsSimplePublishTest")
     public void testMissingNatsMandatoryProperty(){
         SiddhiManager siddhiManager = new SiddhiManager();
         String inStreamDefinition = "@App:name('Test-plan2')\n"
@@ -101,20 +101,17 @@ public class NATSSinkTestCase {
                 + "cluster.id='test-cluster'"
                 + ")"
                 + "define stream inputStream (name string, age int, country string);";
-        try {
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
-            Assert.fail();
-        } catch (SiddhiAppValidationException e) {
-            Assert.assertTrue(e.getMessage().contains("Option 'destination' does not exist in the configuration of "
-                    + "'sink:nats'"));
-        }
+
+        siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
+        siddhiManager.shutdown();
     }
 
     /**
-     * If invalid NATS url provided then {@link SiddhiAppCreationException} will be thrown
+     * If invalid NATS url provided then {@link SiddhiAppValidationException} will be thrown
      */
-    @Test
-    public void testInvalidNatsUrl(){
+    @Test(expectedExceptions = SiddhiAppValidationException.class,
+            dependsOnMethods = "testMissingNatsMandatoryProperty")
+    public void testInvalidNatsUrl() {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inStreamDefinition = "@App:name('Test-plan3')\n"
                 + "@sink(type='nats', @map(type='xml'), "
@@ -125,19 +122,15 @@ public class NATSSinkTestCase {
                 + ")"
                 + "define stream inputStream (name string, age int, country string);";
 
-        try {
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
-            Assert.fail();
-        } catch (SiddhiAppValidationException e) {
-            Assert.assertTrue(e.getMessage().contains("Invalid NATS url"));
-        }
+        siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
+        siddhiManager.shutdown();
     }
 
     /**
      * if the client.id is not given by the user in the extension headers, then a randomly generated client id will
      * be used.
      */
-    @Test()
+    @Test(dependsOnMethods = "testInvalidNatsUrl")
     public void testOptionalClientId() throws InterruptedException, TimeoutException, IOException {
         ResultContainer resultContainer = new ResultContainer(2,3);
         NATSClient NATSClient = new NATSClient("test-cluster","test-plan4","nats://localhost:"
@@ -171,7 +164,7 @@ public class NATSSinkTestCase {
      * If a single stream has multiple sink annotations then all the events from the stream should be passed to
      * the given subjects.
      */
-    @Test
+    @Test(dependsOnMethods = "testOptionalClientId")
     public void testMultipleSinkSingleStream() throws InterruptedException, TimeoutException, IOException {
         ResultContainer resultContainer = new ResultContainer(8,3);
         NATSClient NATSClient = new NATSClient("test-cluster","nats-test-plan5",
@@ -217,7 +210,7 @@ public class NATSSinkTestCase {
     /**
      * Test the NATS sink configurations with mandatory parameters only.
      */
-    @Test
+    @Test(dependsOnMethods = "testMultipleSinkSingleStream")
     public void testNatsSinkWithMandatoryConfigurations() throws InterruptedException, IOException, TimeoutException {
         ResultContainer resultContainer = new ResultContainer(2,3);
         NATSClient NATSClient = new NATSClient("test-cluster","stan_test6","nats://localhost:"
@@ -250,7 +243,7 @@ public class NATSSinkTestCase {
      * If invalid cluster name is provided in NATS sink configurations then {@link ConnectionUnavailableException}
      * should have been thrown. Here incorrect cluster id provided. Hence the connection will fail.
      */
-    @Test
+    @Test(dependsOnMethods = "testNatsSinkWithMandatoryConfigurations")
     public void testIncorrectClusterName() throws InterruptedException {
         log.info("Test with connection unavailable exception");
         log = Logger.getLogger(Sink.class);
@@ -279,7 +272,7 @@ public class NATSSinkTestCase {
      * {@link ConnectionUnavailableException} should have been thrown. Here incorrect cluster url is provided hence the
      * connection will fail.
      */
-    @Test
+    @Test(dependsOnMethods = "testIncorrectClusterName")
     public void testIncorrectNatsServerUrl() throws InterruptedException {
         log.info("Test with connection unavailable exception");
         log = Logger.getLogger(Sink.class);
@@ -310,7 +303,7 @@ public class NATSSinkTestCase {
      * If the map annotation is not included in the sink annotation then {@link SiddhiAppCreationException} should be
      * thrown.
      */
-    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class, dependsOnMethods = "testIncorrectNatsServerUrl")
     public void testMissingMappingAnnotation() {
         SiddhiAppRuntime executionPlanRuntime = null;
         try {

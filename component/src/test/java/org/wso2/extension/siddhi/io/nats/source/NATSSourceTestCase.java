@@ -31,7 +31,6 @@ import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.stream.input.source.Source;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
@@ -122,7 +121,7 @@ public class NATSSourceTestCase {
      * if a property missing from the siddhi stan source which defined as mandatory in the extension definition, then
      * {@link SiddhiAppValidationException} will be thrown.
      */
-    @Test(dependsOnMethods = "testNatsBasicSubscribtion")
+    @Test(dependsOnMethods = "testNatsBasicSubscribtion", expectedExceptions = SiddhiAppValidationException.class)
     public void testMissingNatsMandatoryProperty(){
         SiddhiManager siddhiManager = new SiddhiManager();
         String inStreamDefinition = "@App:name(\"Test-plan2\")"
@@ -137,20 +136,15 @@ public class NATSSourceTestCase {
                 + "select *  "
                 + "insert into outputStream;";
 
-        try {
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
-            Assert.fail();
-        } catch (SiddhiAppValidationException e) {
-            Assert.assertTrue(e.getMessage().contains("'destination' 'static' option is not defined in the "
-                    + "configuration of source:nats"));
-        }
+        siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
         siddhiManager.shutdown();
     }
 
     /**
-     * If invalid NATS url provided then {@link SiddhiAppCreationException} will be thrown
+     * If invalid NATS url provided then {@link SiddhiAppValidationException} will be thrown
      */
-    @Test(dependsOnMethods = "testMissingNatsMandatoryProperty")
+    @Test(dependsOnMethods = "testMissingNatsMandatoryProperty",
+            expectedExceptions = SiddhiAppValidationException.class)
     public void testInvalidNatsUrl(){
         SiddhiManager siddhiManager = new SiddhiManager();
         String inStreamDefinition = "@App:name('Test-plan3')"
@@ -166,12 +160,7 @@ public class NATSSourceTestCase {
                 + "select *  "
                 + "insert into outputStream;";
 
-        try {
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
-            Assert.fail();
-        } catch (SiddhiAppValidationException e) {
-            Assert.assertTrue(e.getMessage().contains("Invalid NATS url"));
-        }
+        siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
         siddhiManager.shutdown();
     }
 
