@@ -97,7 +97,6 @@ import java.util.concurrent.atomic.AtomicInteger;
                         optional = true,
                         defaultValue = "None"
                 )
-
         },
         examples = {
                 @Example(description = "This example shows how to subscribe to a NATS subject with all supporting "

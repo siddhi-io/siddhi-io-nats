@@ -49,7 +49,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Contains test cases for NATS source.
  */
 public class NATSSourceTestCase {
-
     private Logger log = Logger.getLogger(NATSSourceTestCase.class);
     private String clientId;
     private AtomicInteger eventCounter = new AtomicInteger(0);
@@ -105,13 +104,13 @@ public class NATSSourceTestCase {
             }
         });
         executionPlanRuntime.start();
-        Thread.sleep(1000);
+        Thread.sleep(100);
 
         NATSClient.publish("nats-test1","<events><event><name>JAMES</name><age>22</age>"
                + "<country>US</country></event></events>");
         NATSClient.publish("nats-test1","<events><event><name>MIKE</name><age>22</age>"
                 + "<country>GERMANY</country></event></events>");
-        Thread.sleep(1000);
+        Thread.sleep(100);
 
         Assert.assertTrue(resultContainer.assertMessageContent("JAMES"));
         Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
@@ -225,7 +224,6 @@ public class NATSSourceTestCase {
                 }
             }
         });
-
         inStream2RT.addCallback("inputStream2", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
@@ -258,12 +256,11 @@ public class NATSSourceTestCase {
                 + "<country>US</country></event></events>");
         NATSClient.publish("nats-test4","<events><event><name>LAKE</name><age>19</age>"
                 + "<country>GERMANY</country></event></events>");
-        Thread.sleep(3000);
+        Thread.sleep(1000);
 
         Assert.assertTrue(instream1Count.get() != 0, "Total events should be shared between clients");
         Assert.assertTrue(instream2Count.get() != 0, "Total events should be shared between clients");
         Assert.assertEquals(instream1Count.get() + instream2Count.get(), 10);
-
         siddhiManager.shutdown();
         NATSClient.close();
     }
@@ -303,7 +300,6 @@ public class NATSSourceTestCase {
         });
         executionPlanRuntime.start();
         Thread.sleep(1000);
-
         NATSClient.publish("nats-test1","<events><event><name>JAMES</name><age>22</age>"
                 + "<country>US</country></event></events>");
         NATSClient.publish("nats-test1","<events><event><name>MIKE</name><age>22</age>"
@@ -357,7 +353,7 @@ public class NATSSourceTestCase {
             }
         });
         executionPlanRuntime.start();
-        Thread.sleep(1000);
+        Thread.sleep(300);
 
         NATSClient.publish("nats-test6-sub1","<events><event><name>JAMES</name><age>22</age>"
                 + "<country>US</country></event></events>");
@@ -367,7 +363,7 @@ public class NATSSourceTestCase {
                 + "<country>US</country></event></events>");
         NATSClient.publish("nats-test6-sub2","<events><event><name>SMITH</name><age>22</age>"
                 + "<country>GERMANY</country></event></events>");
-        Thread.sleep(1000);
+        Thread.sleep(300);
 
         Assert.assertTrue(resultContainer.assertMessageContent("JAMES"));
         Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
@@ -414,16 +410,14 @@ public class NATSSourceTestCase {
         Collection<List<Source>> sources = executionPlanRuntime.getSources();
         executionPlanRuntime.start();
         sources.forEach(e -> e.forEach(Source::pause));
-
-        Thread.sleep(1000);
+        Thread.sleep(300);
 
         NATSClient.publish("nats-test7","<events><event><name>JAMES</name><age>22</age>"
                 + "<country>US</country></event></events>");
         sources.forEach(e -> e.forEach(Source::resume));
-
         NATSClient.publish("nats-test7","<events><event><name>MIKE</name><age>22</age>"
                 + "<country>GERMANY</country></event></events>");
-        Thread.sleep(1000);
+        Thread.sleep(300);
 
         Assert.assertTrue(resultContainer.assertMessageContent("JAMES"));
         Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
@@ -464,14 +458,13 @@ public class NATSSourceTestCase {
             }
         });
         executionPlanRuntime.start();
-        Thread.sleep(1000);
+        Thread.sleep(300);
 
         NATSClient.publish("nats-test8","<events><event><name>JAMES</name><age>22</age>"
                 + "<country>US</country></event></events>");
         NATSClient.publish("nats-test8","<events><event><name>MIKE</name><age>22</age>"
                 + "<country>GERMANY</country></event></events>");
-        Thread.sleep(1000);
-
+        Thread.sleep(300);
         Assert.assertTrue(resultContainer.assertMessageContent("JAMES"));
         Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
         siddhiManager.shutdown();
@@ -504,8 +497,7 @@ public class NATSSourceTestCase {
 
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
         executionPlanRuntime.start();
-        Thread.sleep(1000);
-
+        Thread.sleep(300);
         Assert.assertTrue(appender.getMessages().contains("Error while connecting to NATS server at destination: "
                 + "nats-test9"));
         siddhiManager.shutdown();
@@ -538,8 +530,7 @@ public class NATSSourceTestCase {
 
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
         executionPlanRuntime.start();
-        Thread.sleep(1000);
-
+        Thread.sleep(300);
         Assert.assertTrue(appender.getMessages().contains("Error while connecting to NATS server at destination: "
                 + "nats-test10"));
         siddhiManager.shutdown();
@@ -575,8 +566,7 @@ public class NATSSourceTestCase {
                 + "<country>US</country></event></events>");
         NATSClient.publish("nats-test11","<events><event><name>LAKE</name><age>19</age>"
                 + "<country>GERMANY</country></event></events>");
-        Thread.sleep(3000);
-
+        Thread.sleep(1000);
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String siddhiApp = "@App:name(\"Test-plan11\")"
@@ -604,7 +594,7 @@ public class NATSSourceTestCase {
             }
         });
         executionPlanRuntime.start();
-        Thread.sleep(1000);
+        Thread.sleep(300);
 
         Assert.assertTrue(resultContainer.assertMessageContent("ALICE"));
         Assert.assertTrue(resultContainer.assertMessageContent("BOP"));
@@ -612,7 +602,6 @@ public class NATSSourceTestCase {
         Assert.assertTrue(resultContainer.assertMessageContent("RAHEEM"));
         Assert.assertTrue(resultContainer.assertMessageContent("JANE"));
         Assert.assertTrue(resultContainer.assertMessageContent("LAKE"));
-
         siddhiManager.shutdown();
         NATSClient.close();
     }
@@ -639,7 +628,6 @@ public class NATSSourceTestCase {
                 + "<country>GERMANY</country></event></events>");
         NATSClient.publish("nats-test12","<events><event><name>ALICE</name><age>32</age>"
                 + "<country>US</country></event></events>");
-
 
         AtomicInteger instream1Count = new AtomicInteger(0);
         AtomicInteger instream2Count = new AtomicInteger(0);
@@ -670,11 +658,8 @@ public class NATSSourceTestCase {
                 + "define stream inputStream2 (name string, age int, country string);";
 
         clientId = "Test-Plan-12_" + new Date().getTime();
-
-
         SiddhiAppRuntime inStream1RT = siddhiManager.createSiddhiAppRuntime(inStreamDefinition1);
         SiddhiAppRuntime inStream2RT = siddhiManager.createSiddhiAppRuntime(inStreamDefinition2);
-
 
         inStream1RT.addCallback("inputStream1", new StreamCallback() {
             @Override
@@ -685,7 +670,6 @@ public class NATSSourceTestCase {
                 }
             }
         });
-
         inStream2RT.addCallback("inputStream2", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
@@ -708,12 +692,11 @@ public class NATSSourceTestCase {
                 + "<country>US</country></event></events>");
         NATSClient.publish("nats-test12","<events><event><name>LAKE</name><age>19</age>"
                 + "<country>GERMANY</country></event></events>");
-        Thread.sleep(1500);
+        Thread.sleep(1000);
 
         Assert.assertTrue(instream1Count.get() != 0, "Total events should be shared between clients");
         Assert.assertTrue(instream2Count.get() != 0, "Total events should be shared between clients");
         Assert.assertEquals(instream1Count.get() + instream2Count.get(), 7);
-
         siddhiManager.shutdown();
         NATSClient.close();
     }
@@ -746,7 +729,6 @@ public class NATSSourceTestCase {
                 + "insert into outputStream;";
 
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
-
         StreamCallback streamCallback = new StreamCallback() {
             @Override
             public void receive(Event[] events) {

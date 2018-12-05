@@ -81,10 +81,9 @@ public class NATSSinkTestCase {
 
         inputStream.send(new Object[]{"JAMES", 23, "USA"});
         inputStream.send(new Object[]{"MIKE", 23, "Germany"});
-        Thread.sleep(1000);
+        Thread.sleep(500);
         Assert.assertTrue(resultContainer.assertMessageContent("JAMES"));
         Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
-
         siddhiManager.shutdown();
     }
 
@@ -102,7 +101,6 @@ public class NATSSinkTestCase {
                 + "cluster.id='test-cluster'"
                 + ")"
                 + "define stream inputStream (name string, age int, country string);";
-
         try {
             SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
             Assert.fail();
@@ -163,10 +161,9 @@ public class NATSSinkTestCase {
 
         inputStream.send(new Object[]{"JAMES", 23, "USA"});
         inputStream.send(new Object[]{"MIKE", 23, "Germany"});
-        Thread.sleep(1000);
+        Thread.sleep(500);
         Assert.assertTrue(resultContainer.assertMessageContent("JAMES"));
         Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
-
         siddhiManager.shutdown();
     }
 
@@ -208,14 +205,12 @@ public class NATSSinkTestCase {
         inputStream.send(new Object[]{"MIKE", 23, "Germany"});
         inputStream.send(new Object[]{"SMITH", 23, "RSA"});
         inputStream.send(new Object[]{"MILLER", 23, "WI"});
-
-        Thread.sleep(1000);
+        Thread.sleep(500);
 
         Assert.assertTrue(resultContainer.assertMessageContent("JAMES"));
         Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
         Assert.assertTrue(resultContainer.assertMessageContent("SMITH"));
         Assert.assertTrue(resultContainer.assertMessageContent("MILLER"));
-
         siddhiManager.shutdown();
     }
 
@@ -245,10 +240,9 @@ public class NATSSinkTestCase {
 
         inputStream.send(new Object[]{"JAMES", 23, "USA"});
         inputStream.send(new Object[]{"MIKE", 23, "Germany"});
-        Thread.sleep(1000);
+        Thread.sleep(500);
         Assert.assertTrue(resultContainer.assertMessageContent("JAMES"));
         Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
-
         siddhiManager.shutdown();
     }
 
@@ -275,8 +269,7 @@ public class NATSSinkTestCase {
 
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
         executionPlanRuntime.start();
-        Thread.sleep(1000);
-
+        Thread.sleep(500);
         Assert.assertTrue(appender.getMessages().contains("Error while connecting to NATS server at destination:"));
         siddhiManager.shutdown();
     }
@@ -308,8 +301,7 @@ public class NATSSinkTestCase {
 
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
         executionPlanRuntime.start();
-        Thread.sleep(1000);
-
+        Thread.sleep(500);
         Assert.assertTrue(appender.getMessages().contains("Error while connecting to NATS server at destination:"));
         siddhiManager.shutdown();
     }

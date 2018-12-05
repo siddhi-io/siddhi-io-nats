@@ -35,7 +35,6 @@ public class ResultContainer {
     private CountDownLatch latch;
     private int timeout = 90;
 
-
     public ResultContainer(int expectedEventCount) {
         eventCount = 0;
         results = new ArrayList<>(expectedEventCount);
