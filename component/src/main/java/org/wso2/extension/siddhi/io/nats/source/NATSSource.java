@@ -145,16 +145,7 @@ public class NATSSource extends Source {
     private NATSMessageProcessor natsMessageProcessor;
     private static final AtomicInteger lastSentSequenceNo = new AtomicInteger(1);
     private String siddhiAppName;
-    /**
-     * The initialization method for {@link Source}, will be called before other methods. Validates and initiates the
-     * NATS properties and other required fields.
-     * @param sourceEventListener After receiving events, the source should trigger onEvent() of this listener.
-     *                            Listener will then pass on the events to the appropriate mappers for processing .
-     * @param optionHolder        Option holder containing static configuration related to the {@link Source}
-     * @param configReader        ConfigReader is used to read the {@link Source} related system configuration.
-     * @param siddhiAppContext    the context of the {@link org.wso2.siddhi.query.api.SiddhiApp} used to get Siddhi
-     *                            related utility functions.
-     */
+
     @Override
     public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
                      String[] requestedTransportPropertyNames, ConfigReader configReader,
@@ -166,21 +157,11 @@ public class NATSSource extends Source {
         initNATSProperties();
     }
 
-    /**
-     * Returns the list of classes which NATS source can output.
-     * @return Array of classes that will be output by the source.
-     */
     @Override
     public Class[] getOutputEventClasses() {
         return new Class[]{String.class, Map.class};
     }
 
-    /**
-     * Initially Called to connect to the NATS server for start retrieving the messages asynchronously .
-     * @param connectionCallback Callback to pass the ConnectionUnavailableException in case of connection failure after
-     *                           initial successful connection. (can be used when events are receiving asynchronously)
-     * @throws ConnectionUnavailableException if it cannot connect to the source backend immediately.
-     */
     @Override
     public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
         try {
@@ -201,9 +182,6 @@ public class NATSSource extends Source {
         subscribe();
     }
 
-    /**
-     * This method can be called when it is needed to disconnect from NATS server.
-     */
     @Override
     public void disconnect() {
         lastSentSequenceNo.set(natsMessageProcessor.getMessageSequenceTracker().get());
@@ -220,25 +198,16 @@ public class NATSSource extends Source {
         }
     }
 
-    /**
-     * Called at the end to clean all the resources consumed by the {@link Source}.
-     */
     @Override
     public void destroy() {
 
     }
 
-    /**
-     * Called to pause event consumption.
-     */
     @Override
     public void pause() {
         natsMessageProcessor.pause();
     }
 
-    /**
-     * Called to resume event consumption.
-     */
     @Override
     public void resume() {
         natsMessageProcessor.resume();

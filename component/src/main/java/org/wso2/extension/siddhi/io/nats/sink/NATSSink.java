@@ -109,32 +109,16 @@ public class NATSSink extends Sink {
     private String clientId;
     private String natsUrl;
 
-    /**
-     * Returns the list of classes which this sink can consume.
-     * @return array of supported classes.
-     */
     @Override
     public Class[] getSupportedInputEventClasses() {
         return new Class[]{String.class};
     }
 
-    /**
-     * @return the list of supported dynamic option keys
-     */
     @Override
     public String[] getSupportedDynamicOptions() {
             return new String[]{NATSConstants.DESTINATION};
     }
 
-    /**
-     * Validate and initiates the NATS properties and required passed parameters.
-     * @param streamDefinition  containing stream definition bind to the {@link Sink}
-     * @param optionHolder      Option holder containing static and dynamic configuration related
-     *                          to the {@link Sink}
-     * @param configReader      to read the sink related system configuration.
-     * @param siddhiAppContext  the context of the {@link org.wso2.siddhi.query.api.SiddhiApp} used to
-     *                          get siddhi related utility functions.
-     */
     @Override
     protected void init(StreamDefinition streamDefinition, OptionHolder optionHolder, ConfigReader configReader,
             SiddhiAppContext siddhiAppContext) {
@@ -143,11 +127,6 @@ public class NATSSink extends Sink {
         validateAndInitNatsProperties();
     }
 
-    /**
-     * Publish the given event to the NATS server.
-     * @param payload        payload of the event based on the supported event class exported by the extensions
-     * @param dynamicOptions holds the dynamic options of this sink and Use this object to obtain dynamic options.
-     */
     @Override
     public void publish(Object payload, DynamicOptions dynamicOptions) {
         String message = (String) payload;
@@ -169,11 +148,6 @@ public class NATSSink extends Sink {
         }
     }
 
-    /**
-     * Initializes the connection to the NATS server.
-     * @throws ConnectionUnavailableException if end point is unavailable the ConnectionUnavailableException thrown
-     *                                        such that the  system will take care retrying for connection
-     */
     @Override
     public void connect() throws ConnectionUnavailableException {
         StreamingConnectionFactory streamingConnectionFactory = new StreamingConnectionFactory(this.clusterId,
@@ -194,9 +168,6 @@ public class NATSSink extends Sink {
         }
     }
 
-    /**
-     * Closes the {@link #streamingConnection} after usage or connection failed.
-     */
     @Override
     public void disconnect() {
         try {
