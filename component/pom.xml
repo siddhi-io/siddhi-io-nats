@@ -130,12 +130,10 @@
                             org.wso2.extension.siddhi.io.nats,
                             org.wso2.extension.siddhi.io.nats.*
                         </Export-Package>
-                        <Import-Package>
-                            ;resolution:=optional
-                        </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                         <Include-Resource>
-                            META-INF=target/classes/META-INF
+                            META-INF=target/classes/META-INF,
+                            {maven-resources}
                         </Include-Resource>
                     </instructions>
                 </configuration>
