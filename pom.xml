@@ -148,6 +148,7 @@
         <nats.version>2.1.0</nats.version>
         <surefire.plugin.version>2.22.0</surefire.plugin.version>
         <surefire.booter.version>2.22.0</surefire.booter.version>
+        <mavan.findbugsplugin.exclude.file>findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
         <testng.version>6.11</testng.version>
         <org.testcontainers.version>1.8.0</org.testcontainers.version>
         <argLine>-Xmx1024m</argLine>

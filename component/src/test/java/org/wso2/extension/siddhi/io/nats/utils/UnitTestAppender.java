@@ -21,6 +21,9 @@ package org.wso2.extension.siddhi.io.nats.utils;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;
 
+/**
+ * Util class to read the logs of test cases.
+ */
 public class UnitTestAppender extends AppenderSkeleton {
     private String messages;
 

@@ -18,7 +18,11 @@
 
 package org.wso2.extension.siddhi.io.nats.utils;
 
-import io.nats.streaming.*;
+import io.nats.streaming.Message;
+import io.nats.streaming.StreamingConnection;
+import io.nats.streaming.StreamingConnectionFactory;
+import io.nats.streaming.Subscription;
+import io.nats.streaming.SubscriptionOptions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -29,6 +33,9 @@ import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * Nats client for running test cases.
+ */
 public class NATSClient {
     private String cluserId;
     private String clientId;
@@ -58,7 +65,7 @@ public class NATSClient {
         try {
             streamingConnection =  streamingConnectionFactory.createConnection();
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
     }
 
