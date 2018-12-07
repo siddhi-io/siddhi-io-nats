@@ -49,7 +49,7 @@ public class NATSMessageProcessor implements MessageHandler {
 
     @Override
     public void onMessage(Message msg) {
-        if (paused) {
+        if (paused) { //spurious wakeup condition is deliberately traded off for performance
             lock.lock();
             try {
                 condition.await();
