@@ -153,4 +153,11 @@
         <org.testcontainers.version>1.8.0</org.testcontainers.version>
         <argLine>-Xmx1024m</argLine>
     </properties>
+
+    <scm>
+        <url>https://github.com/wso2-extensions/siddhi-io-nats.git</url>
+        <developerConnection>scm:git:https://github.com/wso2-extensions/siddhi-io-nats.git</developerConnection>
+        <connection>scm:git:https://github.com/wso2-extensions/siddhi-io-nats.git</connection>
+        <tag>HEAD</tag>
+    </scm>
 </project>
