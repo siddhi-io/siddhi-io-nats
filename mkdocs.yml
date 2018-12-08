@@ -31,5 +31,10 @@ markdown_extensions:
 - codehilite(guess_lang=false)
 pages:
 - Welcome: index.md
-- API Docs:
+- API Docs: null
 - License: license.md
+- API Docs:
+  - 1.0.0: api/1.0.0.md
+  - latest: api/latest.md
+  - ? ''
+    : api/.md
