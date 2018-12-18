@@ -157,14 +157,15 @@ public class NATSSink extends Sink {
         try {
             streamingConnection =  streamingConnectionFactory.createConnection();
         } catch (IOException e) {
-            log.error("Error while connecting to NATS server at destination: " + destination);
+            log.error("Error while connecting to NATS server at destination: " + destination.getValue());
             throw new ConnectionUnavailableException("Error while connecting to NATS server at destination: "
-                    + destination, e);
+                    + destination.getValue(), e);
         } catch (InterruptedException e) {
-            log.error("Error while connecting to NATS server at destination: " + destination + ".The calling thread "
-                    + "is interrupted before the connection can be established.");
+            log.error("Error while connecting to NATS server at destination: " + destination.getValue() +
+                              ".The calling thread is interrupted before the connection can be established.");
             throw new ConnectionUnavailableException("Error while connecting to NATS server at destination: "
-                    + destination + " .The calling thread is interrupted before the connection can be established.", e);
+                    + destination.getValue() + " .The calling thread is interrupted before the connection can be "
+                                                             + "established.", e);
         }
     }
 
