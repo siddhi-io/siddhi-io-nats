@@ -151,7 +151,13 @@
                                     org.wso2.extension.siddhi.io.nats,
                                     org.wso2.extension.siddhi.io.nats.*
                                 </Export-Package>
-                                <DynamicImport-Package>*</DynamicImport-Package>
+                                <Import-Package>
+                                    io.nats.streaming;version="0.0.0",
+                                    org.wso2.siddhi.annotation.*;version="${siddhi.version}",
+                                    org.wso2.siddhi.core.*;version="${siddhi.version}",
+                                    org.wso2.siddhi.query.*;version="${siddhi.version}",
+                                    org.apache.log4j
+                                </Import-Package>
                                 <Include-Resource>
                                     META-INF=target/classes/META-INF,
                                     {maven-resources}
@@ -217,7 +223,13 @@
                             org.wso2.extension.siddhi.io.nats,
                             org.wso2.extension.siddhi.io.nats.*
                         </Export-Package>
-                        <DynamicImport-Package>*</DynamicImport-Package>
+                        <Import-Package>
+                            io.nats.streaming;version="0.0.0",
+                            org.wso2.siddhi.annotation.*;version="${siddhi.version}",
+                            org.wso2.siddhi.core.*;version="${siddhi.version}",
+                            org.wso2.siddhi.query.*;version="${siddhi.version}",
+                            org.apache.log4j
+                        </Import-Package>
                         <Include-Resource>
                             META-INF=target/classes/META-INF,
                             {maven-resources}
