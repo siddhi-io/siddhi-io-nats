@@ -65,7 +65,7 @@ public class NATSClient {
         try {
             streamingConnection =  streamingConnectionFactory.createConnection();
         } catch (IOException | InterruptedException e) {
-            log.error(e.getMessage());
+            log.error("Unable to make a connection to NATS broker at " + natsUrl + ". " + e.getMessage());
         }
     }
 
