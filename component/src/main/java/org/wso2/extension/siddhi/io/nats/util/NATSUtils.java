@@ -21,22 +21,30 @@ package org.wso2.extension.siddhi.io.nats.util;
 
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.Random;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Contains the utility functions required to the NATS extension.
  */
 public class NATSUtils {
     public static void validateNatsUrl(String natsServerUrl, String siddhiStreamName) {
-        String regex = "nats://(\\w*|[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}):(\\d{1,5})";
-        Pattern p = Pattern.compile(regex);
-        Matcher matcher = p.matcher(natsServerUrl);
-        if (!matcher.find()) {
+        try {
+            URI uri = new URI(natsServerUrl);
+            String uriScheme = uri.getScheme();
+            if (!uri.getScheme().equals("nats")) {
+                throw new URISyntaxException(uri.toString(),
+                        "The provided URI scheme '" + uriScheme + "' is invalid; expected 'nats'");
+            }
+            if (uri.getHost() == null || uri.getPort() == -1) {
+                throw new URISyntaxException(uri.toString(),
+                        "URI must have host and port parts");
+            }
+        } catch (URISyntaxException e) {
             throw new SiddhiAppValidationException("Invalid NATS url: " + natsServerUrl + " received for stream: "
-                    + siddhiStreamName + ". Expected url format: nats://<host>:<port>");
+                    + siddhiStreamName + ". Expected url format: nats://<host>:<port>", e);
         }
     }
 
