@@ -29,7 +29,7 @@
     </modules>
     <groupId>org.wso2.extension.siddhi.io.nats</groupId>
     <artifactId>siddhi-io-nats-parent</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.3</version>
     <name>Siddhi IO NATS Extension Parent</name>
     <dependencyManagement>
         <dependencies>
@@ -156,6 +156,6 @@
         <url>https://github.com/wso2-extensions/siddhi-io-nats.git</url>
         <developerConnection>scm:git:https://github.com/wso2-extensions/siddhi-io-nats.git</developerConnection>
         <connection>scm:git:https://github.com/wso2-extensions/siddhi-io-nats.git</connection>
-        <tag>HEAD</tag>
+        <tag>v1.0.3</tag>
     </scm>
 </project>
