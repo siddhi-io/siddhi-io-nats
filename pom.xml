@@ -137,7 +137,7 @@
         </plugins>
     </build>
     <properties>
-        <siddhi.version>5.0.0-m10</siddhi.version>
+        <siddhi.version>5.0.0-m11</siddhi.version>
         <siddhi.version.range>[5.0.0, 6.0.0)</siddhi.version.range>
         <siddhi.doc.gen.version>4.5.0</siddhi.doc.gen.version>
         <log4j.version>1.2.17.wso2v1</log4j.version>
