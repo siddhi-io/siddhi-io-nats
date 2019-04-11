@@ -19,9 +19,9 @@ package org.wso2.extension.siddhi.io.nats.source;
 
 import io.nats.streaming.Message;
 import io.nats.streaming.MessageHandler;
+import io.siddhi.core.stream.input.source.SourceEventListener;
 import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.nats.source.exception.NATSInputAdaptorRuntimeException;
-import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

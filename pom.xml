@@ -29,27 +29,27 @@
     </modules>
     <groupId>org.wso2.extension.siddhi.io.nats</groupId>
     <artifactId>siddhi-io-nats-parent</artifactId>
-    <version>1.0.6-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <name>Siddhi IO NATS Extension Parent</name>
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.wso2.siddhi</groupId>
+                <groupId>io.siddhi</groupId>
                 <artifactId>siddhi-core</artifactId>
                 <version>${siddhi.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.siddhi</groupId>
+                <groupId>io.siddhi</groupId>
                 <artifactId>siddhi-query-api</artifactId>
                 <version>${siddhi.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.siddhi</groupId>
+                <groupId>io.siddhi</groupId>
                 <artifactId>siddhi-annotations</artifactId>
                 <version>${siddhi.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.siddhi</groupId>
+                <groupId>io.siddhi</groupId>
                 <artifactId>siddhi-query-compiler</artifactId>
                 <version>${siddhi.version}</version>
             </dependency>
@@ -125,7 +125,7 @@
             <plugin>
                 <groupId>org.wso2.siddhi</groupId>
                 <artifactId>siddhi-doc-gen</artifactId>
-                <version>${siddhi.version}</version>
+                <version>${siddhi.doc.gen.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -137,12 +137,13 @@
         </plugins>
     </build>
     <properties>
-        <siddhi.version>4.4.9</siddhi.version>
-        <siddhi.version.range>[4.1.0, 5.0.0)</siddhi.version.range>
+        <siddhi.version>5.0.0-m10</siddhi.version>
+        <siddhi.version.range>[5.0.0, 6.0.0)</siddhi.version.range>
+        <siddhi.doc.gen.version>4.5.0</siddhi.doc.gen.version>
         <log4j.version>1.2.17.wso2v1</log4j.version>
         <carbon.transport.version>4.4.15</carbon.transport.version>
-        <siddhi.map.json.version>4.0.15</siddhi.map.json.version>
-        <siddhi.map.xml.version>4.0.11</siddhi.map.xml.version>
+        <siddhi.map.json.version>5.0.1</siddhi.map.json.version>
+        <siddhi.map.xml.version>5.0.0</siddhi.map.xml.version>
         <jacoco.plugin.version>0.7.9</jacoco.plugin.version>
         <nats.version>2.1.0</nats.version>
         <surefire.plugin.version>2.22.0</surefire.plugin.version>

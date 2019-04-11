@@ -21,20 +21,23 @@ import io.nats.streaming.StreamingConnection;
 import io.nats.streaming.StreamingConnectionFactory;
 import io.nats.streaming.Subscription;
 import io.nats.streaming.SubscriptionOptions;
+import io.siddhi.annotation.Example;
+import io.siddhi.annotation.Extension;
+import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.util.DataType;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.stream.ServiceDeploymentInfo;
+import io.siddhi.core.stream.input.source.Source;
+import io.siddhi.core.stream.input.source.SourceEventListener;
+import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
+import io.siddhi.core.util.transport.OptionHolder;
 import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.nats.source.exception.NATSInputAdaptorRuntimeException;
 import org.wso2.extension.siddhi.io.nats.util.NATSConstants;
 import org.wso2.extension.siddhi.io.nats.util.NATSUtils;
-import org.wso2.siddhi.annotation.Example;
-import org.wso2.siddhi.annotation.Extension;
-import org.wso2.siddhi.annotation.Parameter;
-import org.wso2.siddhi.annotation.util.DataType;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
-import org.wso2.siddhi.core.stream.input.source.Source;
-import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
-import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.core.util.transport.OptionHolder;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -129,7 +132,7 @@ import java.util.concurrent.atomic.AtomicInteger;
         }
 )
 
-public class NATSSource extends Source {
+public class NATSSource extends Source<NATSSource.NATSSourceState> {
     private static final Logger log = Logger.getLogger(NATSSource.class);
     private SourceEventListener sourceEventListener;
     private OptionHolder optionHolder;
@@ -143,18 +146,23 @@ public class NATSSource extends Source {
     private String  sequenceNumber;
     private Subscription subscription;
     private NATSMessageProcessor natsMessageProcessor;
-    private static final AtomicInteger lastSentSequenceNo = new AtomicInteger(1);
     private String siddhiAppName;
 
+
+
     @Override
-    public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
-                     String[] requestedTransportPropertyNames, ConfigReader configReader,
-                     SiddhiAppContext siddhiAppContext) {
+    public StateFactory<NATSSourceState> init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
+                             String[] requestedTransportPropertyNames, ConfigReader configReader,
+                             SiddhiAppContext siddhiAppContext) {
         this.sourceEventListener = sourceEventListener;
         this.optionHolder = optionHolder;
-        this.natsMessageProcessor = new NATSMessageProcessor(sourceEventListener, lastSentSequenceNo);
         this.siddhiAppName = siddhiAppContext.getName();
         initNATSProperties();
+        return NATSSourceState::new;
+    }
+
+    @Override protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
+        return null;
     }
 
     @Override
@@ -163,7 +171,8 @@ public class NATSSource extends Source {
     }
 
     @Override
-    public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
+    public void connect(ConnectionCallback connectionCallback, NATSSourceState natsSourceState)
+            throws ConnectionUnavailableException {
         try {
             StreamingConnectionFactory streamingConnectionFactory = new StreamingConnectionFactory(this.clusterId,
                     this.clientId);
@@ -179,12 +188,11 @@ public class NATSSource extends Source {
             throw new ConnectionUnavailableException("Error while connecting to NATS server at destination: "
                     + destination + " .The calling thread is interrupted before the connection can be established.", e);
         }
-        subscribe();
+        subscribe(natsSourceState);
     }
 
     @Override
     public void disconnect() {
-        lastSentSequenceNo.set(natsMessageProcessor.getMessageSequenceTracker().get());
         try {
             if (subscription != null) {
                 subscription.close();
@@ -213,42 +221,19 @@ public class NATSSource extends Source {
         natsMessageProcessor.resume();
     }
 
-    /**
-     * Used to serialize and persist {@link #lastSentSequenceNo} in a configurable interval.
-     * @return stateful objects of the processing element as a map
-     */
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        state.put(siddhiAppName, lastSentSequenceNo.get());
-        return state;
-    }
-
-    /**
-     * Used to get the persisted {@link #lastSentSequenceNo} value in case of client connection failure so that
-     * replay the missing messages/events.
-     * @param map the stateful objects of the processing element as a map.
-     */
-    @Override
-    public void restoreState(Map<String, Object> map) {
-         Object seqObject = map.get(siddhiAppName);
-         if (seqObject != null && sequenceNumber == null) {
-             lastSentSequenceNo.set((int) seqObject);
-         }
-    }
-
-    private void subscribe() {
+    private void subscribe(NATSSourceState natsSourceState) {
         SubscriptionOptions.Builder subscriptionOptionsBuilder = new SubscriptionOptions.Builder();
-        if (sequenceNumber != null) {
-            lastSentSequenceNo.set(Integer.parseInt(sequenceNumber));
+        if (sequenceNumber != null && natsSourceState.lastSentSequenceNo.intValue() <
+                Integer.parseInt(sequenceNumber)) {
+            natsSourceState.lastSentSequenceNo.set(Integer.parseInt(sequenceNumber));
         }
-        subscriptionOptionsBuilder.startAtSequence(lastSentSequenceNo.get());
+        subscriptionOptionsBuilder.startAtSequence(natsSourceState.lastSentSequenceNo.get());
         try {
 
             if (durableName != null) {
                 subscriptionOptionsBuilder.durableName(durableName);
             }
-
+            natsMessageProcessor = new NATSMessageProcessor(sourceEventListener, natsSourceState.lastSentSequenceNo);
             if (queueGroupName != null) {
                 subscription =  streamingConnection.subscribe(destination , queueGroupName, natsMessageProcessor,
                         subscriptionOptionsBuilder.build());
@@ -298,6 +283,36 @@ public class NATSSource extends Source {
             this.sequenceNumber = optionHolder.validateAndGetStaticValue(NATSConstants.SUBSCRIPTION_SEQUENCE);
         }
         NATSUtils.validateNatsUrl(natsUrl, sourceEventListener.getStreamDefinition().getId());
+    }
+
+    class NATSSourceState extends State {
+        private AtomicInteger lastSentSequenceNo = new AtomicInteger(0);
+
+        @Override public boolean canDestroy() {
+            return lastSentSequenceNo.intValue() == 1;
+        }
+
+        /**
+         * Used to serialize and persist {@link #lastSentSequenceNo} in a configurable interval.
+         * @return stateful objects of the processing element as a map
+         */
+        @Override public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            state.put(siddhiAppName, lastSentSequenceNo.get());
+            return state;
+        }
+
+        /**
+         * Used to get the persisted {@link #lastSentSequenceNo} value in case of client connection failure so that
+         * replay the missing messages/events.
+         * @param map the stateful objects of the processing element as a map.
+         */
+        @Override public void restore(Map<String, Object> map) {
+            Object seqObject = map.get(siddhiAppName);
+            if (seqObject != null && sequenceNumber == null) {
+                lastSentSequenceNo.set((int) seqObject);
+            }
+        }
     }
 }
 
