@@ -116,7 +116,7 @@ public class NATSSink extends Sink {
         return new Class[]{String.class};
     }
 
-    @Override protected ServiceDeploymentInfo exposedServiceDeploymentInfo() {
+    @Override protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
         return null;
     }
 
