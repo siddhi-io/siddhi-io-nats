@@ -289,7 +289,7 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
         private AtomicInteger lastSentSequenceNo = new AtomicInteger(0);
 
         @Override public boolean canDestroy() {
-            return lastSentSequenceNo.intValue() == 1;
+            return lastSentSequenceNo.intValue() == 0;
         }
 
         /**
