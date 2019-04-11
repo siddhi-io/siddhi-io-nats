@@ -19,7 +19,7 @@
 package org.wso2.extension.siddhi.io.nats.util;
 
 
-import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
+import io.siddhi.query.api.exception.SiddhiAppValidationException;
 
 import java.net.URI;
 import java.net.URISyntaxException;

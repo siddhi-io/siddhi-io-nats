@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.extension.siddhi.io.nats</groupId>
         <artifactId>siddhi-io-nats-parent</artifactId>
-        <version>1.0.6-SNAPSHOT</version>
+        <version>2.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>siddhi-io-nats</artifactId>
@@ -28,19 +28,19 @@
     <name>Siddhi Extension - NATS </name>
     <dependencies>
         <dependency>
-            <groupId>org.wso2.siddhi</groupId>
+            <groupId>io.siddhi</groupId>
             <artifactId>siddhi-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.siddhi</groupId>
+            <groupId>io.siddhi</groupId>
             <artifactId>siddhi-annotations</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.siddhi</groupId>
+            <groupId>io.siddhi</groupId>
             <artifactId>siddhi-query-compiler</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.siddhi</groupId>
+            <groupId>io.siddhi</groupId>
             <artifactId>siddhi-query-api</artifactId>
         </dependency>
         <dependency>
@@ -83,7 +83,7 @@
                     <plugin>
                         <groupId>org.wso2.siddhi</groupId>
                         <artifactId>siddhi-doc-gen</artifactId>
-                        <version>${siddhi.version}</version>
+                        <version>${siddhi.doc.gen.version}</version>
                         <executions>
                             <execution>
                                 <phase>compile</phase>
@@ -153,9 +153,9 @@
                                 </Export-Package>
                                 <Import-Package>
                                     io.nats.streaming;version="0.0.0",
-                                    org.wso2.siddhi.annotation.*;version="${siddhi.version}",
-                                    org.wso2.siddhi.core.*;version="${siddhi.version}",
-                                    org.wso2.siddhi.query.*;version="${siddhi.version}",
+                                    io.siddhi.annotation.*;version="${siddhi.version}",
+                                    io.siddhi.core.*;version="${siddhi.version}",
+                                    io.siddhi.query.*;version="${siddhi.version}",
                                     org.apache.log4j
                                 </Import-Package>
                                 <Include-Resource>
@@ -226,9 +226,9 @@
                         <Import-Package>
                             io.nats.client;version="0.0.0";resolution:=optional,
                             io.nats.streaming;version="0.0.0";resolution:=optional,
-                            org.wso2.siddhi.annotation.*;version="${siddhi.version.range}",
-                            org.wso2.siddhi.core.*;version="${siddhi.version.range}",
-                            org.wso2.siddhi.query.*;version="${siddhi.version.range}",
+                            io.siddhi.annotation.*;version="${siddhi.version.range}",
+                            io.siddhi.core.*;version="${siddhi.version.range}",
+                            io.siddhi.query.*;version="${siddhi.version.range}",
                             org.apache.log4j
                         </Import-Package>
                         <Include-Resource>

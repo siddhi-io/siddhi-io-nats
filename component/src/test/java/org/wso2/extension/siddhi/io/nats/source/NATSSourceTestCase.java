@@ -17,6 +17,15 @@
  */
 package org.wso2.extension.siddhi.io.nats.source;
 
+import io.siddhi.core.SiddhiAppRuntime;
+import io.siddhi.core.SiddhiManager;
+import io.siddhi.core.event.Event;
+import io.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
+import io.siddhi.core.stream.input.source.Source;
+import io.siddhi.core.stream.output.StreamCallback;
+import io.siddhi.core.util.EventPrinter;
+import io.siddhi.core.util.persistence.InMemoryPersistenceStore;
+import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.apache.log4j.Logger;
 import org.testcontainers.containers.GenericContainer;
 import org.testng.Assert;
@@ -26,15 +35,6 @@ import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.io.nats.utils.NATSClient;
 import org.wso2.extension.siddhi.io.nats.utils.ResultContainer;
 import org.wso2.extension.siddhi.io.nats.utils.UnitTestAppender;
-import org.wso2.siddhi.core.SiddhiAppRuntime;
-import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
-import org.wso2.siddhi.core.stream.input.source.Source;
-import org.wso2.siddhi.core.stream.output.StreamCallback;
-import org.wso2.siddhi.core.util.EventPrinter;
-import org.wso2.siddhi.core.util.persistence.InMemoryPersistenceStore;
-import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -746,13 +746,13 @@ public class NATSSourceTestCase {
         Thread.sleep(300);
         executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
         executionPlanRuntime.addCallback("inputStream", streamCallback);
-        executionPlanRuntime.start();
-        executionPlanRuntime.restoreLastRevision();
-
         natsClient.publish("nats-test13", "<events><event><name>BOP</name><age>28</age>"
                 + "<country>GERMANY</country></event></events>");
         natsClient.publish("nats-test13", "<events><event><name>JAKE</name><age>52</age>"
                 + "<country>US</country></event></events>");
+        executionPlanRuntime.start();
+        executionPlanRuntime.restoreLastRevision();
+
         natsClient.publish("nats-test13", "<events><event><name>RAHEEM</name><age>47</age>"
                 + "<country>GERMANY</country></event></events>");
         natsClient.publish("nats-test13", "<events><event><name>JANE</name><age>36</age>"
