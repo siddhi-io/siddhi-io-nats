@@ -1,7 +1,8 @@
-?siddhi-io-nats
+siddhi-io-nats
 ======================================
 
 The **siddhi-io-nats extension** is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a> that can be used to communicate (publish/subscribe) with an instance of nats-streaming server.
+
 Find some useful links below:
 
 * <a target="_blank" href="https://github.com/wso2-extensions/siddhi-io-nats">Source code</a>
@@ -22,7 +23,7 @@ Find some useful links below:
 
 ```
      <dependency>
-        <groupId>org.wso2.extension.siddhi.io.nats</groupId>
+        <groupId>io.siddhi.extension.io.nats</groupId>
         <artifactId>siddhi-io-nats</artifactId>
         <version>x.x.x</version>
      </dependency>

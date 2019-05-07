@@ -22,7 +22,7 @@ Find some useful links below:
 
 ```
      <dependency>
-        <groupId>org.wso2.extension.siddhi.io.nats</groupId>
+        <groupId>io.siddhi.extension.io.nats</groupId>
         <artifactId>siddhi-io-nats</artifactId>
         <version>x.x.x</version>
      </dependency>
