@@ -18,7 +18,7 @@
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.wso2.extension.siddhi.io.nats</groupId>
+        <groupId>io.siddhi.extension.io.nats</groupId>
         <artifactId>siddhi-io-nats-parent</artifactId>
         <version>2.0.3-SNAPSHOT</version>
     </parent>
@@ -60,12 +60,12 @@
             <artifactId>surefire-booter</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.extension.siddhi.map.xml</groupId>
+            <groupId>io.siddhi.extension.map.xml</groupId>
             <artifactId>siddhi-map-xml</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.extension.siddhi.map.json</groupId>
+            <groupId>io.siddhi.extension.map.json</groupId>
             <artifactId>siddhi-map-json</artifactId>
             <scope>test</scope>
         </dependency>
@@ -148,8 +148,8 @@
                                 <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                                 <Bundle-Name>${project.artifactId}</Bundle-Name>
                                 <Export-Package>
-                                    org.wso2.extension.siddhi.io.nats,
-                                    org.wso2.extension.siddhi.io.nats.*
+                                    io.siddhi.extension.io.nats,
+                                    io.siddhi.extension.io.nats.*
                                 </Export-Package>
                                 <Import-Package>
                                     io.nats.streaming;version="0.0.0",
@@ -220,8 +220,8 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.extension.siddhi.io.nats,
-                            org.wso2.extension.siddhi.io.nats.*
+                            io.siddhi.extension.io.nats,
+                            io.siddhi.extension.io.nats.*
                         </Export-Package>
                         <Import-Package>
                             io.nats.client;version="0.0.0";resolution:=optional,

@@ -19,7 +19,7 @@
 
 <FindBugsFilter>
     <Match>
-        <class name="org.wso2.extension.siddhi.io.jms.source.JMSMessageProcessor"/>
+        <class name="io.siddhi.extension.io.jms.source.JMSMessageProcessor"/>
         <Bug pattern="WA_AWAIT_NOT_IN_LOOP"/>
     </Match>
 </FindBugsFilter>

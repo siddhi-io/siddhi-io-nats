@@ -21,8 +21,8 @@
 <suite name="Siddhi-Io-Nats-Test-Suite">
     <test name="Siddhi-io-nats-tests" enabled="true" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2.extension.siddhi.io.nats.sink.NATSSinkTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.nats.source.NATSSourceTestCase"/>
+            <class name="io.siddhi.extension.io.nats.sink.NATSSinkTestCase"/>
+            <class name="io.siddhi.extension.io.nats.source.NATSSourceTestCase"/>
         </classes>
     </test>
 </suite>
