@@ -213,12 +213,22 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
 
     @Override
     public void pause() {
-        natsMessageProcessor.pause();
+        if (natsMessageProcessor != null) {
+            natsMessageProcessor.pause();
+            if (log.isDebugEnabled()) {
+                log.debug("Nats source paused for destination: " + destination);
+            }
+        }
     }
 
     @Override
     public void resume() {
-        natsMessageProcessor.resume();
+        if (natsMessageProcessor != null) {
+            natsMessageProcessor.resume();
+            if (log.isDebugEnabled()) {
+                log.debug("Nats source resumed for destination: " + destination);
+            }
+        }
     }
 
     private void subscribe(NATSSourceState natsSourceState) {
