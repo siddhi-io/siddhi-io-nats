@@ -2,8 +2,8 @@ Siddhi IO NATS
 ======================================
 
   [![Jenkins Build Status](https://wso2.org/jenkins/job/siddhi/job/siddhi-io-nats/badge/icon)](https://wso2.org/jenkins/job/siddhi/job/siddhi-io-nats/)
-  [![GitHub (pre-)Release](https://img.shields.io/github/release/siddhi-io/siddhi-io-nats/all.svg)](https://github.com/siddhi-io/siddhi-io-nats/releases)
-  [![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/siddhi-io/siddhi-io-nats.svg)](https://github.com/siddhi-io/siddhi-io-nats/releases)
+  [![GitHub Release](https://img.shields.io/github/release/siddhi-io/siddhi-io-nats/all.svg)](https://github.com/siddhi-io/siddhi-io-nats/releases)
+  [![GitHub Release Date](https://img.shields.io/github/release-date/siddhi-io/siddhi-io-nats.svg)](https://github.com/siddhi-io/siddhi-io-nats/releases)
   [![GitHub Open Issues](https://img.shields.io/github/issues-raw/siddhi-io/siddhi-io-nats.svg)](https://github.com/siddhi-io/siddhi-io-nats/issues)
   [![GitHub Last Commit](https://img.shields.io/github/last-commit/siddhi-io/siddhi-io-nats.svg)](https://github.com/siddhi-io/siddhi-io-nats/commits/master)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
