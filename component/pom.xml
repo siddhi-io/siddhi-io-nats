@@ -16,7 +16,8 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>io.siddhi.extension.io.nats</groupId>
         <artifactId>siddhi-io-nats-parent</artifactId>
@@ -25,7 +26,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>siddhi-io-nats</artifactId>
     <packaging>bundle</packaging>
-    <name>Siddhi Extension - NATS </name>
+    <name>Siddhi Extension - NATS</name>
     <dependencies>
         <dependency>
             <groupId>io.siddhi</groupId>
@@ -81,9 +82,9 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.wso2.siddhi</groupId>
+                        <groupId>io.siddhi</groupId>
                         <artifactId>siddhi-doc-gen</artifactId>
-                        <version>${siddhi.doc.gen.version}</version>
+                        <version>${siddhi.version}</version>
                         <executions>
                             <execution>
                                 <phase>compile</phase>
@@ -237,6 +238,18 @@
                         </Include-Resource>
                     </instructions>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>io.siddhi</groupId>
+                <artifactId>siddhi-doc-gen</artifactId>
+                <version>${siddhi.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate-md-docs</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
