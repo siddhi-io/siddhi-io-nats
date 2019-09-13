@@ -142,7 +142,6 @@ public class NATSSink extends Sink {
 
     @Override
     public void publish(Object payload, DynamicOptions dynamicOptions, State state) throws
-
                                                                                    ConnectionUnavailableException  {
         String message = (String) payload;
         String subjectName = destination.getValue();
