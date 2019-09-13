@@ -17,6 +17,8 @@
  */
 package io.siddhi.extension.io.nats.source;
 
+import io.nats.streaming.ConnectionLostHandler;
+import io.nats.streaming.Options;
 import io.nats.streaming.StreamingConnection;
 import io.nats.streaming.StreamingConnectionFactory;
 import io.nats.streaming.Subscription;
@@ -174,9 +176,10 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
     public void connect(ConnectionCallback connectionCallback, NATSSourceState natsSourceState)
             throws ConnectionUnavailableException {
         try {
-            StreamingConnectionFactory streamingConnectionFactory = new StreamingConnectionFactory(this.clusterId,
-                    this.clientId);
-            streamingConnectionFactory.setNatsUrl(this.natsUrl);
+            Options options = new Options.Builder().natsUrl(this.natsUrl).
+                    clientId(this.clientId).clusterId(this.clusterId).
+                    connectionLostHandler(new NATSConnectionLostHandler(connectionCallback)).build();
+            StreamingConnectionFactory streamingConnectionFactory = new StreamingConnectionFactory(options);
             streamingConnection =  streamingConnectionFactory.createConnection();
         } catch (IOException e) {
             log.error("Error while connecting to NATS server at destination: " + destination);
@@ -194,9 +197,6 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
     @Override
     public void disconnect() {
         try {
-            if (subscription != null) {
-                subscription.close();
-            }
             if (streamingConnection != null) {
                 streamingConnection.close();
             }
@@ -322,6 +322,27 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
             if (seqObject != null && sequenceNumber == null) {
                 lastSentSequenceNo.set((int) seqObject);
             }
+        }
+    }
+
+    class NATSConnectionLostHandler implements ConnectionLostHandler {
+        private ConnectionCallback connectionCallback;
+
+        NATSConnectionLostHandler(ConnectionCallback connectionCallback) {
+            this.connectionCallback = connectionCallback;
+        }
+
+        @Override
+        public void connectionLost(StreamingConnection streamingConnection, Exception e) {
+            log.error("Exception occurred in Siddhi App" + siddhiAppName +
+                    " when consuming messages from NATS endpoint " + natsUrl + " . " + e.getMessage(), e);
+            Thread thread = new Thread() {
+                public void run() {
+                    connectionCallback.onError(new ConnectionUnavailableException(e));
+                }
+            };
+
+            thread.start();
         }
     }
 }
