@@ -38,7 +38,7 @@
     
     
       
-        <title>1.0.5 - Siddhi IO NATS</title>
+        <title>2.0.5 - Siddhi IO NATS</title>
       
     
     
@@ -114,7 +114,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#api-docs-v105" tabindex="1" class="md-skip">
+      <a href="#api-docs-v205" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -140,7 +140,7 @@
             </span>
             <span class="md-header-nav__topic">
               
-                1.0.5
+                2.0.5
               
             </span>
           
@@ -294,42 +294,6 @@
           
           
 
-
-  <li class="md-nav__item">
-    <a href="../2.0.5/" title="2.0.5" class="md-nav__link">
-      2.0.5
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../2.0.4/" title="2.0.4" class="md-nav__link">
-      2.0.4
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../2.0.3/" title="2.0.3" class="md-nav__link">
-      2.0.3
-    </a>
-  </li>
-
-        
-          
-          
-          
-
   
 
 
@@ -341,11 +305,11 @@
     
     
       <label class="md-nav__link md-nav__link--active" for="__toc">
-        1.0.5
+        2.0.5
       </label>
     
-    <a href="./" title="1.0.5" class="md-nav__link md-nav__link--active">
-      1.0.5
+    <a href="./" title="2.0.5" class="md-nav__link md-nav__link--active">
+      2.0.5
     </a>
     
       
@@ -406,6 +370,42 @@
   
 </nav>
     
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../2.0.4/" title="2.0.4" class="md-nav__link">
+      2.0.4
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../2.0.3/" title="2.0.3" class="md-nav__link">
+      2.0.3
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../1.0.5/" title="1.0.5" class="md-nav__link">
+      1.0.5
+    </a>
   </li>
 
         
@@ -562,15 +562,20 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/siddhi-io/siddhi-io-nats/blob/master/api/1.0.5.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/siddhi-io/siddhi-io-nats/blob/master/api/2.0.5.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="api-docs-v105">API Docs - v1.0.5</h1>
+                <h1 id="api-docs-v205">API Docs - v2.0.5</h1>
+<div class="admonition info">
+<p class="admonition-title">Tested Siddhi Core version: <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/">5.1.3</a></em></p>
+<p>It could also support other Siddhi Core minor versions.</p>
+</div>
 <h2 id="sink">Sink</h2>
-<h3 id="nats-sink">nats <em><a target="_blank" href="https://siddhi.io/en/v4.x/docs/query-guide/#sink">(Sink)</a></em></h3>
-<p style="word-wrap: break-word">NATS Sink allows users to subscribe to a NATS broker and publish messages.</p>
-
-<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<h3 id="nats-sink">nats <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#sink">(Sink)</a></em></h3>
+<p><p></p>
+<p style="word-wrap: break-word;margin: 0;">NATS Sink allows users to subscribe to a NATS broker and publish messages.</p>
+<p></p>
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
 <pre><code>@sink(type=&quot;nats&quot;, destination=&quot;&lt;STRING&gt;&quot;, bootstrap.servers=&quot;&lt;STRING&gt;&quot;, client.id=&quot;&lt;STRING&gt;&quot;, cluster.id=&quot;&lt;STRING&gt;&quot;, @map(...)))
 </code></pre>
 
@@ -586,7 +591,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">destination</td>
-        <td style="vertical-align: top; word-wrap: break-word">Subject name which NATS sink should publish to.</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Subject name which NATS sink should publish to.</p></td>
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">No</td>
@@ -594,7 +599,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">bootstrap.servers</td>
-        <td style="vertical-align: top; word-wrap: break-word">The NATS based url of the NATS server.</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">The NATS based url of the NATS server.</p></td>
         <td style="vertical-align: top">nats://localhost:4222</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -602,7 +607,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">client.id</td>
-        <td style="vertical-align: top; word-wrap: break-word">The identifier of the client publishing/connecting to the NATS broker. Should be unique for each client connecting to the server/cluster.</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">The identifier of the client publishing/connecting to the NATS broker. Should be unique for each client connecting to the server/cluster.</p></td>
         <td style="vertical-align: top">None</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -610,7 +615,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">cluster.id</td>
-        <td style="vertical-align: top; word-wrap: break-word">The identifier of the NATS server/cluster.</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">The identifier of the NATS server/cluster.</p></td>
         <td style="vertical-align: top">test-cluster</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -623,20 +628,29 @@
 define stream outputStream (name string, age int, country string);
 </code></pre>
 
-<p style="word-wrap: break-word">This example shows how to publish to a NATS subject with all supporting configurations. With the following configuration the sink identified as 'nats-client' will publish to a subject named as 'SP_NATS_OUTPUT_TEST' which resides in a nats instance with a cluster id of 'test-cluster', running in localhost and listening to the port 4222 for client connection.</p>
+<p></p>
+
+<p style="word-wrap: break-word;margin: 0;">This example shows how to publish to a NATS subject with all supporting configurations. With the following configuration the sink identified as 'nats-client' will publish to a subject named as 'SP_NATS_OUTPUT_TEST' which resides in a nats instance with a cluster id of 'test-cluster', running in localhost and listening to the port 4222 for client connection.</p>
+
+<p></p>
 
 <p><span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span></p>
 <pre><code>@sink(type='nats', @map(type='xml'), destination='SP_NATS_OUTPUT_TEST')
 define stream outputStream (name string, age int, country string);
 </code></pre>
 
-<p style="word-wrap: break-word">This example shows how to publish to a NATS subject with mandatory configurations. With the following configuration the sink identified with an auto generated client id will publish to a subject named as 'SP_NATS_OUTPUT_TEST' which resides in a nats instance with a cluster id of 'test-cluster', running in localhost and listening to the port 4222 for client connection.</p>
+<p></p>
+
+<p style="word-wrap: break-word;margin: 0;">This example shows how to publish to a NATS subject with mandatory configurations. With the following configuration the sink identified with an auto generated client id will publish to a subject named as 'SP_NATS_OUTPUT_TEST' which resides in a nats instance with a cluster id of 'test-cluster', running in localhost and listening to the port 4222 for client connection.</p>
+
+<p></p>
 
 <h2 id="source">Source</h2>
-<h3 id="nats-source">nats <em><a target="_blank" href="https://siddhi.io/en/v4.x/docs/query-guide/#source">(Source)</a></em></h3>
-<p style="word-wrap: break-word">NATS Source allows users to subscribe to a NATS broker and receive messages. It has the ability to receive all the message types supported by NATS.</p>
-
-<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<h3 id="nats-source">nats <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#source">(Source)</a></em></h3>
+<p><p></p>
+<p style="word-wrap: break-word;margin: 0;">NATS Source allows users to subscribe to a NATS broker and receive messages. It has the ability to receive all the message types supported by NATS.</p>
+<p></p>
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
 <pre><code>@source(type=&quot;nats&quot;, destination=&quot;&lt;STRING&gt;&quot;, bootstrap.servers=&quot;&lt;STRING&gt;&quot;, client.id=&quot;&lt;STRING&gt;&quot;, cluster.id=&quot;&lt;STRING&gt;&quot;, queue.group.name=&quot;&lt;STRING&gt;&quot;, durable.name=&quot;&lt;STRING&gt;&quot;, subscription.sequence=&quot;&lt;STRING&gt;&quot;, @map(...)))
 </code></pre>
 
@@ -652,7 +666,7 @@ define stream outputStream (name string, age int, country string);
     </tr>
     <tr>
         <td style="vertical-align: top">destination</td>
-        <td style="vertical-align: top; word-wrap: break-word">Subject name which NATS Source should subscribe to.</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Subject name which NATS Source should subscribe to.</p></td>
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">No</td>
@@ -660,7 +674,7 @@ define stream outputStream (name string, age int, country string);
     </tr>
     <tr>
         <td style="vertical-align: top">bootstrap.servers</td>
-        <td style="vertical-align: top; word-wrap: break-word">The NATS based url of the NATS server.</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">The NATS based url of the NATS server.</p></td>
         <td style="vertical-align: top">nats://localhost:4222</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -668,7 +682,7 @@ define stream outputStream (name string, age int, country string);
     </tr>
     <tr>
         <td style="vertical-align: top">client.id</td>
-        <td style="vertical-align: top; word-wrap: break-word">The identifier of the client subscribing/connecting to the NATS broker.</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">The identifier of the client subscribing/connecting to the NATS broker.</p></td>
         <td style="vertical-align: top">None</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -676,7 +690,7 @@ define stream outputStream (name string, age int, country string);
     </tr>
     <tr>
         <td style="vertical-align: top">cluster.id</td>
-        <td style="vertical-align: top; word-wrap: break-word">The identifier of the NATS server/cluster.</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">The identifier of the NATS server/cluster.</p></td>
         <td style="vertical-align: top">test-cluster</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -684,7 +698,7 @@ define stream outputStream (name string, age int, country string);
     </tr>
     <tr>
         <td style="vertical-align: top">queue.group.name</td>
-        <td style="vertical-align: top; word-wrap: break-word">This can be used when there is a requirement to share the load of a NATS subject. Clients belongs to the same queue group share the subscription load.</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This can be used when there is a requirement to share the load of a NATS subject. Clients belongs to the same queue group share the subscription load.</p></td>
         <td style="vertical-align: top">None</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -692,7 +706,7 @@ define stream outputStream (name string, age int, country string);
     </tr>
     <tr>
         <td style="vertical-align: top">durable.name</td>
-        <td style="vertical-align: top; word-wrap: break-word">This can be used to subscribe to a subject from the last acknowledged message when a client or connection failure happens. The client can be uniquely identified using the tuple (client.id, durable.name).</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This can be used to subscribe to a subject from the last acknowledged message when a client or connection failure happens. The client can be uniquely identified using the tuple (client.id, durable.name).</p></td>
         <td style="vertical-align: top">None</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -700,7 +714,7 @@ define stream outputStream (name string, age int, country string);
     </tr>
     <tr>
         <td style="vertical-align: top">subscription.sequence</td>
-        <td style="vertical-align: top; word-wrap: break-word">This can be used to subscribe to a subject from a given number of message sequence. All the messages from the given point of sequence number will be passed to the client. If not provided then the either the persisted value or 0 will be used.</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This can be used to subscribe to a subject from a given number of message sequence. All the messages from the given point of sequence number will be passed to the client. If not provided then the either the persisted value or 0 will be used.</p></td>
         <td style="vertical-align: top">None</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -713,14 +727,22 @@ define stream outputStream (name string, age int, country string);
 define stream inputStream (name string, age int, country string);
 </code></pre>
 
-<p style="word-wrap: break-word">This example shows how to subscribe to a NATS subject with all supporting configurations.With the following configuration the source identified as 'nats-client' will subscribes to a subject named as 'SP_NATS_INPUT_TEST' which resides in a nats instance with a cluster id of 'test-cluster', running in localhost and listening to the port 4222 for client connection. This subscription will receive all the messages from 100th in the subject.</p>
+<p></p>
+
+<p style="word-wrap: break-word;margin: 0;">This example shows how to subscribe to a NATS subject with all supporting configurations.With the following configuration the source identified as 'nats-client' will subscribes to a subject named as 'SP_NATS_INPUT_TEST' which resides in a nats instance with a cluster id of 'test-cluster', running in localhost and listening to the port 4222 for client connection. This subscription will receive all the messages from 100th in the subject.</p>
+
+<p></p>
 
 <p><span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span></p>
 <pre><code>@source(type='nats', @map(type='text'), destination='SP_NATS_INPUT_TEST', )
 define stream inputStream (name string, age int, country string);
 </code></pre>
 
-<p style="word-wrap: break-word">This example shows how to subscribe to a NATS subject with mandatory configurations.With the following configuration the source identified with an auto generated client id will subscribes to a subject named as 'SP_NATS_INTPUT_TEST' which resides in a nats instance with a cluster id of 'test-cluster', running in localhost and listening to the port 4222 for client connection. This will receive all available messages in the subject</p>
+<p></p>
+
+<p style="word-wrap: break-word;margin: 0;">This example shows how to subscribe to a NATS subject with mandatory configurations.With the following configuration the source identified with an auto generated client id will subscribes to a subject named as 'SP_NATS_INTPUT_TEST' which resides in a nats instance with a cluster id of 'test-cluster', running in localhost and listening to the port 4222 for client connection. This will receive all available messages in the subject</p>
+
+<p></p>
                 
                   
                 
@@ -741,7 +763,7 @@ define stream inputStream (name string, age int, country string);
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../2.0.3/" title="2.0.3" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../latest/" title="latest" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -750,19 +772,19 @@ define stream inputStream (name string, age int, country string);
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                2.0.3
+                latest
               </span>
             </div>
           </a>
         
         
-          <a href="../1.0.4/" title="1.0.4" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../2.0.4/" title="2.0.4" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                1.0.4
+                2.0.4
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
