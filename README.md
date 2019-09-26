@@ -28,7 +28,11 @@ Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-i
 
 ## Dependencies 
 
-There are no other dependencies needed for this extension. 
+Add necessary NATS client jars and related dependencies. 
+
+* java-nats-streaming-2.2.2.jar (Add to <SIDDHI_HOME>/jars)
+* jnats-2.6.5.jar (Add to <SIDDHI_HOME>/jars)
+* protobuf-java-3.9.1.jar (Add to <SIDDHI_HOME>/bundles)
 
 ## Installation
 
