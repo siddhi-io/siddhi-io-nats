@@ -17,23 +17,32 @@
  */
 package io.siddhi.extension.io.nats.sink;
 
+import com.google.protobuf.AbstractMessageLite;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
+import io.siddhi.core.event.Event;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.stream.input.InputHandler;
+import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.stream.output.sink.Sink;
+import io.siddhi.core.util.EventPrinter;
 import io.siddhi.extension.io.nats.utils.NATSClient;
 import io.siddhi.extension.io.nats.utils.ResultContainer;
 import io.siddhi.extension.io.nats.utils.UnitTestAppender;
+import io.siddhi.extension.io.nats.utils.protobuf.Person;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.apache.log4j.Logger;
 import org.testcontainers.containers.GenericContainer;
 import org.testng.Assert;
+import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Contains test cases for NATS sink.
@@ -41,12 +50,19 @@ import java.util.concurrent.TimeoutException;
 public class NATSSinkTestCase {
     private Logger log = Logger.getLogger(NATSSinkTestCase.class);
     private int port;
+    private AtomicInteger eventCounter = new AtomicInteger(0);
+
+    @BeforeMethod
+    private void setUp() {
+        eventCounter.set(0);
+    }
 
     @BeforeClass
     private void initializeDockerContainer() throws InterruptedException {
         GenericContainer simpleWebServer
                 = new GenericContainer("nats-streaming:0.11.2");
         simpleWebServer.setPrivilegedMode(true);
+        eventCounter.set(0);
         simpleWebServer.start();
         port = simpleWebServer.getMappedPort(4222);
         Thread.sleep(500);
@@ -322,6 +338,58 @@ public class NATSSinkTestCase {
                 executionPlanRuntime.shutdown();
             }
         }
+    }
+
+    /**
+     * Test for configure the NATS Sink to publish the message to a NATS-streaming subject.
+     */
+    @Test
+    public void testNatsProtobuf() throws InterruptedException, NoSuchMethodException,
+            InvocationTargetException, IllegalAccessException {
+        ResultContainer resultContainer = new ResultContainer(2, 3);
+        NATSClient natsClient = new NATSClient("test-cluster", "stan_test1", "nats://localhost:"
+                + port, resultContainer);
+        natsClient.connect();
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "@App:name('Test-plan1')\n"
+                + "@sink(type='nats', " +
+                "@map(type='protobuf', class='io.siddhi.extension.io.nats.utils.protobuf.Person'), "
+                + "destination='nats-sink-test10', "
+                + "client.id='test-plan10-siddhi',"
+                + "bootstrap.servers='" + "nats://localhost:" + port + "', "
+                + "cluster.id='test-cluster'"
+                + ")"
+                + "define stream inputStream (nic long, name string);";
+
+        SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
+        InputHandler inputStream = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.addCallback("inputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                for (int i = 0; i < events.length; i++) {
+                    eventCounter.incrementAndGet();
+                }
+            }
+        });
+        executionPlanRuntime.start();
+        Thread.sleep(100);
+
+        long nic1 = 1222;
+        Person person1 = Person.newBuilder().setNic(nic1).setName("Jimmy").build();
+        byte[] messageObjectByteArray1 = (byte[]) AbstractMessageLite.class
+                .getDeclaredMethod("toByteArray").invoke(person1);
+        long nic2 = 1222;
+        Person person2 = Person.newBuilder().setNic(nic2).setName("Natalie").build();
+        byte[] messageObjectByteArray2 = (byte[]) AbstractMessageLite.class
+                .getDeclaredMethod("toByteArray").invoke(person2);
+        inputStream.send(new Object[] {messageObjectByteArray1});
+        inputStream.send(new Object[] {messageObjectByteArray2});
+
+        Thread.sleep(100);
+        AssertJUnit.assertEquals(eventCounter.get(), 2);
+        siddhiManager.shutdown();
     }
 }
 
