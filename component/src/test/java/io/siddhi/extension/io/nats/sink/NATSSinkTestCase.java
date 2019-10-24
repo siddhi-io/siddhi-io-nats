@@ -29,11 +29,15 @@ import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.apache.log4j.Logger;
 import org.testcontainers.containers.GenericContainer;
 import org.testng.Assert;
+import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Contains test cases for NATS sink.
@@ -41,12 +45,19 @@ import java.util.concurrent.TimeoutException;
 public class NATSSinkTestCase {
     private Logger log = Logger.getLogger(NATSSinkTestCase.class);
     private int port;
+    private AtomicInteger eventCounter = new AtomicInteger(0);
+
+    @BeforeMethod
+    private void setUp() {
+        eventCounter.set(0);
+    }
 
     @BeforeClass
     private void initializeDockerContainer() throws InterruptedException {
         GenericContainer simpleWebServer
                 = new GenericContainer("nats-streaming:0.11.2");
         simpleWebServer.setPrivilegedMode(true);
+        eventCounter.set(0);
         simpleWebServer.start();
         port = simpleWebServer.getMappedPort(4222);
         Thread.sleep(500);
@@ -322,6 +333,43 @@ public class NATSSinkTestCase {
                 executionPlanRuntime.shutdown();
             }
         }
+    }
+
+    /**
+     * Test for configure the NATS Sink to publish the message to a NATS-streaming subject.
+     */
+    @Test
+    public void testNatsProtobuf() throws InterruptedException, NoSuchMethodException,
+            InvocationTargetException, IllegalAccessException, TimeoutException, IOException {
+        ResultContainer resultContainer = new ResultContainer(2, 10);
+        NATSClient natsClient = new NATSClient("test-cluster", "stan-test10",
+                "nats://localhost:" + port, resultContainer);
+        natsClient.connect();
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "@App:name('Test-plan10')\n"
+                + "@sink(type='nats', " +
+                "@map(type='protobuf', class='io.siddhi.extension.io.nats.utils.protobuf.Person'), "
+                + "destination='nats-test10', "
+                + "client.id='test-plan10-siddhi',"
+                + "bootstrap.servers='" + "nats://localhost:" + port + "', "
+                + "cluster.id='test-cluster'"
+                + ")"
+                + "define stream inputStream (nic long, name string);";
+
+        natsClient.subsripeFromNow("nats-test10");
+        SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
+        InputHandler inputStream = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+
+        long nic1 = 1222;
+        long nic2 = 1223;
+        inputStream.send(new Object[] {nic1, "Jimmy"});
+        inputStream.send(new Object[] {nic2, "Natalie"});
+
+        Thread.sleep(500);
+        AssertJUnit.assertEquals(resultContainer.getEventCount(), 2);
+        siddhiManager.shutdown();
     }
 }
 

@@ -17,6 +17,7 @@
  */
 package io.siddhi.extension.io.nats.source;
 
+import com.google.protobuf.AbstractMessageLite;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
@@ -28,15 +29,18 @@ import io.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import io.siddhi.extension.io.nats.utils.NATSClient;
 import io.siddhi.extension.io.nats.utils.ResultContainer;
 import io.siddhi.extension.io.nats.utils.UnitTestAppender;
+import io.siddhi.extension.io.nats.utils.protobuf.Person;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.apache.log4j.Logger;
 import org.testcontainers.containers.GenericContainer;
 import org.testng.Assert;
+import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -854,6 +858,62 @@ public class NATSSourceTestCase {
         Assert.assertTrue(resultContainer.assertMessageContent("JANE"));
         Assert.assertTrue(resultContainer.assertMessageContent("LAKE"));
 
+        siddhiManager.shutdown();
+        natsClient.close();
+    }
+
+    /**
+     * Test the checks the capability of the NATS source to send protobuf events.
+     */
+    @Test
+    public void testNatsProtobuf()
+            throws InterruptedException, TimeoutException,
+            IOException, NoSuchMethodException,
+            InvocationTargetException, IllegalAccessException {
+        NATSClient natsClient = new NATSClient("test-cluster", "nats-source-test1",
+                "nats://localhost:" + port);
+        natsClient.connect();
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String siddhiApp = "@App:name(\"Test-plan15\")"
+                + "@source(type='nats', " +
+                "@map(type='protobuf', class='io.siddhi.extension.io.nats.utils.protobuf.Person'), "
+                + "destination='nats-test15', "
+                + "client.id='nats-source-test15-siddhi', "
+                + "bootstrap.servers='" + "nats://localhost:" + port + "', "
+                + "cluster.id='test-cluster'"
+                + ")"
+                + "define stream inputStream (nic long, name string);"
+                + "@info(name = 'query1') "
+                + "from inputStream "
+                + "select *  "
+                + "insert into outputStream;";
+
+        SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+        executionPlanRuntime.addCallback("inputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                for (int i = 0; i < events.length; i++) {
+                    eventCounter.incrementAndGet();
+                }
+            }
+        });
+        executionPlanRuntime.start();
+        Thread.sleep(100);
+
+        long nic1 = 1222;
+        Person person1 = Person.newBuilder().setNic(nic1).setName("Jimmy").build();
+        byte[] messageObjectByteArray1 = (byte[]) AbstractMessageLite.class
+                .getDeclaredMethod("toByteArray").invoke(person1);
+        long nic2 = 1222;
+        Person person2 = Person.newBuilder().setNic(nic2).setName("Natalie").build();
+        byte[] messageObjectByteArray2 = (byte[]) AbstractMessageLite.class
+                .getDeclaredMethod("toByteArray").invoke(person2);
+        natsClient.publishProtobufMessage("nats-test15", messageObjectByteArray1);
+        natsClient.publishProtobufMessage("nats-test15", messageObjectByteArray2);
+
+        Thread.sleep(100);
+        AssertJUnit.assertEquals(eventCounter.get(), 2);
         siddhiManager.shutdown();
         natsClient.close();
     }

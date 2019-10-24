@@ -77,6 +77,14 @@ public class NATSClient {
         }
     }
 
+    public void publishProtobufMessage(String subjectName, Object message) {
+        try {
+            streamingConnection.publish(subjectName, (byte[]) message);
+        } catch (IOException | InterruptedException | TimeoutException e) {
+            log.error(e.getMessage());
+        }
+    }
+
     public void subsripeFromNow(String subject) throws InterruptedException, TimeoutException, IOException {
         subscription = streamingConnection.subscribe(subject, (Message m) ->
                         resultContainer.eventReceived(new String(m.getData(), StandardCharsets.UTF_8)),
