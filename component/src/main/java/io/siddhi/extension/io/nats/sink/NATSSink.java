@@ -17,6 +17,7 @@
  */
 package io.siddhi.extension.io.nats.sink;
 
+import com.google.protobuf.GeneratedMessageV3;
 import io.nats.streaming.ConnectionLostHandler;
 import io.nats.streaming.Options;
 import io.nats.streaming.StreamingConnection;
@@ -43,6 +44,7 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -118,7 +120,7 @@ public class NATSSink extends Sink {
 
     @Override
     public Class[] getSupportedInputEventClasses() {
-        return new Class[]{String.class};
+        return new Class[]{String.class, Map.class, GeneratedMessageV3.class};
     }
 
     @Override protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
@@ -143,14 +145,21 @@ public class NATSSink extends Sink {
     @Override
     public void publish(Object payload, DynamicOptions dynamicOptions, State state) throws
                                                                                    ConnectionUnavailableException  {
-        String message = (String) payload;
+        byte[] messageBytes;
         String subjectName = destination.getValue();
         try {
+            if (payload instanceof byte[]) {
+                messageBytes = (byte[]) payload;
+            } else {
+                String message = (String) payload;
+                messageBytes = message.getBytes(StandardCharsets.UTF_8);
+            }
+
             if (isConnectionClosed.get()) {
                 streamingConnection.close();
                 connect();
             }
-            streamingConnection.publish(subjectName, message.getBytes(StandardCharsets.UTF_8),
+            streamingConnection.publish(subjectName, messageBytes,
                     new AsyncAckHandler(siddhiAppName, natsUrl, payload, this, dynamicOptions));
         } catch (IOException e) {
             log.error("Error sending message to destination: " + subjectName);

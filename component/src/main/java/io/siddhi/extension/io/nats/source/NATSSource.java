@@ -17,6 +17,7 @@
  */
 package io.siddhi.extension.io.nats.source;
 
+import com.google.protobuf.GeneratedMessageV3;
 import io.nats.streaming.ConnectionLostHandler;
 import io.nats.streaming.Options;
 import io.nats.streaming.StreamingConnection;
@@ -169,7 +170,7 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
 
     @Override
     public Class[] getOutputEventClasses() {
-        return new Class[]{String.class, Map.class};
+        return new Class[]{String.class, Map.class, GeneratedMessageV3.class};
     }
 
     @Override
