@@ -131,7 +131,16 @@ import java.util.concurrent.atomic.AtomicInteger;
                         syntax = "@source(type='nats', @map(type='text'), "
                                 + "destination='SP_NATS_INPUT_TEST', "
                                 + ")\n"
-                                + "define stream inputStream (name string, age int, country string);")
+                                + "define stream inputStream (name string, age int, country string);"),
+                @Example(description = "This example shows how to pass NATS Streaming sequence number to the event.",
+                        syntax = "@source(type='nats', @map(type='json', @attributes(name='$.name', age='$.age', " +
+                                "country='$.country', sequenceNum='trp:sequenceNumber')), " +
+                                "destination='SIDDHI_NATS_SOURCE_TEST_DEST', " +
+                                "client.id='nats_client', " +
+                                "bootstrap.servers='nats://localhost:4222', " +
+                                "cluster.id='test-cluster'" +
+                                ")\n" +
+                                "define stream inputStream (name string, age int, country string, sequenceNum string);")
         }
 )
 
@@ -150,8 +159,7 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
     private Subscription subscription;
     private NATSMessageProcessor natsMessageProcessor;
     private String siddhiAppName;
-
-
+    private String[] reqTransportPropertyNames;
 
     @Override
     public StateFactory<NATSSourceState> init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
@@ -160,6 +168,7 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
         this.sourceEventListener = sourceEventListener;
         this.optionHolder = optionHolder;
         this.siddhiAppName = siddhiAppContext.getName();
+        this.reqTransportPropertyNames = requestedTransportPropertyNames.clone();
         initNATSProperties();
         return NATSSourceState::new;
     }
@@ -244,7 +253,8 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
             if (durableName != null) {
                 subscriptionOptionsBuilder.durableName(durableName);
             }
-            natsMessageProcessor = new NATSMessageProcessor(sourceEventListener, natsSourceState.lastSentSequenceNo);
+            natsMessageProcessor = new NATSMessageProcessor(sourceEventListener, reqTransportPropertyNames,
+                    natsSourceState.lastSentSequenceNo);
             if (queueGroupName != null) {
                 subscription =  streamingConnection.subscribe(destination , queueGroupName, natsMessageProcessor,
                         subscriptionOptionsBuilder.build());

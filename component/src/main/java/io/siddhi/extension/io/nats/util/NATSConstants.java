@@ -30,4 +30,5 @@ public class NATSConstants {
     public static final String QUEUE_GROUP_NAME = "queue.group.name";
     public static final String DURABLE_NAME = "durable.name";
     public static final String SUBSCRIPTION_SEQUENCE = "subscription.sequence";
+    public static final String SEQUENCE_NUMBER  = "sequenceNumber";
 }

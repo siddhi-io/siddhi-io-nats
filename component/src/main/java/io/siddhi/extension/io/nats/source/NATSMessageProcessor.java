@@ -29,6 +29,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static io.siddhi.extension.io.nats.util.NATSConstants.SEQUENCE_NUMBER;
+
 /**
  * Process the NATS subject subscription channel in concurrent safe manner.
  */
@@ -39,10 +41,13 @@ public class NATSMessageProcessor implements MessageHandler {
     private ReentrantLock lock;
     private Condition condition;
     private AtomicInteger messageSequenceTracker;
+    private String[] requestedTransportPropertyNames;
 
-    protected NATSMessageProcessor(SourceEventListener sourceEventListener, AtomicInteger messageSequenceTracker) {
+    protected NATSMessageProcessor(SourceEventListener sourceEventListener, String[] requestedTransportPropertyNames,
+                                   AtomicInteger messageSequenceTracker) {
         this.sourceEventListener = sourceEventListener;
         this.messageSequenceTracker = messageSequenceTracker;
+        this.requestedTransportPropertyNames = requestedTransportPropertyNames;
         lock = new ReentrantLock();
         condition = lock.newCondition();
     }
@@ -59,9 +64,14 @@ public class NATSMessageProcessor implements MessageHandler {
                 lock.unlock();
             }
         }
-        sourceEventListener.onEvent(msg.getData(), new String[0]);
         messageSequenceTracker.incrementAndGet();
-
+        String[] properties = new String[requestedTransportPropertyNames.length];
+        for (int i = 0; i < requestedTransportPropertyNames.length; i++) {
+            if (requestedTransportPropertyNames[i].equalsIgnoreCase(SEQUENCE_NUMBER)) {
+                properties[i] = String.valueOf(messageSequenceTracker.get());
+            }
+        }
+        sourceEventListener.onEvent(msg.getData(), properties);
         try {
             msg.ack();
         } catch (IOException e) {
