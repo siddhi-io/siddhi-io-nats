@@ -131,7 +131,16 @@ import java.util.concurrent.atomic.AtomicInteger;
                         syntax = "@source(type='nats', @map(type='text'), "
                                 + "destination='SP_NATS_INPUT_TEST', "
                                 + ")\n"
-                                + "define stream inputStream (name string, age int, country string);")
+                                + "define stream inputStream (name string, age int, country string);"),
+                @Example(description = "This example shows how to pass NATS Streaming sequence number to the event.",
+                        syntax = "@source(type='nats', @map(type='json', @attributes(name='$.name', age='$.age', " +
+                                "country='$.country', sequenceNum='trp:sequenceNumber')), " +
+                                "destination='SIDDHI_NATS_SOURCE_TEST_DEST', " +
+                                "client.id='nats_client', " +
+                                "bootstrap.servers='nats://localhost:4222', " +
+                                "cluster.id='test-cluster'" +
+                                ")\n" +
+                                "define stream inputStream (name string, age int, country string, sequenceNum string);")
         }
 )
 
