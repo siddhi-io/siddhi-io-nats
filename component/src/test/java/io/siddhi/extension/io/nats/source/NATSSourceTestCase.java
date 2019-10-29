@@ -45,6 +45,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -914,6 +915,67 @@ public class NATSSourceTestCase {
 
         Thread.sleep(100);
         AssertJUnit.assertEquals(eventCounter.get(), 2);
+        siddhiManager.shutdown();
+        natsClient.close();
+    }
+
+    /**
+     * Test passing NATS Streaming sequence number as an event attribute.
+     */
+    @Test
+    public void testUsingSeqNumber() throws InterruptedException, TimeoutException, IOException {
+        AtomicBoolean eventReceived = new AtomicBoolean(false);
+        ResultContainer eventsAtSource = new ResultContainer(2, 3);
+        NATSClient natsClient = new NATSClient("test-cluster", "nats-source-test1",
+                "nats://localhost:" + port);
+        natsClient.connect();
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String siddhiApp = "@App:name(\"Test-plan1\")"
+                + "@source(type='nats', @map(type='xml', @attributes(name='//events/event/name', " +
+                "age='//events/event/age', country='//events/event/country', sequenceNum='trp:sequenceNumber')), "
+                + "destination='nats-test1', "
+                + "client.id='nats-source-test1-siddhi', "
+                + "bootstrap.servers='" + "nats://localhost:" + port + "', "
+                + "cluster.id='test-cluster'"
+                + ") "
+                + "define stream inputStream (name string, age int, country string, sequenceNum string);"
+                + "@info(name = 'query1') "
+                + "from inputStream[(math:parseInt(sequenceNum) == 2)] "
+                + "select *  "
+                + "insert into outputStream;";
+
+        SiddhiAppRuntime siddhiRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+        siddhiRuntime.addCallback("inputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                for (Event event : events) {
+                    eventsAtSource.eventReceived(event.toString());
+                }
+            }
+        });
+        siddhiRuntime.addCallback("outputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                for (Event event : events) {
+                    eventReceived.set(true);
+                    Assert.assertTrue(event.getData(0).equals("MIKE"));
+                }
+            }
+        });
+        siddhiRuntime.start();
+        Thread.sleep(100);
+
+        natsClient.publish("nats-test1", "<events><event><name>JAMES</name><age>22</age>"
+                + "<country>US</country></event></events>");
+        natsClient.publish("nats-test1", "<events><event><name>MIKE</name><age>25</age>"
+                + "<country>GERMANY</country></event></events>");
+        Thread.sleep(100);
+
+        Assert.assertTrue(eventsAtSource.assertMessageContent("JAMES"));
+        Assert.assertTrue(eventsAtSource.assertMessageContent("MIKE"));
+        Assert.assertTrue(eventReceived.get());
+
         siddhiManager.shutdown();
         natsClient.close();
     }

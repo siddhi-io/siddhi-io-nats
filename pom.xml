@@ -99,6 +99,12 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
+                <groupId>io.siddhi.extension.execution.math</groupId>
+                <artifactId>siddhi-execution-math</artifactId>
+                <version>${siddhi.execution.math.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.maven.surefire</groupId>
                 <artifactId>surefire-booter</artifactId>
                 <version>${surefire.booter.version}</version>
@@ -177,6 +183,7 @@
         <org.testcontainers.version>1.8.0</org.testcontainers.version>
         <siddhi.map.protobuf.version>1.0.2</siddhi.map.protobuf.version>
         <com.google.protobuf.java.version>3.9.1</com.google.protobuf.java.version>
+        <siddhi.execution.math.version>5.0.4</siddhi.execution.math.version>
         <argLine>-Xmx1024m</argLine>
     </properties>
 
