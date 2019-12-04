@@ -371,5 +371,57 @@ public class NATSSinkTestCase {
         AssertJUnit.assertEquals(resultContainer.getEventCount(), 2);
         siddhiManager.shutdown();
     }
+
+    @Test
+    public void testDistributedSink() throws InterruptedException, TimeoutException, IOException {
+        log.info("Test distributed Nats Sink");
+        ResultContainer topic1ResultContainer = new ResultContainer(4, 20);
+        NATSClient topic1NatsClient = new NATSClient("test-cluster", "stan-distributed-sink-1",
+                "nats://localhost:" + port, topic1ResultContainer);
+        topic1NatsClient.connect();
+
+        ResultContainer topic2ResultContainer = new ResultContainer(2, 20);
+        NATSClient topic2NatsClient = new NATSClient("test-cluster", "stan-distributed-sink-2",
+                "nats://localhost:" + port, topic2ResultContainer);
+        topic2NatsClient.connect();
+
+        String streams = "" +
+                "@app:name('TestSiddhiApp') \n" +
+                "define stream FooStream (symbol string, price float, volume long); "
+                + "@sink(type='nats', "
+                + "client.id='test-distributed-sink', "
+                + "@distribution(strategy='partitioned', partitionKey='symbol', "
+                + "@destination(destination = 'nats-topic1'), @destination(destination = 'nats-topic2')), "
+                + "bootstrap.servers='" + "nats://localhost:" + port + "', "
+                + "cluster.id='test-cluster', "
+                + "@map(type='json')) " +
+                "define stream BarStream (symbol string, price float, volume long); ";
+        String query = "" +
+                "from FooStream " +
+                "select * " +
+                "insert into BarStream; ";
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+        Thread.sleep(1000);
+        topic1NatsClient.subsripeFromNow("nats-topic1");
+        topic2NatsClient.subsripeFromNow("nats-topic2");
+
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 57.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+
+        Thread.sleep(5000);
+        AssertJUnit.assertEquals("Number of WSO2 events received at 'nats-topic1'", 4,
+                topic1ResultContainer.getEventCount());
+        AssertJUnit.assertEquals("Number of IBM events received at 'nats-topic2'", 2,
+                topic2ResultContainer.getEventCount());
+        siddhiManager.shutdown();
+    }
 }
 
