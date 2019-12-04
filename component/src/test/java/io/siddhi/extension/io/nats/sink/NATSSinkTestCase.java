@@ -417,9 +417,9 @@ public class NATSSinkTestCase {
         stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
 
         Thread.sleep(5000);
-        AssertJUnit.assertEquals("Number of WSO2 events received at 'nats-topic1'", 2,
+        AssertJUnit.assertEquals("Number of IBM events received at 'nats-topic1'", 2,
                 topic1ResultContainer.getEventCount());
-        AssertJUnit.assertEquals("Number of IBM events received at 'nats-topic2'", 4,
+        AssertJUnit.assertEquals("Number of WSO2 events received at 'nats-topic2'", 4,
                 topic2ResultContainer.getEventCount());
         siddhiManager.shutdown();
     }
