@@ -146,7 +146,7 @@ public class NATSSink extends Sink {
     public void publish(Object payload, DynamicOptions dynamicOptions, State state) throws
                                                                                    ConnectionUnavailableException  {
         byte[] messageBytes;
-        String subjectName = destination.getValue();
+        String subjectName = destination.getValue(dynamicOptions);
         try {
             if (payload instanceof byte[]) {
                 messageBytes = (byte[]) payload;

@@ -375,12 +375,12 @@ public class NATSSinkTestCase {
     @Test
     public void testDistributedSink() throws InterruptedException, TimeoutException, IOException {
         log.info("Test distributed Nats Sink");
-        ResultContainer topic1ResultContainer = new ResultContainer(4, 20);
+        ResultContainer topic1ResultContainer = new ResultContainer(2, 20);
         NATSClient topic1NatsClient = new NATSClient("test-cluster", "stan-distributed-sink-1",
                 "nats://localhost:" + port, topic1ResultContainer);
         topic1NatsClient.connect();
 
-        ResultContainer topic2ResultContainer = new ResultContainer(2, 20);
+        ResultContainer topic2ResultContainer = new ResultContainer(4, 20);
         NATSClient topic2NatsClient = new NATSClient("test-cluster", "stan-distributed-sink-2",
                 "nats://localhost:" + port, topic2ResultContainer);
         topic2NatsClient.connect();
@@ -417,9 +417,9 @@ public class NATSSinkTestCase {
         stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
 
         Thread.sleep(5000);
-        AssertJUnit.assertEquals("Number of WSO2 events received at 'nats-topic1'", 4,
+        AssertJUnit.assertEquals("Number of WSO2 events received at 'nats-topic1'", 2,
                 topic1ResultContainer.getEventCount());
-        AssertJUnit.assertEquals("Number of IBM events received at 'nats-topic2'", 2,
+        AssertJUnit.assertEquals("Number of IBM events received at 'nats-topic2'", 4,
                 topic2ResultContainer.getEventCount());
         siddhiManager.shutdown();
     }
