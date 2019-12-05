@@ -239,7 +239,7 @@
                         </Export-Package>
                         <Import-Package>
                             io.nats.client;version="0.0.0";resolution:=optional,
-                            com.google.protobuf.*;version="0.0.0",
+                            com.google.protobuf.*;version="0.0.0";resolution:=optional,
                             io.nats.streaming;version="0.0.0";resolution:=optional,
                             io.siddhi.annotation.*;version="${siddhi.version.range}",
                             io.siddhi.core.*;version="${siddhi.version.range}",
