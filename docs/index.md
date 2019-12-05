@@ -19,12 +19,12 @@ For information on <a target="_blank" href="https://siddhi.io/">Siddhi</a> and i
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-io-nats/api/2.0.9">2.0.9</a>.
+Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-io-nats/api/2.0.10">2.0.10</a>.
 
 ## Features
 
-* <a target="_blank" href="https://siddhi-io.github.io/siddhi-io-nats/api/2.0.9/#nats-sink">nats</a> *(<a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#sink">Sink</a>)*<br> <div style="padding-left: 1em;"><p><p style="word-wrap: break-word;margin: 0;">NATS Sink allows users to subscribe to a NATS broker and publish messages.</p></p></div>
-* <a target="_blank" href="https://siddhi-io.github.io/siddhi-io-nats/api/2.0.9/#nats-source">nats</a> *(<a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#source">Source</a>)*<br> <div style="padding-left: 1em;"><p><p style="word-wrap: break-word;margin: 0;">NATS Source allows users to subscribe to a NATS broker and receive messages. It has the ability to receive all the message types supported by NATS.</p></p></div>
+* <a target="_blank" href="https://siddhi-io.github.io/siddhi-io-nats/api/2.0.10/#nats-sink">nats</a> *(<a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#sink">Sink</a>)*<br> <div style="padding-left: 1em;"><p><p style="word-wrap: break-word;margin: 0;">NATS Sink allows users to subscribe to a NATS broker and publish messages.</p></p></div>
+* <a target="_blank" href="https://siddhi-io.github.io/siddhi-io-nats/api/2.0.10/#nats-source">nats</a> *(<a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#source">Source</a>)*<br> <div style="padding-left: 1em;"><p><p style="word-wrap: break-word;margin: 0;">NATS Source allows users to subscribe to a NATS broker and receive messages. It has the ability to receive all the message types supported by NATS.</p></p></div>
 
 ## Dependencies 
 
