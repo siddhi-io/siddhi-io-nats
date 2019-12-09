@@ -30,9 +30,9 @@ Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-i
 
 Add necessary NATS client jars and related dependencies. 
 
-* [java-nats-streaming-2.2.2.jar](https://repo1.maven.org/maven2/io/nats/java-nats-streaming/2.2.2/java-nats-streaming-2.2.2.jar) (Add to <SIDDHI_HOME>/jars)
-* [jnats-2.6.5.jar](https://repo1.maven.org/maven2/io/nats/jnats/2.6.5/jnats-2.6.5.jar) (Add to <SIDDHI_HOME>/jars)
-* [protobuf-java-3.9.1.jar](https://repo1.maven.org/maven2/com/google/protobuf/protobuf-java/3.9.1/protobuf-java-3.9.1.jar) (Add to <SIDDHI_HOME>/bundles)
+* [java-nats-streaming-2.2.2.jar](https://repo1.maven.org/maven2/io/nats/java-nats-streaming/2.2.2/java-nats-streaming-2.2.2.jar) (Add to `<SIDDHI_HOME>/jars`)
+* [jnats-2.6.5.jar](https://repo1.maven.org/maven2/io/nats/jnats/2.6.5/jnats-2.6.5.jar) (Add to `<SIDDHI_HOME>/jars`)
+* [protobuf-java-3.9.1.jar](https://repo1.maven.org/maven2/com/google/protobuf/protobuf-java/3.9.1/protobuf-java-3.9.1.jar) (Add to `<SIDDHI_HOME>/bundles`)
 
 ## Installation
 
