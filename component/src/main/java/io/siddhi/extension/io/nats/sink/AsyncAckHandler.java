@@ -19,21 +19,42 @@
 package io.siddhi.extension.io.nats.sink;
 
 import io.nats.streaming.AckHandler;
+import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.util.transport.DynamicOptions;
 import org.apache.log4j.Logger;
 
 /**
  * Handle the acknowledgement for the published messages in an asynchronous manner.
  */
 public class AsyncAckHandler implements AckHandler {
+
     private static final Logger log = Logger.getLogger(AsyncAckHandler.class);
+    private String siddhiAppName;
+    private String natsURL;
+    private Object payload;
+    private NATSSink natsSink;
+    private DynamicOptions dynamicOptions;
+
+    AsyncAckHandler(String siddhiAppName, String natsURL, Object payload, NATSSink natsSink,
+                    DynamicOptions dynamicOptions) {
+        this.siddhiAppName = siddhiAppName;
+        this.natsURL = natsURL;
+        this.payload = payload;
+        this.natsSink = natsSink;
+        this.dynamicOptions = dynamicOptions;
+    }
 
     @Override
-    public void onAck(String nuid, Exception exception) {
-        if (exception != null) {
-            log.error("Error publishing msg id " + nuid + " : " + exception.getMessage());
+    public void onAck(String nuid, Exception e) {
+        if (e != null) {
+            log.error("Exception occurred in Siddhi App " + siddhiAppName +
+                    " when publishing message " + nuid + " to NATS endpoint " + natsURL + " . " +
+                    e.getMessage(), e);
+            natsSink.onError(payload, dynamicOptions, new ConnectionUnavailableException(e.getMessage(), e));
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("Received ack for msg id " + nuid);
+                log.debug("Received ack for msg id " + nuid + " in Siddhi App " + siddhiAppName +
+                        " when publishing message to NATS endpoint " + natsURL + " . ");
             }
         }
     }

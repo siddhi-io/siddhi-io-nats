@@ -29,11 +29,15 @@ import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.apache.log4j.Logger;
 import org.testcontainers.containers.GenericContainer;
 import org.testng.Assert;
+import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Contains test cases for NATS sink.
@@ -41,12 +45,19 @@ import java.util.concurrent.TimeoutException;
 public class NATSSinkTestCase {
     private Logger log = Logger.getLogger(NATSSinkTestCase.class);
     private int port;
+    private AtomicInteger eventCounter = new AtomicInteger(0);
+
+    @BeforeMethod
+    private void setUp() {
+        eventCounter.set(0);
+    }
 
     @BeforeClass
     private void initializeDockerContainer() throws InterruptedException {
         GenericContainer simpleWebServer
                 = new GenericContainer("nats-streaming:0.11.2");
         simpleWebServer.setPrivilegedMode(true);
+        eventCounter.set(0);
         simpleWebServer.start();
         port = simpleWebServer.getMappedPort(4222);
         Thread.sleep(500);
@@ -322,6 +333,95 @@ public class NATSSinkTestCase {
                 executionPlanRuntime.shutdown();
             }
         }
+    }
+
+    /**
+     * Test for configure the NATS Sink to publish the message to a NATS-streaming subject.
+     */
+    @Test
+    public void testNatsProtobuf() throws InterruptedException, NoSuchMethodException,
+            InvocationTargetException, IllegalAccessException, TimeoutException, IOException {
+        ResultContainer resultContainer = new ResultContainer(2, 10);
+        NATSClient natsClient = new NATSClient("test-cluster", "stan-test10",
+                "nats://localhost:" + port, resultContainer);
+        natsClient.connect();
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "@App:name('Test-plan10')\n"
+                + "@sink(type='nats', " +
+                "@map(type='protobuf', class='io.siddhi.extension.io.nats.utils.protobuf.Person'), "
+                + "destination='nats-test10', "
+                + "client.id='test-plan10-siddhi',"
+                + "bootstrap.servers='" + "nats://localhost:" + port + "', "
+                + "cluster.id='test-cluster'"
+                + ")"
+                + "define stream inputStream (nic long, name string);";
+
+        natsClient.subsripeFromNow("nats-test10");
+        SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
+        InputHandler inputStream = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+
+        long nic1 = 1222;
+        long nic2 = 1223;
+        inputStream.send(new Object[] {nic1, "Jimmy"});
+        inputStream.send(new Object[] {nic2, "Natalie"});
+
+        Thread.sleep(500);
+        AssertJUnit.assertEquals(resultContainer.getEventCount(), 2);
+        siddhiManager.shutdown();
+    }
+
+    @Test
+    public void testDistributedSink() throws InterruptedException, TimeoutException, IOException {
+        log.info("Test distributed Nats Sink");
+        ResultContainer topic1ResultContainer = new ResultContainer(2, 20);
+        NATSClient topic1NatsClient = new NATSClient("test-cluster", "stan-distributed-sink-1",
+                "nats://localhost:" + port, topic1ResultContainer);
+        topic1NatsClient.connect();
+
+        ResultContainer topic2ResultContainer = new ResultContainer(4, 20);
+        NATSClient topic2NatsClient = new NATSClient("test-cluster", "stan-distributed-sink-2",
+                "nats://localhost:" + port, topic2ResultContainer);
+        topic2NatsClient.connect();
+
+        String streams = "" +
+                "@app:name('TestSiddhiApp') \n" +
+                "define stream FooStream (symbol string, price float, volume long); "
+                + "@sink(type='nats', "
+                + "client.id='test-distributed-sink', "
+                + "@distribution(strategy='partitioned', partitionKey='symbol', "
+                + "@destination(destination = 'nats-topic1'), @destination(destination = 'nats-topic2')), "
+                + "bootstrap.servers='" + "nats://localhost:" + port + "', "
+                + "cluster.id='test-cluster', "
+                + "@map(type='json')) " +
+                "define stream BarStream (symbol string, price float, volume long); ";
+        String query = "" +
+                "from FooStream " +
+                "select * " +
+                "insert into BarStream; ";
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+        Thread.sleep(1000);
+        topic1NatsClient.subsripeFromNow("nats-topic1");
+        topic2NatsClient.subsripeFromNow("nats-topic2");
+
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 57.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+
+        Thread.sleep(5000);
+        AssertJUnit.assertEquals("Number of IBM events received at 'nats-topic1'", 2,
+                topic1ResultContainer.getEventCount());
+        AssertJUnit.assertEquals("Number of WSO2 events received at 'nats-topic2'", 4,
+                topic2ResultContainer.getEventCount());
+        siddhiManager.shutdown();
     }
 }
 

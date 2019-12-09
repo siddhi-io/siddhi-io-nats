@@ -17,6 +17,9 @@
  */
 package io.siddhi.extension.io.nats.source;
 
+import com.google.protobuf.GeneratedMessageV3;
+import io.nats.streaming.ConnectionLostHandler;
+import io.nats.streaming.Options;
 import io.nats.streaming.StreamingConnection;
 import io.nats.streaming.StreamingConnectionFactory;
 import io.nats.streaming.Subscription;
@@ -128,7 +131,16 @@ import java.util.concurrent.atomic.AtomicInteger;
                         syntax = "@source(type='nats', @map(type='text'), "
                                 + "destination='SP_NATS_INPUT_TEST', "
                                 + ")\n"
-                                + "define stream inputStream (name string, age int, country string);")
+                                + "define stream inputStream (name string, age int, country string);"),
+                @Example(description = "This example shows how to pass NATS Streaming sequence number to the event.",
+                        syntax = "@source(type='nats', @map(type='json', @attributes(name='$.name', age='$.age', " +
+                                "country='$.country', sequenceNum='trp:sequenceNumber')), " +
+                                "destination='SIDDHI_NATS_SOURCE_TEST_DEST', " +
+                                "client.id='nats_client', " +
+                                "bootstrap.servers='nats://localhost:4222', " +
+                                "cluster.id='test-cluster'" +
+                                ")\n" +
+                                "define stream inputStream (name string, age int, country string, sequenceNum string);")
         }
 )
 
@@ -147,8 +159,7 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
     private Subscription subscription;
     private NATSMessageProcessor natsMessageProcessor;
     private String siddhiAppName;
-
-
+    private String[] reqTransportPropertyNames;
 
     @Override
     public StateFactory<NATSSourceState> init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
@@ -157,6 +168,7 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
         this.sourceEventListener = sourceEventListener;
         this.optionHolder = optionHolder;
         this.siddhiAppName = siddhiAppContext.getName();
+        this.reqTransportPropertyNames = requestedTransportPropertyNames.clone();
         initNATSProperties();
         return NATSSourceState::new;
     }
@@ -167,16 +179,17 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
 
     @Override
     public Class[] getOutputEventClasses() {
-        return new Class[]{String.class, Map.class};
+        return new Class[]{String.class, Map.class, GeneratedMessageV3.class};
     }
 
     @Override
     public void connect(ConnectionCallback connectionCallback, NATSSourceState natsSourceState)
             throws ConnectionUnavailableException {
         try {
-            StreamingConnectionFactory streamingConnectionFactory = new StreamingConnectionFactory(this.clusterId,
-                    this.clientId);
-            streamingConnectionFactory.setNatsUrl(this.natsUrl);
+            Options options = new Options.Builder().natsUrl(this.natsUrl).
+                    clientId(this.clientId).clusterId(this.clusterId).
+                    connectionLostHandler(new NATSConnectionLostHandler(connectionCallback)).build();
+            StreamingConnectionFactory streamingConnectionFactory = new StreamingConnectionFactory(options);
             streamingConnection =  streamingConnectionFactory.createConnection();
         } catch (IOException e) {
             log.error("Error while connecting to NATS server at destination: " + destination);
@@ -194,9 +207,6 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
     @Override
     public void disconnect() {
         try {
-            if (subscription != null) {
-                subscription.close();
-            }
             if (streamingConnection != null) {
                 streamingConnection.close();
             }
@@ -243,7 +253,8 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
             if (durableName != null) {
                 subscriptionOptionsBuilder.durableName(durableName);
             }
-            natsMessageProcessor = new NATSMessageProcessor(sourceEventListener, natsSourceState.lastSentSequenceNo);
+            natsMessageProcessor = new NATSMessageProcessor(sourceEventListener, reqTransportPropertyNames,
+                    natsSourceState.lastSentSequenceNo);
             if (queueGroupName != null) {
                 subscription =  streamingConnection.subscribe(destination , queueGroupName, natsMessageProcessor,
                         subscriptionOptionsBuilder.build());
@@ -322,6 +333,27 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
             if (seqObject != null && sequenceNumber == null) {
                 lastSentSequenceNo.set((int) seqObject);
             }
+        }
+    }
+
+    class NATSConnectionLostHandler implements ConnectionLostHandler {
+        private ConnectionCallback connectionCallback;
+
+        NATSConnectionLostHandler(ConnectionCallback connectionCallback) {
+            this.connectionCallback = connectionCallback;
+        }
+
+        @Override
+        public void connectionLost(StreamingConnection streamingConnection, Exception e) {
+            log.error("Exception occurred in Siddhi App" + siddhiAppName +
+                    " when consuming messages from NATS endpoint " + natsUrl + " . " + e.getMessage(), e);
+            Thread thread = new Thread() {
+                public void run() {
+                    connectionCallback.onError(new ConnectionUnavailableException(e));
+                }
+            };
+
+            thread.start();
         }
     }
 }
