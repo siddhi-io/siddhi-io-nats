@@ -26,6 +26,7 @@ import io.siddhi.extension.io.nats.utils.NATSClient;
 import io.siddhi.extension.io.nats.utils.ResultContainer;
 import io.siddhi.extension.io.nats.utils.UnitTestAppender;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.testcontainers.containers.GenericContainer;
 import org.testng.Assert;
@@ -44,15 +45,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class NATSSinkTestCase {
     private Logger log = Logger.getLogger(NATSSinkTestCase.class);
-    private int port;
+    private int port=4222;
     private AtomicInteger eventCounter = new AtomicInteger(0);
 
-    @BeforeMethod
+//    @BeforeMethod
     private void setUp() {
         eventCounter.set(0);
     }
 
-    @BeforeClass
+//    @BeforeClass
     private void initializeDockerContainer() throws InterruptedException {
         GenericContainer simpleWebServer
                 = new GenericContainer("nats-streaming:0.11.2");
@@ -220,7 +221,8 @@ public class NATSSinkTestCase {
     /**
      * Test the NATS sink configurations with mandatory parameters only.
      */
-    @Test(dependsOnMethods = "testMultipleSinkSingleStream")
+//    @Test(dependsOnMethods = "testMultipleSinkSingleStream")
+    @Test
     public void testNatsSinkWithMandatoryConfigurations() throws InterruptedException, IOException, TimeoutException {
         ResultContainer resultContainer = new ResultContainer(2, 3);
         NATSClient natsClient = new NATSClient("test-cluster", "stan_test6", "nats://localhost:"
@@ -230,7 +232,7 @@ public class NATSSinkTestCase {
 
         String inStreamDefinition = "@App:name('Test-plan6')\n"
                 + "@sink(type='nats', @map(type='xml'), "
-                + "bootstrap.servers='" + "nats://localhost:" + port + "', "
+                + "bootstrap.servers='" + "nats://localhost:" + port + "', streaming.cluster.id='test-cluster',"
                 + "destination='nats-test6' "
                 + ")"
                 + "define stream inputStream (name string, age int, country string);";
@@ -253,7 +255,8 @@ public class NATSSinkTestCase {
      * If invalid cluster name is provided in NATS sink configurations then ConnectionUnavailableException
      * should have been thrown. Here incorrect cluster id provided. Hence the connection will fail.
      */
-    @Test(dependsOnMethods = "testNatsSinkWithMandatoryConfigurations")
+//    @Test(dependsOnMethods = "testNatsSinkWithMandatoryConfigurations")
+    @Test
     public void testIncorrectClusterName() throws InterruptedException {
         log.info("Test with connection unavailable exception");
         log = Logger.getLogger(Sink.class);
@@ -273,7 +276,8 @@ public class NATSSinkTestCase {
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
         executionPlanRuntime.start();
         Thread.sleep(500);
-        Assert.assertTrue(appender.getMessages().contains("Error while connecting to NATS server at destination:"));
+        Assert.assertTrue(appender.getMessages().contains("Error in Siddhi App Test-plan7 while " +
+                "connecting to NATS server "));
         siddhiManager.shutdown();
     }
 
@@ -282,7 +286,8 @@ public class NATSSinkTestCase {
      * ConnectionUnavailableException should have been thrown. Here incorrect cluster url is provided hence the
      * connection will fail.
      */
-    @Test(dependsOnMethods = "testIncorrectClusterName")
+//    @Test(dependsOnMethods = "testIncorrectClusterName")
+    @Test
     public void testIncorrectNatsServerUrl() throws InterruptedException {
         log.info("Test with connection unavailable exception");
         log = Logger.getLogger(Sink.class);
@@ -305,7 +310,8 @@ public class NATSSinkTestCase {
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
         executionPlanRuntime.start();
         Thread.sleep(500);
-        Assert.assertTrue(appender.getMessages().contains("Error while connecting to NATS server at destination:"));
+        Assert.assertTrue(appender.getMessages().contains("Error in Siddhi App Test-plan8 while connecting to NATS " +
+                "server endpoint nats://localhost:5223"));
         siddhiManager.shutdown();
     }
 

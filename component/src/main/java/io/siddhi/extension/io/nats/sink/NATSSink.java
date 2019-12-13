@@ -37,6 +37,7 @@ import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.core.util.transport.Option;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.extension.io.nats.sink.exception.NATSSinkAdaptorRuntimeException;
+import io.siddhi.extension.io.nats.sink.nats.NATS;
 import io.siddhi.extension.io.nats.util.NATSConstants;
 import io.siddhi.extension.io.nats.util.NATSUtils;
 import io.siddhi.query.api.definition.StreamDefinition;
@@ -77,7 +78,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 @Parameter(name = NATSConstants.CLUSTER_ID,
                         description = "The identifier of the NATS server/cluster.",
                         type = DataType.STRING,
-                        optional = true,
                         defaultValue = NATSConstants.DEFAULT_CLUSTER_ID
                 ),
         },
@@ -108,15 +108,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NATSSink extends Sink {
     private static final Logger log = Logger.getLogger(NATSSink.class);
-    private StreamingConnection streamingConnection;
-    private OptionHolder optionHolder;
-    private StreamDefinition streamDefinition;
-    private Option destination;
-    private String clusterId;
-    private String clientId;
-    private String natsUrl;
     private String siddhiAppName;
-    private AtomicBoolean isConnectionClosed = new AtomicBoolean(false);
+    private NATS nats;
 
     @Override
     public Class[] getSupportedInputEventClasses() {
@@ -136,64 +129,35 @@ public class NATSSink extends Sink {
     protected StateFactory init(StreamDefinition streamDefinition, OptionHolder optionHolder, ConfigReader configReader,
                                 SiddhiAppContext siddhiAppContext) {
         this.siddhiAppName = siddhiAppContext.getName();
-        this.optionHolder = optionHolder;
-        this.streamDefinition = streamDefinition;
-        validateAndInitNatsProperties();
+        if (optionHolder.isOptionExists("cluster.id") || optionHolder.isOptionExists(
+                "streaming.cluster.id")) {
+            NATS.setIsNATSStreaming(true);
+        }
+        nats = NATS.getNats();
+        nats.initiateClient(optionHolder, siddhiAppName, streamDefinition.getId());
+        nats.setNatsSink(this);
         return null;
     }
 
     @Override
     public void publish(Object payload, DynamicOptions dynamicOptions, State state) throws
-                                                                                   ConnectionUnavailableException  {
-        byte[] messageBytes;
-        String subjectName = destination.getValue(dynamicOptions);
-        try {
-            if (payload instanceof byte[]) {
-                messageBytes = (byte[]) payload;
-            } else {
-                String message = (String) payload;
-                messageBytes = message.getBytes(StandardCharsets.UTF_8);
-            }
-
-            if (isConnectionClosed.get()) {
-                streamingConnection.close();
-                connect();
-            }
-            streamingConnection.publish(subjectName, messageBytes,
-                    new AsyncAckHandler(siddhiAppName, natsUrl, payload, this, dynamicOptions));
-        } catch (IOException e) {
-            log.error("Error sending message to destination: " + subjectName);
-            throw new NATSSinkAdaptorRuntimeException("Error sending message to destination:" + subjectName, e);
-        } catch (InterruptedException e) {
-            log.error("Error sending message to destination: " + subjectName + ".The calling thread is "
-                    + "interrupted before the call completes.");
-            throw new NATSSinkAdaptorRuntimeException("Error sending message to destination:" + subjectName
-                    + ".The calling thread is interrupted before the call completes.", e);
-        } catch (TimeoutException e) {
-            log.error("Error sending message to destination: " + subjectName + ".Timeout occured while trying to ack.");
-            throw new NATSSinkAdaptorRuntimeException("Error sending message to destination:" + subjectName
-                    + ".Timeout occured while trying to ack.", e);
-        }
+            ConnectionUnavailableException  {
+            nats.publishMessages(payload,dynamicOptions, state);
     }
 
     @Override
     public void connect() throws ConnectionUnavailableException {
         try {
-            Options options = new Options.Builder().natsUrl(this.natsUrl).
-                    clientId(this.clientId).clusterId(this.clusterId).
-                    connectionLostHandler(new NATSSink.NATSConnectionLostHandler()).build();
-            StreamingConnectionFactory streamingConnectionFactory = new StreamingConnectionFactory(options);
-            streamingConnection = streamingConnectionFactory.createConnection();
-            isConnectionClosed.set(false);
+            nats.createNATSClient();
         } catch (IOException e) {
             String errorMessage = "Error in Siddhi App " + siddhiAppName + " while connecting to NATS server " +
-                    "endpoint " + natsUrl + " at destination: " + destination.getValue();
+                    "endpoint " + nats.getNatsUrl()[0] + " at destination: " + nats.getDestination();
             log.error(errorMessage);
             throw new ConnectionUnavailableException(errorMessage, e);
         } catch (InterruptedException e) {
             String errorMessage = "Error in Siddhi App " + siddhiAppName + " while connecting to NATS server " +
-                    "endpoint " + natsUrl + " at destination: " + destination.getValue() + ". The calling thread is " +
-                    "interrupted before the connection can be established.";
+                    "endpoint " + nats.getNatsUrl()[0] + " at destination: " + nats.getDestination().getValue() +
+                    ". The calling thread is interrupted before the connection can be established.";
             log.error(errorMessage);
             throw new ConnectionUnavailableException(errorMessage, e);
         }
@@ -202,12 +166,10 @@ public class NATSSink extends Sink {
     @Override
     public void disconnect() {
         try {
-            if (streamingConnection != null) {
-                streamingConnection.close();
-            }
+            nats.disconnect();
         } catch (IOException | TimeoutException | InterruptedException e) {
             log.error("Error disconnecting the Stan receiver in Siddhi App " + siddhiAppName +
-                    " when publishing messages to NATS endpoint " + natsUrl + " . " + e.getMessage(), e);
+                    " when publishing messages to NATS endpoint " + nats.getNatsUrl()[0] + " . " + e.getMessage(), e);
         }
     }
 
@@ -216,24 +178,5 @@ public class NATSSink extends Sink {
 
     }
 
-    private void validateAndInitNatsProperties() {
-        this.destination = optionHolder.validateAndGetOption(NATSConstants.DESTINATION);
-        this.clusterId = optionHolder.validateAndGetStaticValue(NATSConstants.CLUSTER_ID, NATSConstants
-                .DEFAULT_CLUSTER_ID);
-        this.clientId = optionHolder.validateAndGetStaticValue(NATSConstants.CLIENT_ID, NATSUtils.createClientId());
-        this.natsUrl = optionHolder.validateAndGetStaticValue(NATSConstants.BOOTSTRAP_SERVERS,
-                NATSConstants.DEFAULT_SERVER_URL);
-
-        NATSUtils.validateNatsUrl(natsUrl, streamDefinition.getId());
-    }
-
-    class NATSConnectionLostHandler implements ConnectionLostHandler {
-        @Override
-        public void connectionLost(StreamingConnection streamingConnection, Exception e) {
-            log.error("Exception occurred in Siddhi App " + siddhiAppName +
-                    " when publishing messages to NATS endpoint " + natsUrl + " . " + e.getMessage(), e);
-            isConnectionClosed = new AtomicBoolean(true);
-        }
-    }
 }
 

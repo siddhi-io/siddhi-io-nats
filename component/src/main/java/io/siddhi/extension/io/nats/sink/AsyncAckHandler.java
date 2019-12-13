@@ -35,7 +35,7 @@ public class AsyncAckHandler implements AckHandler {
     private NATSSink natsSink;
     private DynamicOptions dynamicOptions;
 
-    AsyncAckHandler(String siddhiAppName, String natsURL, Object payload, NATSSink natsSink,
+    public AsyncAckHandler(String siddhiAppName, String natsURL, Object payload, NATSSink natsSink,
                     DynamicOptions dynamicOptions) {
         this.siddhiAppName = siddhiAppName;
         this.natsURL = natsURL;
