@@ -39,4 +39,12 @@ public class NATSClient {
         d.subscribe(subject);
     }
 
+    public void publish(String message) {
+        nc.publish(subject, message.getBytes());
+    }
+
+    public void close() throws InterruptedException {
+        nc.close();
+    }
+
 }

@@ -131,9 +131,10 @@ public class NATSSink extends Sink {
         this.siddhiAppName = siddhiAppContext.getName();
         if (optionHolder.isOptionExists("cluster.id") || optionHolder.isOptionExists(
                 "streaming.cluster.id")) {
-            NATS.setIsNATSStreaming(true);
+            nats = NATS.getNats(true);
+        } else {
+            nats = NATS.getNats(false);
         }
-        nats = NATS.getNats();
         nats.initiateClient(optionHolder, siddhiAppName, streamDefinition.getId());
         nats.setNatsSink(this);
         return null;

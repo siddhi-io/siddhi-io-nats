@@ -144,8 +144,8 @@ import java.util.concurrent.atomic.AtomicInteger;
         }
 )
 
-public class NATSSource extends Source<NATSSource.NATSSourceState> {
-    private static final Logger log = Logger.getLogger(NATSSource.class);
+public class NATSSource extends Source {
+/*    private static final Logger log = Logger.getLogger(NATSSource.class);
     private SourceEventListener sourceEventListener;
     private OptionHolder optionHolder;
     private StreamingConnection streamingConnection;
@@ -159,18 +159,28 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
     private Subscription subscription;
     private NATSMessageProcessor natsMessageProcessor;
     private String siddhiAppName;
-    private String[] reqTransportPropertyNames;
+    private String[] reqTransportPropertyNames;*/
+
+    private NATS nats;
 
     @Override
-    public StateFactory<NATSSourceState> init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
+    public StateFactory init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
                              String[] requestedTransportPropertyNames, ConfigReader configReader,
                              SiddhiAppContext siddhiAppContext) {
-        this.sourceEventListener = sourceEventListener;
+        if (optionHolder.isOptionExists("cluster.id") || optionHolder.isOptionExists(
+                "streaming.cluster.id")) {
+            nats = NATS.getNATS(true);
+        } else {
+            nats = NATS.getNATS(false);
+        }
+        return nats.initiateNatsClient(sourceEventListener,optionHolder,requestedTransportPropertyNames,configReader,
+                siddhiAppContext);
+        /*this.sourceEventListener = sourceEventListener;
         this.optionHolder = optionHolder;
         this.siddhiAppName = siddhiAppContext.getName();
         this.reqTransportPropertyNames = requestedTransportPropertyNames.clone();
         initNATSProperties();
-        return NATSSourceState::new;
+        return NATSSourceState::new;*/
     }
 
     @Override protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
@@ -183,9 +193,11 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
     }
 
     @Override
-    public void connect(ConnectionCallback connectionCallback, NATSSourceState natsSourceState)
+    public void connect(ConnectionCallback connectionCallback, State natsSourceState)
             throws ConnectionUnavailableException {
-        try {
+        nats.createConnection(connectionCallback, natsSourceState);
+
+        /*try {
             Options options = new Options.Builder().natsUrl(this.natsUrl).
                     clientId(this.clientId).clusterId(this.clusterId).
                     connectionLostHandler(new NATSConnectionLostHandler(connectionCallback)).build();
@@ -201,19 +213,20 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
             throw new ConnectionUnavailableException("Error while connecting to NATS server at destination: "
                     + destination + " .The calling thread is interrupted before the connection can be established.", e);
         }
-        subscribe(natsSourceState);
+        subscribe(natsSourceState);*/
     }
 
     @Override
     public void disconnect() {
-        try {
+        nats.disconnect();
+        /*try {
             if (streamingConnection != null) {
                 streamingConnection.close();
             }
 
         } catch (IOException | TimeoutException | InterruptedException e) {
             log.error("Error disconnecting the Stan receiver", e);
-        }
+        }*/
     }
 
     @Override
@@ -223,25 +236,27 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
 
     @Override
     public void pause() {
-        if (natsMessageProcessor != null) {
+        nats.pause();
+        /*if (natsMessageProcessor != null) {
             natsMessageProcessor.pause();
             if (log.isDebugEnabled()) {
                 log.debug("Nats source paused for destination: " + destination);
             }
-        }
+        }*/
     }
 
     @Override
     public void resume() {
-        if (natsMessageProcessor != null) {
+        nats.resume();
+        /*if (natsMessageProcessor != null) {
             natsMessageProcessor.resume();
             if (log.isDebugEnabled()) {
                 log.debug("Nats source resumed for destination: " + destination);
             }
-        }
+        }*/
     }
 
-    private void subscribe(NATSSourceState natsSourceState) {
+    /*private void subscribe(NATSSourceState natsSourceState) {
         SubscriptionOptions.Builder subscriptionOptionsBuilder = new SubscriptionOptions.Builder();
         if (sequenceNumber != null && natsSourceState.lastSentSequenceNo.intValue() <
                 Integer.parseInt(sequenceNumber)) {
@@ -283,9 +298,9 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
                     + sourceEventListener.getStreamDefinition().getId() + ".The server request cannot be completed "
                     + "within the subscription timeout.", e);
         }
-    }
+    }*/
 
-    private void initNATSProperties() {
+    /*private void initNATSProperties() {
         this.destination = optionHolder.validateAndGetStaticValue(NATSConstants.DESTINATION);
         this.clusterId = optionHolder.validateAndGetStaticValue(NATSConstants.CLUSTER_ID,
                 NATSConstants.DEFAULT_CLUSTER_ID);
@@ -304,39 +319,39 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
             this.sequenceNumber = optionHolder.validateAndGetStaticValue(NATSConstants.SUBSCRIPTION_SEQUENCE);
         }
         NATSUtils.validateNatsUrl(natsUrl, sourceEventListener.getStreamDefinition().getId());
-    }
+    }*/
 
-    class NATSSourceState extends State {
+    /*class NATSSourceState extends State {
         private AtomicInteger lastSentSequenceNo = new AtomicInteger(0);
 
         @Override public boolean canDestroy() {
             return lastSentSequenceNo.intValue() == 0;
         }
 
-        /**
+        *//**
          * Used to serialize and persist {@link #lastSentSequenceNo} in a configurable interval.
          * @return stateful objects of the processing element as a map
-         */
+         *//*
         @Override public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             state.put(siddhiAppName, lastSentSequenceNo.get());
             return state;
         }
 
-        /**
+        *//**
          * Used to get the persisted {@link #lastSentSequenceNo} value in case of client connection failure so that
          * replay the missing messages/events.
          * @param map the stateful objects of the processing element as a map.
-         */
+         *//*
         @Override public void restore(Map<String, Object> map) {
             Object seqObject = map.get(siddhiAppName);
             if (seqObject != null && sequenceNumber == null) {
                 lastSentSequenceNo.set((int) seqObject);
             }
         }
-    }
+    }*/
 
-    class NATSConnectionLostHandler implements ConnectionLostHandler {
+    /*class NATSConnectionLostHandler implements ConnectionLostHandler {
         private ConnectionCallback connectionCallback;
 
         NATSConnectionLostHandler(ConnectionCallback connectionCallback) {
@@ -355,7 +370,7 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
 
             thread.start();
         }
-    }
+    }*/
 }
 
 

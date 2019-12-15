@@ -14,13 +14,12 @@ import java.util.concurrent.TimeoutException;
 
 public abstract class NATS {
 
-    private static final Logger log = Logger.getLogger(NATSSink.class);
+    private static final Logger log = Logger.getLogger(NATS.class);
     protected Option destination;
     protected String clientId;
     protected String[] natsUrl;
     protected String streamId;
     protected String siddhiAppName;
-    private static boolean isNATSStreaming;
     protected NATSSink natsSink;
 
     public void initiateClient(OptionHolder optionHolder, String siddhiAppName, String streamId) {
@@ -49,16 +48,13 @@ public abstract class NATS {
         this.natsSink = natsSink;
     }
 
-    public static NATS getNats() {
+    public static NATS getNats(boolean isNATSStreaming) {
         if (isNATSStreaming) {
             return new NATSStreaming();
         }
         return new NATSCore();
     }
 
-    public static void setIsNATSStreaming(boolean isNATSStreaming) {
-        NATS.isNATSStreaming = isNATSStreaming;
-    }
 
     public Option getDestination() {
         return destination;
