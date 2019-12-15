@@ -56,6 +56,11 @@
             <dependency>
                 <groupId>io.nats</groupId>
                 <artifactId>java-nats-streaming</artifactId>
+                <version>${nats.streaming.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.nats</groupId>
+                <artifactId>jnats</artifactId>
                 <version>${nats.version}</version>
             </dependency>
             <dependency>
@@ -175,7 +180,8 @@
         <siddhi.map.json.version>5.0.2</siddhi.map.json.version>
         <siddhi.map.xml.version>5.0.2</siddhi.map.xml.version>
         <jacoco.plugin.version>0.7.9</jacoco.plugin.version>
-        <nats.version>2.2.2</nats.version>
+        <nats.streaming.version>2.2.2</nats.streaming.version>
+        <nats.version>2.6.6</nats.version>
         <surefire.plugin.version>2.22.0</surefire.plugin.version>
         <surefire.booter.version>2.22.0</surefire.booter.version>
         <mavan.findbugsplugin.exclude.file>findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>

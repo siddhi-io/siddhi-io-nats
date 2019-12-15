@@ -23,16 +23,14 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.sink.Sink;
 import io.siddhi.extension.io.nats.utils.NATSClient;
+import io.siddhi.extension.io.nats.utils.STANClient;
 import io.siddhi.extension.io.nats.utils.ResultContainer;
 import io.siddhi.extension.io.nats.utils.UnitTestAppender;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.testcontainers.containers.GenericContainer;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -70,9 +68,9 @@ public class NATSSinkTestCase {
     @Test
     public void natsSimplePublishTest() throws InterruptedException, TimeoutException, IOException {
         ResultContainer resultContainer = new ResultContainer(2, 3);
-        NATSClient natsClient = new NATSClient("test-cluster", "stan_test1", "nats://localhost:"
+        STANClient STANClient = new STANClient("test-cluster", "stan_test1", "nats://localhost:"
                 + port, resultContainer);
-        natsClient.connect();
+        STANClient.connect();
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "@App:name('Test-plan1')\n"
@@ -84,7 +82,7 @@ public class NATSSinkTestCase {
                 + ")"
                 + "define stream inputStream (name string, age int, country string);";
 
-        natsClient.subsripeFromNow("nats-test1");
+        STANClient.subsripeFromNow("nats-test1");
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.
                 createSiddhiAppRuntime(inStreamDefinition);
         InputHandler inputStream = executionPlanRuntime.getInputHandler("inputStream");
@@ -144,9 +142,9 @@ public class NATSSinkTestCase {
     @Test(dependsOnMethods = "testInvalidNatsUrl")
     public void testOptionalClientId() throws InterruptedException, TimeoutException, IOException {
         ResultContainer resultContainer = new ResultContainer(2, 3);
-        NATSClient natsClient = new NATSClient("test-cluster", "test-plan4", "nats://localhost:"
+        STANClient STANClient = new STANClient("test-cluster", "test-plan4", "nats://localhost:"
                 + port, resultContainer);
-        natsClient.connect();
+        STANClient.connect();
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "@App:name('Test-plan1')\n"
@@ -157,7 +155,7 @@ public class NATSSinkTestCase {
                 + ")"
                 + "define stream inputStream (name string, age int, country string);";
 
-        natsClient.subsripeFromNow("test-plan4");
+        STANClient.subsripeFromNow("test-plan4");
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.
                 createSiddhiAppRuntime(inStreamDefinition);
         InputHandler inputStream = executionPlanRuntime.getInputHandler("inputStream");
@@ -178,9 +176,9 @@ public class NATSSinkTestCase {
     @Test(dependsOnMethods = "testOptionalClientId")
     public void testMultipleSinkSingleStream() throws InterruptedException, TimeoutException, IOException {
         ResultContainer resultContainer = new ResultContainer(8, 3);
-        NATSClient natsClient = new NATSClient("test-cluster", "nats-test-plan5",
+        STANClient STANClient = new STANClient("test-cluster", "nats-test-plan5",
                 "nats://localhost:" + port, resultContainer);
-        natsClient.connect();
+        STANClient.connect();
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "@App:name('Test-plan5')\n"
@@ -198,8 +196,8 @@ public class NATSSinkTestCase {
                 + ")"
                 + "define stream inputStream (name string, age int, country string);";
 
-        natsClient.subsripeFromNow("nats-source-test-siddhi-1");
-        natsClient.subsripeFromNow("nats-source-test-siddhi-2");
+        STANClient.subsripeFromNow("nats-source-test-siddhi-1");
+        STANClient.subsripeFromNow("nats-source-test-siddhi-2");
 
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
         InputHandler inputStream = executionPlanRuntime.getInputHandler("inputStream");
@@ -225,9 +223,9 @@ public class NATSSinkTestCase {
     @Test
     public void testNatsSinkWithMandatoryConfigurations() throws InterruptedException, IOException, TimeoutException {
         ResultContainer resultContainer = new ResultContainer(2, 3);
-        NATSClient natsClient = new NATSClient("test-cluster", "stan_test6", "nats://localhost:"
+        STANClient STANClient = new STANClient("test-cluster", "stan_test6", "nats://localhost:"
                 + port, resultContainer);
-        natsClient.connect();
+        STANClient.connect();
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "@App:name('Test-plan6')\n"
@@ -237,7 +235,7 @@ public class NATSSinkTestCase {
                 + ")"
                 + "define stream inputStream (name string, age int, country string);";
 
-        natsClient.subsripeFromNow("nats-test6");
+        STANClient.subsripeFromNow("nats-test6");
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.
                 createSiddhiAppRuntime(inStreamDefinition);
         InputHandler inputStream = executionPlanRuntime.getInputHandler("inputStream");
@@ -348,9 +346,9 @@ public class NATSSinkTestCase {
     public void testNatsProtobuf() throws InterruptedException, NoSuchMethodException,
             InvocationTargetException, IllegalAccessException, TimeoutException, IOException {
         ResultContainer resultContainer = new ResultContainer(2, 10);
-        NATSClient natsClient = new NATSClient("test-cluster", "stan-test10",
+        STANClient STANClient = new STANClient("test-cluster", "stan-test10",
                 "nats://localhost:" + port, resultContainer);
-        natsClient.connect();
+        STANClient.connect();
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "@App:name('Test-plan10')\n"
@@ -363,7 +361,7 @@ public class NATSSinkTestCase {
                 + ")"
                 + "define stream inputStream (nic long, name string);";
 
-        natsClient.subsripeFromNow("nats-test10");
+        STANClient.subsripeFromNow("nats-test10");
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
         InputHandler inputStream = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
@@ -382,14 +380,14 @@ public class NATSSinkTestCase {
     public void testDistributedSink() throws InterruptedException, TimeoutException, IOException {
         log.info("Test distributed Nats Sink");
         ResultContainer topic1ResultContainer = new ResultContainer(2, 20);
-        NATSClient topic1NatsClient = new NATSClient("test-cluster", "stan-distributed-sink-1",
+        STANClient topic1STANClient = new STANClient("test-cluster", "stan-distributed-sink-1",
                 "nats://localhost:" + port, topic1ResultContainer);
-        topic1NatsClient.connect();
+        topic1STANClient.connect();
 
         ResultContainer topic2ResultContainer = new ResultContainer(4, 20);
-        NATSClient topic2NatsClient = new NATSClient("test-cluster", "stan-distributed-sink-2",
+        STANClient topic2STANClient = new STANClient("test-cluster", "stan-distributed-sink-2",
                 "nats://localhost:" + port, topic2ResultContainer);
-        topic2NatsClient.connect();
+        topic2STANClient.connect();
 
         String streams = "" +
                 "@app:name('TestSiddhiApp') \n" +
@@ -412,8 +410,8 @@ public class NATSSinkTestCase {
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
         Thread.sleep(1000);
-        topic1NatsClient.subsripeFromNow("nats-topic1");
-        topic2NatsClient.subsripeFromNow("nats-topic2");
+        topic1STANClient.subsripeFromNow("nats-topic1");
+        topic2STANClient.subsripeFromNow("nats-topic2");
 
         stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
         stockStream.send(new Object[]{"IBM", 75.6f, 100L});
@@ -427,6 +425,36 @@ public class NATSSinkTestCase {
                 topic1ResultContainer.getEventCount());
         AssertJUnit.assertEquals("Number of WSO2 events received at 'nats-topic2'", 4,
                 topic2ResultContainer.getEventCount());
+        siddhiManager.shutdown();
+    }
+
+    @Test
+    public void natsCoreSimplePublishTest() throws InterruptedException, TimeoutException, IOException {
+        ResultContainer resultContainer = new ResultContainer(20, 8);
+        NATSClient natsClient = new NATSClient("nats-test1", resultContainer);
+        natsClient.connectClient();
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "@App:name('Test-plan1')\n"
+                + "@sink(type='nats', @map(type='xml'), "
+                + "destination='nats-test1', "
+                + "bootstrap.servers='" + "nats://localhost:" + port + "' "
+                + ")"
+                + "define stream inputStream (name string, age int, country string);";
+
+        natsClient.subscribe();
+        SiddhiAppRuntime executionPlanRuntime = siddhiManager.
+                createSiddhiAppRuntime(inStreamDefinition);
+        InputHandler inputStream = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+
+//        inputStream.send(new Object[]{"JAMES", 23, "USA"});
+        for (int i =0; i<20;i++) {
+            inputStream.send(new Object[]{"MIKE", i, "Germany"});
+        }
+        Thread.sleep(1000);
+        Assert.assertTrue(resultContainer.assertMessageContent("<events><event><name>MIKE</name><age>19</age>" +
+                "<country>Germany</country></event></events>"));
         siddhiManager.shutdown();
     }
 }

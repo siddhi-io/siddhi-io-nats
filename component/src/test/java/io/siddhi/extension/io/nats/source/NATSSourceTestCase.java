@@ -26,7 +26,7 @@ import io.siddhi.core.stream.input.source.Source;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.persistence.InMemoryPersistenceStore;
-import io.siddhi.extension.io.nats.utils.NATSClient;
+import io.siddhi.extension.io.nats.utils.STANClient;
 import io.siddhi.extension.io.nats.utils.ResultContainer;
 import io.siddhi.extension.io.nats.utils.UnitTestAppender;
 import io.siddhi.extension.io.nats.utils.protobuf.Person;
@@ -79,9 +79,9 @@ public class NATSSourceTestCase {
     @Test
     public void testNatsBasicSubscribtion() throws InterruptedException, TimeoutException, IOException {
         ResultContainer resultContainer = new ResultContainer(2, 3);
-        NATSClient natsClient = new NATSClient("test-cluster", "nats-source-test1",
+        STANClient STANClient = new STANClient("test-cluster", "nats-source-test1",
                 "nats://localhost:" + port);
-        natsClient.connect();
+        STANClient.connect();
         SiddhiManager siddhiManager = new SiddhiManager();
         String siddhiApp = "@App:name(\"Test-plan1\")"
                 + "@source(type='nats', @map(type='xml'), "
@@ -109,16 +109,16 @@ public class NATSSourceTestCase {
         executionPlanRuntime.start();
         Thread.sleep(100);
 
-        natsClient.publish("nats-test1", "<events><event><name>JAMES</name><age>22</age>"
+        STANClient.publish("nats-test1", "<events><event><name>JAMES</name><age>22</age>"
                + "<country>US</country></event></events>");
-        natsClient.publish("nats-test1", "<events><event><name>MIKE</name><age>22</age>"
+        STANClient.publish("nats-test1", "<events><event><name>MIKE</name><age>22</age>"
                 + "<country>GERMANY</country></event></events>");
         Thread.sleep(100);
 
         Assert.assertTrue(resultContainer.assertMessageContent("JAMES"));
         Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
         siddhiManager.shutdown();
-        natsClient.close();
+        STANClient.close();
     }
 
     /**
@@ -201,9 +201,9 @@ public class NATSSourceTestCase {
                 + "define stream inputStream2 (name string, age int, country string);";
 
         clientId = "Test-Plan-4_" + new Date().getTime();
-        NATSClient natsClient = new NATSClient("test-cluster", clientId,
+        STANClient STANClient = new STANClient("test-cluster", clientId,
                 "nats://localhost:" + port);
-        natsClient.connect();
+        STANClient.connect();
 
         SiddhiAppRuntime inStream1RT = siddhiManager.createSiddhiAppRuntime(inStreamDefinition1);
         SiddhiAppRuntime inStream2RT = siddhiManager.createSiddhiAppRuntime(inStreamDefinition2);
@@ -229,25 +229,25 @@ public class NATSSourceTestCase {
         inStream1RT.start();
         inStream2RT.start();
 
-        natsClient.publish("nats-test4", "<events><event><name>JAMES</name><age>22</age>"
+        STANClient.publish("nats-test4", "<events><event><name>JAMES</name><age>22</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test4", "<events><event><name>MIKE</name><age>30</age>"
+        STANClient.publish("nats-test4", "<events><event><name>MIKE</name><age>30</age>"
                 + "<country>GERMANY</country></event></events>");
-        natsClient.publish("nats-test4", "<events><event><name>JHON</name><age>25</age>"
+        STANClient.publish("nats-test4", "<events><event><name>JHON</name><age>25</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test4", "<events><event><name>ARUN</name><age>52</age>"
+        STANClient.publish("nats-test4", "<events><event><name>ARUN</name><age>52</age>"
                 + "<country>GERMANY</country></event></events>");
-        natsClient.publish("nats-test4", "<events><event><name>ALICE</name><age>32</age>"
+        STANClient.publish("nats-test4", "<events><event><name>ALICE</name><age>32</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test4", "<events><event><name>BOP</name><age>28</age>"
+        STANClient.publish("nats-test4", "<events><event><name>BOP</name><age>28</age>"
                 + "<country>GERMANY</country></event></events>");
-        natsClient.publish("nats-test4", "<events><event><name>JAKE</name><age>52</age>"
+        STANClient.publish("nats-test4", "<events><event><name>JAKE</name><age>52</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test4", "<events><event><name>RAHEEM</name><age>47</age>"
+        STANClient.publish("nats-test4", "<events><event><name>RAHEEM</name><age>47</age>"
                 + "<country>GERMANY</country></event></events>");
-        natsClient.publish("nats-test4", "<events><event><name>JANE</name><age>36</age>"
+        STANClient.publish("nats-test4", "<events><event><name>JANE</name><age>36</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test4", "<events><event><name>LAKE</name><age>19</age>"
+        STANClient.publish("nats-test4", "<events><event><name>LAKE</name><age>19</age>"
                 + "<country>GERMANY</country></event></events>");
         Thread.sleep(1000);
 
@@ -255,7 +255,7 @@ public class NATSSourceTestCase {
         Assert.assertTrue(instream2Count.get() != 0, "Total events should be shared between clients");
         Assert.assertEquals(instream1Count.get() + instream2Count.get(), 10);
         siddhiManager.shutdown();
-        natsClient.close();
+        STANClient.close();
     }
 
     /**
@@ -265,9 +265,9 @@ public class NATSSourceTestCase {
     @Test(dependsOnMethods = "testQueueGroupSubscription")
     public void testOptionalClientId() throws InterruptedException, TimeoutException, IOException {
         ResultContainer resultContainer = new ResultContainer(2, 3);
-        NATSClient natsClient = new NATSClient("test-cluster", "nats-source-test-5",
+        STANClient STANClient = new STANClient("test-cluster", "nats-source-test-5",
                 "nats://localhost:" + port);
-        natsClient.connect();
+        STANClient.connect();
         SiddhiManager siddhiManager = new SiddhiManager();
         String siddhiApp = "@App:name(\"Test-plan5\")"
                 + "@source(type='nats', @map(type='xml'), "
@@ -293,16 +293,16 @@ public class NATSSourceTestCase {
         });
         executionPlanRuntime.start();
         Thread.sleep(1000);
-        natsClient.publish("nats-test1", "<events><event><name>JAMES</name><age>22</age>"
+        STANClient.publish("nats-test1", "<events><event><name>JAMES</name><age>22</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test1", "<events><event><name>MIKE</name><age>22</age>"
+        STANClient.publish("nats-test1", "<events><event><name>MIKE</name><age>22</age>"
                 + "<country>GERMANY</country></event></events>");
         Thread.sleep(1000);
 
         Assert.assertTrue(resultContainer.assertMessageContent("JAMES"));
         Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
         siddhiManager.shutdown();
-        natsClient.close();
+        STANClient.close();
     }
 
     /**
@@ -312,9 +312,9 @@ public class NATSSourceTestCase {
     @Test(dependsOnMethods = "testOptionalClientId")
     public void testMultipleSourceSingleStream() throws InterruptedException, TimeoutException, IOException {
         ResultContainer resultContainer = new ResultContainer(4, 3);
-        NATSClient natsClient = new NATSClient("test-cluster", "nats-source-test6",
+        STANClient STANClient = new STANClient("test-cluster", "nats-source-test6",
                 "nats://localhost:" + port);
-        natsClient.connect();
+        STANClient.connect();
         SiddhiManager siddhiManager = new SiddhiManager();
         String siddhiApp = "@App:name(\"Test-plan6\")"
                 + "@source(type='nats', @map(type='xml'), "
@@ -348,13 +348,13 @@ public class NATSSourceTestCase {
         executionPlanRuntime.start();
         Thread.sleep(300);
 
-        natsClient.publish("nats-test6-sub1", "<events><event><name>JAMES</name><age>22</age>"
+        STANClient.publish("nats-test6-sub1", "<events><event><name>JAMES</name><age>22</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test6-sub1", "<events><event><name>MIKE</name><age>22</age>"
+        STANClient.publish("nats-test6-sub1", "<events><event><name>MIKE</name><age>22</age>"
                 + "<country>GERMANY</country></event></events>");
-        natsClient.publish("nats-test6-sub2", "<events><event><name>JHON</name><age>22</age>"
+        STANClient.publish("nats-test6-sub2", "<events><event><name>JHON</name><age>22</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test6-sub2", "<events><event><name>SMITH</name><age>22</age>"
+        STANClient.publish("nats-test6-sub2", "<events><event><name>SMITH</name><age>22</age>"
                 + "<country>GERMANY</country></event></events>");
         Thread.sleep(300);
 
@@ -363,7 +363,7 @@ public class NATSSourceTestCase {
         Assert.assertTrue(resultContainer.assertMessageContent("JHON"));
         Assert.assertTrue(resultContainer.assertMessageContent("SMITH"));
         siddhiManager.shutdown();
-        natsClient.close();
+        STANClient.close();
     }
 
     /**
@@ -372,9 +372,9 @@ public class NATSSourceTestCase {
     @Test(dependsOnMethods = "testMultipleSourceSingleStream")
     public void testNatsSourcePause() throws InterruptedException, TimeoutException, IOException {
         ResultContainer resultContainer = new ResultContainer(2, 3);
-        NATSClient natsClient = new NATSClient("test-cluster", "nats-source-test7",
+        STANClient STANClient = new STANClient("test-cluster", "nats-source-test7",
                 "nats://localhost:" + port);
-        natsClient.connect();
+        STANClient.connect();
         SiddhiManager siddhiManager = new SiddhiManager();
         String siddhiApp = "@App:name(\"Test-plan7\")"
                 + "@source(type='nats', @map(type='xml'), "
@@ -405,17 +405,17 @@ public class NATSSourceTestCase {
         sources.forEach(e -> e.forEach(Source::pause));
         Thread.sleep(300);
 
-        natsClient.publish("nats-test7", "<events><event><name>JAMES</name><age>22</age>"
+        STANClient.publish("nats-test7", "<events><event><name>JAMES</name><age>22</age>"
                 + "<country>US</country></event></events>");
         sources.forEach(e -> e.forEach(Source::resume));
-        natsClient.publish("nats-test7", "<events><event><name>MIKE</name><age>22</age>"
+        STANClient.publish("nats-test7", "<events><event><name>MIKE</name><age>22</age>"
                 + "<country>GERMANY</country></event></events>");
         Thread.sleep(300);
 
         Assert.assertTrue(resultContainer.assertMessageContent("JAMES"));
         Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
         siddhiManager.shutdown();
-        natsClient.close();
+        STANClient.close();
     }
 
     /**
@@ -425,9 +425,9 @@ public class NATSSourceTestCase {
     public void testNatsSequenceSubscribtionWithMandatoryConfigs() throws InterruptedException, IOException,
             TimeoutException {
         ResultContainer resultContainer = new ResultContainer(2, 3);
-        NATSClient natsClient = new NATSClient("test-cluster", "nats-source-test8",
+        STANClient STANClient = new STANClient("test-cluster", "nats-source-test8",
                 "nats://localhost:" + port);
-        natsClient.connect();
+        STANClient.connect();
         SiddhiManager siddhiManager = new SiddhiManager();
         String siddhiApp = "@App:name(\"Test-plan8\")"
                 + "@source(type='nats', @map(type='xml'), "
@@ -453,15 +453,15 @@ public class NATSSourceTestCase {
         executionPlanRuntime.start();
         Thread.sleep(300);
 
-        natsClient.publish("nats-test8", "<events><event><name>JAMES</name><age>22</age>"
+        STANClient.publish("nats-test8", "<events><event><name>JAMES</name><age>22</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test8", "<events><event><name>MIKE</name><age>22</age>"
+        STANClient.publish("nats-test8", "<events><event><name>MIKE</name><age>22</age>"
                 + "<country>GERMANY</country></event></events>");
         Thread.sleep(300);
         Assert.assertTrue(resultContainer.assertMessageContent("JAMES"));
         Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
         siddhiManager.shutdown();
-        natsClient.close();
+        STANClient.close();
     }
 
     /**
@@ -535,29 +535,29 @@ public class NATSSourceTestCase {
     @Test(dependsOnMethods = "testIncorrectNatsServerUrl")
     public void testNatsSequenceSubscribtion() throws InterruptedException, TimeoutException, IOException {
         ResultContainer resultContainer = new ResultContainer(6, 3);
-        NATSClient natsClient = new NATSClient("test-cluster", "nats-source-test1",
+        STANClient STANClient = new STANClient("test-cluster", "nats-source-test1",
                 "nats://localhost:" + port);
-        natsClient.connect();
+        STANClient.connect();
 
-        natsClient.publish("nats-test11", "<events><event><name>JAMES</name><age>22</age>"
+        STANClient.publish("nats-test11", "<events><event><name>JAMES</name><age>22</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test11", "<events><event><name>MIKE</name><age>30</age>"
+        STANClient.publish("nats-test11", "<events><event><name>MIKE</name><age>30</age>"
                 + "<country>GERMANY</country></event></events>");
-        natsClient.publish("nats-test11", "<events><event><name>JHON</name><age>25</age>"
+        STANClient.publish("nats-test11", "<events><event><name>JHON</name><age>25</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test11", "<events><event><name>ARUN</name><age>52</age>"
+        STANClient.publish("nats-test11", "<events><event><name>ARUN</name><age>52</age>"
                 + "<country>GERMANY</country></event></events>");
-        natsClient.publish("nats-test11", "<events><event><name>ALICE</name><age>32</age>"
+        STANClient.publish("nats-test11", "<events><event><name>ALICE</name><age>32</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test11", "<events><event><name>BOP</name><age>28</age>"
+        STANClient.publish("nats-test11", "<events><event><name>BOP</name><age>28</age>"
                 + "<country>GERMANY</country></event></events>");
-        natsClient.publish("nats-test11", "<events><event><name>JAKE</name><age>52</age>"
+        STANClient.publish("nats-test11", "<events><event><name>JAKE</name><age>52</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test11", "<events><event><name>RAHEEM</name><age>47</age>"
+        STANClient.publish("nats-test11", "<events><event><name>RAHEEM</name><age>47</age>"
                 + "<country>GERMANY</country></event></events>");
-        natsClient.publish("nats-test11", "<events><event><name>JANE</name><age>36</age>"
+        STANClient.publish("nats-test11", "<events><event><name>JANE</name><age>36</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test11", "<events><event><name>LAKE</name><age>19</age>"
+        STANClient.publish("nats-test11", "<events><event><name>LAKE</name><age>19</age>"
                 + "<country>GERMANY</country></event></events>");
         Thread.sleep(1000);
 
@@ -596,7 +596,7 @@ public class NATSSourceTestCase {
         Assert.assertTrue(resultContainer.assertMessageContent("JANE"));
         Assert.assertTrue(resultContainer.assertMessageContent("LAKE"));
         siddhiManager.shutdown();
-        natsClient.close();
+        STANClient.close();
     }
 
     /**
@@ -608,18 +608,18 @@ public class NATSSourceTestCase {
         clientId = "Test-Plan-12_" + new Date().getTime();
         Thread.sleep(100);
 
-        NATSClient natsClient = new NATSClient("test-cluster", clientId,
+        STANClient STANClient = new STANClient("test-cluster", clientId,
                 "nats://localhost:" + port);
-        natsClient.connect();
-        natsClient.publish("nats-test12", "<events><event><name>JAMES</name><age>22</age>"
+        STANClient.connect();
+        STANClient.publish("nats-test12", "<events><event><name>JAMES</name><age>22</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test12", "<events><event><name>MIKE</name><age>30</age>"
+        STANClient.publish("nats-test12", "<events><event><name>MIKE</name><age>30</age>"
                 + "<country>GERMANY</country></event></events>");
-        natsClient.publish("nats-test12", "<events><event><name>JHON</name><age>25</age>"
+        STANClient.publish("nats-test12", "<events><event><name>JHON</name><age>25</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test12", "<events><event><name>ARUN</name><age>52</age>"
+        STANClient.publish("nats-test12", "<events><event><name>ARUN</name><age>52</age>"
                 + "<country>GERMANY</country></event></events>");
-        natsClient.publish("nats-test12", "<events><event><name>ALICE</name><age>32</age>"
+        STANClient.publish("nats-test12", "<events><event><name>ALICE</name><age>32</age>"
                 + "<country>US</country></event></events>");
 
         AtomicInteger instream1Count = new AtomicInteger(0);
@@ -675,15 +675,15 @@ public class NATSSourceTestCase {
         inStream1RT.start();
         inStream2RT.start();
 
-        natsClient.publish("nats-test12", "<events><event><name>BOP</name><age>28</age>"
+        STANClient.publish("nats-test12", "<events><event><name>BOP</name><age>28</age>"
                 + "<country>GERMANY</country></event></events>");
-        natsClient.publish("nats-test12", "<events><event><name>JAKE</name><age>52</age>"
+        STANClient.publish("nats-test12", "<events><event><name>JAKE</name><age>52</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test12", "<events><event><name>RAHEEM</name><age>47</age>"
+        STANClient.publish("nats-test12", "<events><event><name>RAHEEM</name><age>47</age>"
                 + "<country>GERMANY</country></event></events>");
-        natsClient.publish("nats-test12", "<events><event><name>JANE</name><age>36</age>"
+        STANClient.publish("nats-test12", "<events><event><name>JANE</name><age>36</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test12", "<events><event><name>LAKE</name><age>19</age>"
+        STANClient.publish("nats-test12", "<events><event><name>LAKE</name><age>19</age>"
                 + "<country>GERMANY</country></event></events>");
         Thread.sleep(1000);
 
@@ -691,7 +691,7 @@ public class NATSSourceTestCase {
         Assert.assertTrue(instream2Count.get() != 0, "Total events should be shared between clients");
         Assert.assertEquals(instream1Count.get() + instream2Count.get(), 7);
         siddhiManager.shutdown();
-        natsClient.close();
+        STANClient.close();
     }
 
     /**
@@ -702,9 +702,9 @@ public class NATSSourceTestCase {
             CannotRestoreSiddhiAppStateException {
         ResultContainer resultContainer = new ResultContainer(10, 3);
         InMemoryPersistenceStore inMemoryPersistenceStore = new InMemoryPersistenceStore();
-        NATSClient natsClient = new NATSClient("test-cluster", "nats-source-test13",
+        STANClient STANClient = new STANClient("test-cluster", "nats-source-test13",
                 "nats://localhost:" + port);
-        natsClient.connect();
+        STANClient.connect();
 
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(inMemoryPersistenceStore);
@@ -734,15 +734,15 @@ public class NATSSourceTestCase {
         executionPlanRuntime.addCallback("inputStream", streamCallback);
         executionPlanRuntime.start();
 
-        natsClient.publish("nats-test13", "<events><event><name>JAMES</name><age>22</age>"
+        STANClient.publish("nats-test13", "<events><event><name>JAMES</name><age>22</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test13", "<events><event><name>MIKE</name><age>30</age>"
+        STANClient.publish("nats-test13", "<events><event><name>MIKE</name><age>30</age>"
                 + "<country>GERMANY</country></event></events>");
-        natsClient.publish("nats-test13", "<events><event><name>JHON</name><age>25</age>"
+        STANClient.publish("nats-test13", "<events><event><name>JHON</name><age>25</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test13", "<events><event><name>ARUN</name><age>52</age>"
+        STANClient.publish("nats-test13", "<events><event><name>ARUN</name><age>52</age>"
                 + "<country>GERMANY</country></event></events>");
-        natsClient.publish("nats-test13", "<events><event><name>ALICE</name><age>32</age>"
+        STANClient.publish("nats-test13", "<events><event><name>ALICE</name><age>32</age>"
                 + "<country>US</country></event></events>");
         Thread.sleep(500);
 
@@ -751,18 +751,18 @@ public class NATSSourceTestCase {
         Thread.sleep(300);
         executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
         executionPlanRuntime.addCallback("inputStream", streamCallback);
-        natsClient.publish("nats-test13", "<events><event><name>BOP</name><age>28</age>"
+        STANClient.publish("nats-test13", "<events><event><name>BOP</name><age>28</age>"
                 + "<country>GERMANY</country></event></events>");
-        natsClient.publish("nats-test13", "<events><event><name>JAKE</name><age>52</age>"
+        STANClient.publish("nats-test13", "<events><event><name>JAKE</name><age>52</age>"
                 + "<country>US</country></event></events>");
         executionPlanRuntime.start();
         executionPlanRuntime.restoreLastRevision();
 
-        natsClient.publish("nats-test13", "<events><event><name>RAHEEM</name><age>47</age>"
+        STANClient.publish("nats-test13", "<events><event><name>RAHEEM</name><age>47</age>"
                 + "<country>GERMANY</country></event></events>");
-        natsClient.publish("nats-test13", "<events><event><name>JANE</name><age>36</age>"
+        STANClient.publish("nats-test13", "<events><event><name>JANE</name><age>36</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test13", "<events><event><name>LAKE</name><age>19</age>"
+        STANClient.publish("nats-test13", "<events><event><name>LAKE</name><age>19</age>"
                 + "<country>GERMANY</country></event></events>");
         Thread.sleep(500);
 
@@ -774,7 +774,7 @@ public class NATSSourceTestCase {
         Assert.assertTrue(resultContainer.assertMessageContent("LAKE"));
 
         siddhiManager.shutdown();
-        natsClient.close();
+        STANClient.close();
     }
 
     /**
@@ -786,9 +786,9 @@ public class NATSSourceTestCase {
             TimeoutException, IOException {
         ResultContainer resultContainer = new ResultContainer(10, 3);
         InMemoryPersistenceStore inMemoryPersistenceStore = new InMemoryPersistenceStore();
-        NATSClient natsClient = new NATSClient("test-cluster", "nats-source-test14",
+        STANClient STANClient = new STANClient("test-cluster", "nats-source-test14",
                 "nats://localhost:" + port);
-        natsClient.connect();
+        STANClient.connect();
 
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(inMemoryPersistenceStore);
@@ -820,15 +820,15 @@ public class NATSSourceTestCase {
         executionPlanRuntime.addCallback("inputStream", streamCallback);
         executionPlanRuntime.start();
 
-        natsClient.publish("nats-test14", "<events><event><name>JAMES</name><age>22</age>"
+        STANClient.publish("nats-test14", "<events><event><name>JAMES</name><age>22</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test14", "<events><event><name>MIKE</name><age>30</age>"
+        STANClient.publish("nats-test14", "<events><event><name>MIKE</name><age>30</age>"
                 + "<country>GERMANY</country></event></events>");
-        natsClient.publish("nats-test14", "<events><event><name>JHON</name><age>25</age>"
+        STANClient.publish("nats-test14", "<events><event><name>JHON</name><age>25</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test14", "<events><event><name>ARUN</name><age>52</age>"
+        STANClient.publish("nats-test14", "<events><event><name>ARUN</name><age>52</age>"
                 + "<country>GERMANY</country></event></events>");
-        natsClient.publish("nats-test14", "<events><event><name>ALICE</name><age>32</age>"
+        STANClient.publish("nats-test14", "<events><event><name>ALICE</name><age>32</age>"
                 + "<country>US</country></event></events>");
         Thread.sleep(500);
 
@@ -840,15 +840,15 @@ public class NATSSourceTestCase {
         executionPlanRuntime.start();
         executionPlanRuntime.restoreLastRevision();
 
-        natsClient.publish("nats-test14", "<events><event><name>BOP</name><age>28</age>"
+        STANClient.publish("nats-test14", "<events><event><name>BOP</name><age>28</age>"
                 + "<country>GERMANY</country></event></events>");
-        natsClient.publish("nats-test14", "<events><event><name>JAKE</name><age>52</age>"
+        STANClient.publish("nats-test14", "<events><event><name>JAKE</name><age>52</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test14", "<events><event><name>RAHEEM</name><age>47</age>"
+        STANClient.publish("nats-test14", "<events><event><name>RAHEEM</name><age>47</age>"
                 + "<country>GERMANY</country></event></events>");
-        natsClient.publish("nats-test14", "<events><event><name>JANE</name><age>36</age>"
+        STANClient.publish("nats-test14", "<events><event><name>JANE</name><age>36</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test14", "<events><event><name>LAKE</name><age>19</age>"
+        STANClient.publish("nats-test14", "<events><event><name>LAKE</name><age>19</age>"
                 + "<country>GERMANY</country></event></events>");
         Thread.sleep(500);
 
@@ -860,7 +860,7 @@ public class NATSSourceTestCase {
         Assert.assertTrue(resultContainer.assertMessageContent("LAKE"));
 
         siddhiManager.shutdown();
-        natsClient.close();
+        STANClient.close();
     }
 
     /**
@@ -871,9 +871,9 @@ public class NATSSourceTestCase {
             throws InterruptedException, TimeoutException,
             IOException, NoSuchMethodException,
             InvocationTargetException, IllegalAccessException {
-        NATSClient natsClient = new NATSClient("test-cluster", "nats-source-test1",
+        STANClient STANClient = new STANClient("test-cluster", "nats-source-test1",
                 "nats://localhost:" + port);
-        natsClient.connect();
+        STANClient.connect();
         SiddhiManager siddhiManager = new SiddhiManager();
         String siddhiApp = "@App:name(\"Test-plan15\")"
                 + "@source(type='nats', " +
@@ -910,13 +910,13 @@ public class NATSSourceTestCase {
         Person person2 = Person.newBuilder().setNic(nic2).setName("Natalie").build();
         byte[] messageObjectByteArray2 = (byte[]) AbstractMessageLite.class
                 .getDeclaredMethod("toByteArray").invoke(person2);
-        natsClient.publishProtobufMessage("nats-test15", messageObjectByteArray1);
-        natsClient.publishProtobufMessage("nats-test15", messageObjectByteArray2);
+        STANClient.publishProtobufMessage("nats-test15", messageObjectByteArray1);
+        STANClient.publishProtobufMessage("nats-test15", messageObjectByteArray2);
 
         Thread.sleep(100);
         AssertJUnit.assertEquals(eventCounter.get(), 2);
         siddhiManager.shutdown();
-        natsClient.close();
+        STANClient.close();
     }
 
     /**
@@ -926,9 +926,9 @@ public class NATSSourceTestCase {
     public void testUsingSeqNumber() throws InterruptedException, TimeoutException, IOException {
         AtomicBoolean eventReceived = new AtomicBoolean(false);
         ResultContainer eventsAtSource = new ResultContainer(2, 3);
-        NATSClient natsClient = new NATSClient("test-cluster", "nats-source-test1",
+        STANClient STANClient = new STANClient("test-cluster", "nats-source-test1",
                 "nats://localhost:" + port);
-        natsClient.connect();
+        STANClient.connect();
         SiddhiManager siddhiManager = new SiddhiManager();
         String siddhiApp = "@App:name(\"Test-plan1\")"
                 + "@source(type='nats', @map(type='xml', @attributes(name='//events/event/name', " +
@@ -966,9 +966,9 @@ public class NATSSourceTestCase {
         siddhiRuntime.start();
         Thread.sleep(100);
 
-        natsClient.publish("nats-test1", "<events><event><name>JAMES</name><age>22</age>"
+        STANClient.publish("nats-test1", "<events><event><name>JAMES</name><age>22</age>"
                 + "<country>US</country></event></events>");
-        natsClient.publish("nats-test1", "<events><event><name>MIKE</name><age>25</age>"
+        STANClient.publish("nats-test1", "<events><event><name>MIKE</name><age>25</age>"
                 + "<country>GERMANY</country></event></events>");
         Thread.sleep(100);
 
@@ -977,7 +977,7 @@ public class NATSSourceTestCase {
         Assert.assertTrue(eventReceived.get());
 
         siddhiManager.shutdown();
-        natsClient.close();
+        STANClient.close();
     }
 }
 
