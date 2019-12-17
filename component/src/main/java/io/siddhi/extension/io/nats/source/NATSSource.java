@@ -17,13 +17,9 @@
  */
 package io.siddhi.extension.io.nats.source;
 
+//import com.google.protobuf.GeneratedMessageV3;
+
 import com.google.protobuf.GeneratedMessageV3;
-import io.nats.streaming.ConnectionLostHandler;
-import io.nats.streaming.Options;
-import io.nats.streaming.StreamingConnection;
-import io.nats.streaming.StreamingConnectionFactory;
-import io.nats.streaming.Subscription;
-import io.nats.streaming.SubscriptionOptions;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
@@ -37,16 +33,10 @@ import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.OptionHolder;
-import io.siddhi.extension.io.nats.source.exception.NATSInputAdaptorRuntimeException;
+import io.siddhi.extension.io.nats.source.nats.NATS;
 import io.siddhi.extension.io.nats.util.NATSConstants;
-import io.siddhi.extension.io.nats.util.NATSUtils;
-import org.apache.log4j.Logger;
 
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This is a sample class-level comment, explaining what the extension class does.
@@ -145,21 +135,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 )
 
 public class NATSSource extends Source {
-/*    private static final Logger log = Logger.getLogger(NATSSource.class);
-    private SourceEventListener sourceEventListener;
-    private OptionHolder optionHolder;
-    private StreamingConnection streamingConnection;
-    private String destination;
-    private String clusterId;
-    private String clientId;
-    private String natsUrl;
-    private String queueGroupName;
-    private String durableName;
-    private String  sequenceNumber;
-    private Subscription subscription;
-    private NATSMessageProcessor natsMessageProcessor;
-    private String siddhiAppName;
-    private String[] reqTransportPropertyNames;*/
 
     private NATS nats;
 
@@ -167,20 +142,14 @@ public class NATSSource extends Source {
     public StateFactory init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
                              String[] requestedTransportPropertyNames, ConfigReader configReader,
                              SiddhiAppContext siddhiAppContext) {
-        if (optionHolder.isOptionExists("cluster.id") || optionHolder.isOptionExists(
-                "streaming.cluster.id")) {
+        if (optionHolder.isOptionExists(NATSConstants.CLUSTER_ID) || optionHolder.isOptionExists(
+                NATSConstants.STREAMING_CLUSTER_ID)) {
             nats = NATS.getNATS(true);
         } else {
             nats = NATS.getNATS(false);
         }
-        return nats.initiateNatsClient(sourceEventListener,optionHolder,requestedTransportPropertyNames,configReader,
+        return nats.initiateNatsClient(sourceEventListener, optionHolder, requestedTransportPropertyNames, configReader,
                 siddhiAppContext);
-        /*this.sourceEventListener = sourceEventListener;
-        this.optionHolder = optionHolder;
-        this.siddhiAppName = siddhiAppContext.getName();
-        this.reqTransportPropertyNames = requestedTransportPropertyNames.clone();
-        initNATSProperties();
-        return NATSSourceState::new;*/
     }
 
     @Override protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
@@ -196,37 +165,11 @@ public class NATSSource extends Source {
     public void connect(ConnectionCallback connectionCallback, State natsSourceState)
             throws ConnectionUnavailableException {
         nats.createConnection(connectionCallback, natsSourceState);
-
-        /*try {
-            Options options = new Options.Builder().natsUrl(this.natsUrl).
-                    clientId(this.clientId).clusterId(this.clusterId).
-                    connectionLostHandler(new NATSConnectionLostHandler(connectionCallback)).build();
-            StreamingConnectionFactory streamingConnectionFactory = new StreamingConnectionFactory(options);
-            streamingConnection =  streamingConnectionFactory.createConnection();
-        } catch (IOException e) {
-            log.error("Error while connecting to NATS server at destination: " + destination);
-            throw new ConnectionUnavailableException("Error while connecting to NATS server at destination: "
-                    + destination, e);
-        } catch (InterruptedException e) {
-            log.error("Error while connecting to NATS server at destination: " + destination + ".The calling thread "
-                    + "is interrupted before the connection can be established.");
-            throw new ConnectionUnavailableException("Error while connecting to NATS server at destination: "
-                    + destination + " .The calling thread is interrupted before the connection can be established.", e);
-        }
-        subscribe(natsSourceState);*/
     }
 
     @Override
     public void disconnect() {
         nats.disconnect();
-        /*try {
-            if (streamingConnection != null) {
-                streamingConnection.close();
-            }
-
-        } catch (IOException | TimeoutException | InterruptedException e) {
-            log.error("Error disconnecting the Stan receiver", e);
-        }*/
     }
 
     @Override
@@ -237,140 +180,12 @@ public class NATSSource extends Source {
     @Override
     public void pause() {
         nats.pause();
-        /*if (natsMessageProcessor != null) {
-            natsMessageProcessor.pause();
-            if (log.isDebugEnabled()) {
-                log.debug("Nats source paused for destination: " + destination);
-            }
-        }*/
     }
 
     @Override
     public void resume() {
         nats.resume();
-        /*if (natsMessageProcessor != null) {
-            natsMessageProcessor.resume();
-            if (log.isDebugEnabled()) {
-                log.debug("Nats source resumed for destination: " + destination);
-            }
-        }*/
     }
-
-    /*private void subscribe(NATSSourceState natsSourceState) {
-        SubscriptionOptions.Builder subscriptionOptionsBuilder = new SubscriptionOptions.Builder();
-        if (sequenceNumber != null && natsSourceState.lastSentSequenceNo.intValue() <
-                Integer.parseInt(sequenceNumber)) {
-            natsSourceState.lastSentSequenceNo.set(Integer.parseInt(sequenceNumber));
-        }
-        subscriptionOptionsBuilder.startAtSequence(natsSourceState.lastSentSequenceNo.get());
-        try {
-
-            if (durableName != null) {
-                subscriptionOptionsBuilder.durableName(durableName);
-            }
-            natsMessageProcessor = new NATSMessageProcessor(sourceEventListener, reqTransportPropertyNames,
-                    natsSourceState.lastSentSequenceNo);
-            if (queueGroupName != null) {
-                subscription =  streamingConnection.subscribe(destination , queueGroupName, natsMessageProcessor,
-                        subscriptionOptionsBuilder.build());
-            } else {
-                subscription =  streamingConnection.subscribe(destination , natsMessageProcessor,
-                        subscriptionOptionsBuilder.build());
-            }
-
-        } catch (IOException e) {
-            log.error("Error occurred in initializing the NATS receiver for stream: "
-                    + sourceEventListener.getStreamDefinition().getId());
-            throw new NATSInputAdaptorRuntimeException("Error occurred in initializing the NATS receiver for stream: "
-                    + sourceEventListener.getStreamDefinition().getId(), e);
-        } catch (InterruptedException e) {
-            log.error("Error occurred in initializing the NATS receiver for stream: " + sourceEventListener
-                    .getStreamDefinition().getId() + ".The calling thread is interrupted before the connection "
-                    + "completes.");
-            throw new NATSInputAdaptorRuntimeException("Error occurred in initializing the NATS receiver for stream: "
-                    + sourceEventListener.getStreamDefinition().getId() + ".The calling thread is interrupted before "
-                    + "the connection completes.", e);
-        } catch (TimeoutException e) {
-            log.error("Error occurred in initializing the NATS receiver for stream: " + sourceEventListener
-                    .getStreamDefinition().getId() + ".The server request cannot be completed within the subscription"
-                    + " timeout.");
-            throw new NATSInputAdaptorRuntimeException("Error occurred in initializing the NATS receiver for stream: "
-                    + sourceEventListener.getStreamDefinition().getId() + ".The server request cannot be completed "
-                    + "within the subscription timeout.", e);
-        }
-    }*/
-
-    /*private void initNATSProperties() {
-        this.destination = optionHolder.validateAndGetStaticValue(NATSConstants.DESTINATION);
-        this.clusterId = optionHolder.validateAndGetStaticValue(NATSConstants.CLUSTER_ID,
-                NATSConstants.DEFAULT_CLUSTER_ID);
-        this.clientId = optionHolder.validateAndGetStaticValue(NATSConstants.CLIENT_ID, NATSUtils.createClientId());
-        this.natsUrl = optionHolder.validateAndGetStaticValue(NATSConstants.BOOTSTRAP_SERVERS,
-                NATSConstants.DEFAULT_SERVER_URL);
-        if (optionHolder.isOptionExists(NATSConstants.DURABLE_NAME)) {
-            this.durableName = optionHolder.validateAndGetStaticValue(NATSConstants.DURABLE_NAME);
-        }
-
-        if (optionHolder.isOptionExists(NATSConstants.QUEUE_GROUP_NAME)) {
-            this.queueGroupName = optionHolder.validateAndGetStaticValue(NATSConstants.QUEUE_GROUP_NAME);
-        }
-
-        if (optionHolder.isOptionExists(NATSConstants.SUBSCRIPTION_SEQUENCE)) {
-            this.sequenceNumber = optionHolder.validateAndGetStaticValue(NATSConstants.SUBSCRIPTION_SEQUENCE);
-        }
-        NATSUtils.validateNatsUrl(natsUrl, sourceEventListener.getStreamDefinition().getId());
-    }*/
-
-    /*class NATSSourceState extends State {
-        private AtomicInteger lastSentSequenceNo = new AtomicInteger(0);
-
-        @Override public boolean canDestroy() {
-            return lastSentSequenceNo.intValue() == 0;
-        }
-
-        *//**
-         * Used to serialize and persist {@link #lastSentSequenceNo} in a configurable interval.
-         * @return stateful objects of the processing element as a map
-         *//*
-        @Override public Map<String, Object> snapshot() {
-            Map<String, Object> state = new HashMap<>();
-            state.put(siddhiAppName, lastSentSequenceNo.get());
-            return state;
-        }
-
-        *//**
-         * Used to get the persisted {@link #lastSentSequenceNo} value in case of client connection failure so that
-         * replay the missing messages/events.
-         * @param map the stateful objects of the processing element as a map.
-         *//*
-        @Override public void restore(Map<String, Object> map) {
-            Object seqObject = map.get(siddhiAppName);
-            if (seqObject != null && sequenceNumber == null) {
-                lastSentSequenceNo.set((int) seqObject);
-            }
-        }
-    }*/
-
-    /*class NATSConnectionLostHandler implements ConnectionLostHandler {
-        private ConnectionCallback connectionCallback;
-
-        NATSConnectionLostHandler(ConnectionCallback connectionCallback) {
-            this.connectionCallback = connectionCallback;
-        }
-
-        @Override
-        public void connectionLost(StreamingConnection streamingConnection, Exception e) {
-            log.error("Exception occurred in Siddhi App" + siddhiAppName +
-                    " when consuming messages from NATS endpoint " + natsUrl + " . " + e.getMessage(), e);
-            Thread thread = new Thread() {
-                public void run() {
-                    connectionCallback.onError(new ConnectionUnavailableException(e));
-                }
-            };
-
-            thread.start();
-        }
-    }*/
 }
 
 

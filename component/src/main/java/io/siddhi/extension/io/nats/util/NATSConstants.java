@@ -37,4 +37,5 @@ public class NATSConstants {
     public static final String MAX_RETRY_ATTEMPTS  = "max.retry.attempts";
     public static final String RETRY_BUFFER_SIZE = "max.buffer.size";
     public static final String SERVER_URLS = "server.urls";
+    public static final String STREAMING_CLUSTER_ID = "streaming.cluster.id";
 }

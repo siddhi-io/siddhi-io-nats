@@ -43,8 +43,8 @@ public class NATSMessageProcessor implements MessageHandler {
     private AtomicInteger messageSequenceTracker;
     private String[] requestedTransportPropertyNames;
 
-    protected NATSMessageProcessor(SourceEventListener sourceEventListener, String[] requestedTransportPropertyNames,
-                                   AtomicInteger messageSequenceTracker) {
+    public NATSMessageProcessor(SourceEventListener sourceEventListener, String[] requestedTransportPropertyNames,
+                                AtomicInteger messageSequenceTracker) {
         this.sourceEventListener = sourceEventListener;
         this.messageSequenceTracker = messageSequenceTracker;
         this.requestedTransportPropertyNames = requestedTransportPropertyNames;
@@ -87,11 +87,11 @@ public class NATSMessageProcessor implements MessageHandler {
         return messageSequenceTracker;
     }
 
-    void pause() {
+    public void pause() {
         paused = true;
     }
 
-    void resume() {
+    public void resume() {
         paused = false;
         try {
             lock.lock();

@@ -1,4 +1,4 @@
-package io.siddhi.extension.io.nats.source;
+package io.siddhi.extension.io.nats.source.nats;
 
 import io.nats.streaming.ConnectionLostHandler;
 import io.nats.streaming.Options;
@@ -14,6 +14,7 @@ import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.OptionHolder;
+import io.siddhi.extension.io.nats.source.NATSMessageProcessor;
 import io.siddhi.extension.io.nats.source.exception.NATSInputAdaptorRuntimeException;
 import io.siddhi.extension.io.nats.util.NATSConstants;
 import io.siddhi.extension.io.nats.util.NATSUtils;
@@ -25,9 +26,12 @@ import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Class which extends NATS to create nats streaming client and receive messages from relevant subject.
+ */
 public class NATSStreaming extends NATS {
 
-    private final static Logger log = Logger.getLogger(NATSStreaming.class);
+    private static final Logger log = Logger.getLogger(NATSStreaming.class);
     private String durableName;
     private String  sequenceNumber;
     private Subscription subscription;
@@ -39,9 +43,9 @@ public class NATSStreaming extends NATS {
     private SourceEventListener sourceEventListener;
 
     @Override
-    public StateFactory<NATSSourceState> initiateNatsClient(SourceEventListener sourceEventListener, OptionHolder optionHolder,
-                                           String[] requestedTransportPropertyNames, ConfigReader configReader,
-                                           SiddhiAppContext siddhiAppContext) {
+    public StateFactory<NATSSourceState> initiateNatsClient(SourceEventListener sourceEventListener
+            , OptionHolder optionHolder, String[] requestedTransportPropertyNames, ConfigReader configReader
+            , SiddhiAppContext siddhiAppContext) {
         super.initiateNatsClient(sourceEventListener, optionHolder, requestedTransportPropertyNames, configReader,
                 siddhiAppContext);
         this.sourceEventListener = sourceEventListener;

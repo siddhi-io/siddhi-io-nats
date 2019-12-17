@@ -1,7 +1,5 @@
-package io.siddhi.extension.io.nats.source;
+package io.siddhi.extension.io.nats.source.nats;
 
-import io.nats.streaming.StreamingConnection;
-import io.nats.streaming.Subscription;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.stream.input.source.Source;
@@ -10,9 +8,13 @@ import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.OptionHolder;
+import io.siddhi.extension.io.nats.util.NATSConstants;
 import io.siddhi.extension.io.nats.util.NATSUtils;
 import org.apache.log4j.Logger;
 
+/**
+ * An abstract class which holds methods to create and managing nats client.
+ */
 public abstract class NATS {
 
     private static final Logger log = Logger.getLogger(NATS.class);
@@ -20,19 +22,21 @@ public abstract class NATS {
     protected String[] natsUrl;
     protected String queueGroupName;
     protected String siddhiAppName;
+    protected String streamId;
 
     public StateFactory initiateNatsClient(SourceEventListener sourceEventListener, OptionHolder optionHolder,
                                            String[] requestedTransportPropertyNames, ConfigReader configReader,
                                            SiddhiAppContext siddhiAppContext) {
         this.siddhiAppName = siddhiAppContext.getName();
-        this.destination = optionHolder.validateAndGetStaticValue("destination");
+        this.streamId = sourceEventListener.getStreamDefinition().getId();
+        this.destination = optionHolder.validateAndGetStaticValue(NATSConstants.DESTINATION);
 
-        this.queueGroupName = optionHolder.validateAndGetStaticValue("queue.group.name", null);
+        this.queueGroupName = optionHolder.validateAndGetStaticValue(NATSConstants.QUEUE_GROUP_NAME, null);
         String serverUrls;
-        if (optionHolder.isOptionExists("bootstrap.servers")) {
-            serverUrls = optionHolder.validateAndGetStaticValue("bootstrap.servers");
+        if (optionHolder.isOptionExists(NATSConstants.BOOTSTRAP_SERVERS)) {
+            serverUrls = optionHolder.validateAndGetStaticValue(NATSConstants.BOOTSTRAP_SERVERS);
         } else {
-            serverUrls = optionHolder.validateAndGetStaticValue("server.urls");
+            serverUrls = optionHolder.validateAndGetStaticValue(NATSConstants.SERVER_URLS);
         }
         natsUrl = serverUrls.split(",");
         for (String url:natsUrl) {
