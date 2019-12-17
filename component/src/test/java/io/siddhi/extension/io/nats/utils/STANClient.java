@@ -34,7 +34,7 @@ import java.util.Random;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Nats client for running test cases.
+ * Nats streaming client for running test cases.
  */
 public class STANClient {
     private String cluserId;

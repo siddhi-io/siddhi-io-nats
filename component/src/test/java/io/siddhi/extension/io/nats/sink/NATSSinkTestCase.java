@@ -23,8 +23,8 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.sink.Sink;
 import io.siddhi.extension.io.nats.utils.NATSClient;
-import io.siddhi.extension.io.nats.utils.STANClient;
 import io.siddhi.extension.io.nats.utils.ResultContainer;
+import io.siddhi.extension.io.nats.utils.STANClient;
 import io.siddhi.extension.io.nats.utils.UnitTestAppender;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.apache.log4j.Logger;
@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class NATSSinkTestCase {
     private Logger log = Logger.getLogger(NATSSinkTestCase.class);
-    private int port=4222;
+    private int port = 4222;
     private AtomicInteger eventCounter = new AtomicInteger(0);
 
 //    @BeforeMethod
@@ -68,9 +68,9 @@ public class NATSSinkTestCase {
     @Test
     public void natsSimplePublishTest() throws InterruptedException, TimeoutException, IOException {
         ResultContainer resultContainer = new ResultContainer(2, 3);
-        STANClient STANClient = new STANClient("test-cluster", "stan_test1", "nats://localhost:"
+        STANClient stanClient = new STANClient("test-cluster", "stan_test1", "nats://localhost:"
                 + port, resultContainer);
-        STANClient.connect();
+        stanClient.connect();
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "@App:name('Test-plan1')\n"
@@ -82,7 +82,7 @@ public class NATSSinkTestCase {
                 + ")"
                 + "define stream inputStream (name string, age int, country string);";
 
-        STANClient.subsripeFromNow("nats-test1");
+        stanClient.subsripeFromNow("nats-test1");
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.
                 createSiddhiAppRuntime(inStreamDefinition);
         InputHandler inputStream = executionPlanRuntime.getInputHandler("inputStream");
@@ -142,9 +142,9 @@ public class NATSSinkTestCase {
     @Test(dependsOnMethods = "testInvalidNatsUrl")
     public void testOptionalClientId() throws InterruptedException, TimeoutException, IOException {
         ResultContainer resultContainer = new ResultContainer(2, 3);
-        STANClient STANClient = new STANClient("test-cluster", "test-plan4", "nats://localhost:"
+        STANClient stanClient = new STANClient("test-cluster", "test-plan4", "nats://localhost:"
                 + port, resultContainer);
-        STANClient.connect();
+        stanClient.connect();
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "@App:name('Test-plan1')\n"
@@ -155,7 +155,7 @@ public class NATSSinkTestCase {
                 + ")"
                 + "define stream inputStream (name string, age int, country string);";
 
-        STANClient.subsripeFromNow("test-plan4");
+        stanClient.subsripeFromNow("test-plan4");
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.
                 createSiddhiAppRuntime(inStreamDefinition);
         InputHandler inputStream = executionPlanRuntime.getInputHandler("inputStream");
@@ -176,9 +176,9 @@ public class NATSSinkTestCase {
     @Test(dependsOnMethods = "testOptionalClientId")
     public void testMultipleSinkSingleStream() throws InterruptedException, TimeoutException, IOException {
         ResultContainer resultContainer = new ResultContainer(8, 3);
-        STANClient STANClient = new STANClient("test-cluster", "nats-test-plan5",
+        STANClient stanClient = new STANClient("test-cluster", "nats-test-plan5",
                 "nats://localhost:" + port, resultContainer);
-        STANClient.connect();
+        stanClient.connect();
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "@App:name('Test-plan5')\n"
@@ -196,8 +196,8 @@ public class NATSSinkTestCase {
                 + ")"
                 + "define stream inputStream (name string, age int, country string);";
 
-        STANClient.subsripeFromNow("nats-source-test-siddhi-1");
-        STANClient.subsripeFromNow("nats-source-test-siddhi-2");
+        stanClient.subsripeFromNow("nats-source-test-siddhi-1");
+        stanClient.subsripeFromNow("nats-source-test-siddhi-2");
 
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
         InputHandler inputStream = executionPlanRuntime.getInputHandler("inputStream");
@@ -223,9 +223,9 @@ public class NATSSinkTestCase {
     @Test
     public void testNatsSinkWithMandatoryConfigurations() throws InterruptedException, IOException, TimeoutException {
         ResultContainer resultContainer = new ResultContainer(2, 3);
-        STANClient STANClient = new STANClient("test-cluster", "stan_test6", "nats://localhost:"
+        STANClient stanClient = new STANClient("test-cluster", "stan_test6", "nats://localhost:"
                 + port, resultContainer);
-        STANClient.connect();
+        stanClient.connect();
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "@App:name('Test-plan6')\n"
@@ -235,7 +235,7 @@ public class NATSSinkTestCase {
                 + ")"
                 + "define stream inputStream (name string, age int, country string);";
 
-        STANClient.subsripeFromNow("nats-test6");
+        stanClient.subsripeFromNow("nats-test6");
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.
                 createSiddhiAppRuntime(inStreamDefinition);
         InputHandler inputStream = executionPlanRuntime.getInputHandler("inputStream");
@@ -346,9 +346,9 @@ public class NATSSinkTestCase {
     public void testNatsProtobuf() throws InterruptedException, NoSuchMethodException,
             InvocationTargetException, IllegalAccessException, TimeoutException, IOException {
         ResultContainer resultContainer = new ResultContainer(2, 10);
-        STANClient STANClient = new STANClient("test-cluster", "stan-test10",
+        STANClient stanClient = new STANClient("test-cluster", "stan-test10",
                 "nats://localhost:" + port, resultContainer);
-        STANClient.connect();
+        stanClient.connect();
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "@App:name('Test-plan10')\n"
@@ -361,7 +361,7 @@ public class NATSSinkTestCase {
                 + ")"
                 + "define stream inputStream (nic long, name string);";
 
-        STANClient.subsripeFromNow("nats-test10");
+        stanClient.subsripeFromNow("nats-test10");
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
         InputHandler inputStream = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
@@ -448,8 +448,7 @@ public class NATSSinkTestCase {
         InputHandler inputStream = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
 
-//        inputStream.send(new Object[]{"JAMES", 23, "USA"});
-        for (int i =0; i<20;i++) {
+        for (int i = 0; i < 20; i++) {
             inputStream.send(new Object[]{"MIKE", i, "Germany"});
         }
         Thread.sleep(1000);

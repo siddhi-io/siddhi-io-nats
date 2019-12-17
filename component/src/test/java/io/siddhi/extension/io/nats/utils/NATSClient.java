@@ -8,6 +8,9 @@ import io.nats.client.Options;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Nats client for running test cases.
+ */
 public class NATSClient {
 
     private String natsUrl = "nats://localhost:4222";
@@ -24,16 +27,12 @@ public class NATSClient {
         Options o = new Options.Builder().server(natsUrl).build();
         try {
             nc = Nats.connect(o);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (IOException | InterruptedException e) {
         }
     }
 
     public void subscribe() {
         Dispatcher d = nc.createDispatcher((msg) -> {
-            System.out.println(new String(msg.getData()));
             resultContainer.eventReceived(new String(msg.getData(), StandardCharsets.UTF_8));
         });
         d.subscribe(subject);
