@@ -31,4 +31,10 @@ public class NATSConstants {
     public static final String DURABLE_NAME = "durable.name";
     public static final String SUBSCRIPTION_SEQUENCE = "subscription.sequence";
     public static final String SEQUENCE_NUMBER  = "sequenceNumber";
+    public static final String CONNECTION_TIME_OUT  = "connection.timeout";
+    public static final String PING_INTERVAL  = "ping.interval";
+    public static final String MAX_PING_OUTS  = "max.ping.outs";
+    public static final String MAX_RETRY_ATTEMPTS  = "max.retry.attempts";
+    public static final String RETRY_BUFFER_SIZE = "max.buffer.size";
+    public static final String SERVER_URLS = "server.urls";
 }

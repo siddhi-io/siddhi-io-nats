@@ -18,6 +18,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Class which extends NATS to create nats streaming client and publish messages to relevant subject.
+ */
 public class NATSStreaming extends NATS {
 
     private static final Logger log = Logger.getLogger(NATS.class);

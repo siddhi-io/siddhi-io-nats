@@ -12,6 +12,9 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * An abstract class which holds methods to create and managing nats client.
+ */
 public abstract class NATS {
 
     private static final Logger log = Logger.getLogger(NATS.class);
@@ -25,10 +28,10 @@ public abstract class NATS {
     public void initiateClient(OptionHolder optionHolder, String siddhiAppName, String streamId) {
         this.destination = optionHolder.validateAndGetOption(NATSConstants.DESTINATION);
         String serverUrls;
-        if (optionHolder.isOptionExists("bootstrap.servers")) {
-            serverUrls = optionHolder.validateAndGetStaticValue("bootstrap.servers");
+        if (optionHolder.isOptionExists(NATSConstants.BOOTSTRAP_SERVERS)) {
+            serverUrls = optionHolder.validateAndGetStaticValue(NATSConstants.BOOTSTRAP_SERVERS);
         } else {
-            serverUrls = optionHolder.validateAndGetStaticValue("server.urls");
+            serverUrls = optionHolder.validateAndGetStaticValue(NATSConstants.SERVER_URLS);
         }
         natsUrl = serverUrls.split(",");
         for (String url:natsUrl) {

@@ -18,10 +18,6 @@
 package io.siddhi.extension.io.nats.sink;
 
 import com.google.protobuf.GeneratedMessageV3;
-import io.nats.streaming.ConnectionLostHandler;
-import io.nats.streaming.Options;
-import io.nats.streaming.StreamingConnection;
-import io.nats.streaming.StreamingConnectionFactory;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
@@ -34,20 +30,15 @@ import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.DynamicOptions;
-import io.siddhi.core.util.transport.Option;
 import io.siddhi.core.util.transport.OptionHolder;
-import io.siddhi.extension.io.nats.sink.exception.NATSSinkAdaptorRuntimeException;
 import io.siddhi.extension.io.nats.sink.nats.NATS;
 import io.siddhi.extension.io.nats.util.NATSConstants;
-import io.siddhi.extension.io.nats.util.NATSUtils;
 import io.siddhi.query.api.definition.StreamDefinition;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * NATS output transport(Handle the publishing process) class.
@@ -143,7 +134,7 @@ public class NATSSink extends Sink {
     @Override
     public void publish(Object payload, DynamicOptions dynamicOptions, State state) throws
             ConnectionUnavailableException  {
-            nats.publishMessages(payload,dynamicOptions, state);
+            nats.publishMessages(payload, dynamicOptions, state);
     }
 
     @Override
