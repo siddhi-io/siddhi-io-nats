@@ -22,4 +22,10 @@
         <class name="io.siddhi.extension.io.jms.source.JMSMessageProcessor"/>
         <Bug pattern="WA_AWAIT_NOT_IN_LOOP"/>
     </Match>
+
+    <!--        NATSStreaming.streamingConnection is initialize in the createConnection method-->
+    <Match>
+        <class name="io.siddhi.extension.io.nats.sink.nats.NATSStreaming"/>
+        <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
+    </Match>
 </FindBugsFilter>

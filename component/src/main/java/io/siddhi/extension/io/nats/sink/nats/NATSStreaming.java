@@ -98,7 +98,7 @@ public class NATSStreaming extends NATS {
         @Override
         public void connectionLost(StreamingConnection streamingConnection, Exception e) {
             log.error("Exception occurred in Siddhi App " + siddhiAppName +
-                    " when publishing messages to NATS endpoint " + natsUrl + " . " + e.getMessage(), e);
+                    " when publishing messages to NATS endpoint " + natsUrl[0] + " . " + e.getMessage(), e);
             isConnectionClosed = new AtomicBoolean(true);
         }
     }

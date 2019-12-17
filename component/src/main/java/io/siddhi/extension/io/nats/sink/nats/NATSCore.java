@@ -11,6 +11,7 @@ import io.siddhi.extension.io.nats.util.NATSConstants;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.concurrent.TimeoutException;
 
@@ -65,7 +66,7 @@ public class NATSCore extends NATS {
                     .CLOSED) {
                 createNATSClient();
             }
-            connection.publish(subjectName, message.getBytes());
+            connection.publish(subjectName, message.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             log.error("Error sending message to destination: " + subjectName);
             throw new NATSSinkAdaptorRuntimeException("Error sending message to destination:" + subjectName, e);

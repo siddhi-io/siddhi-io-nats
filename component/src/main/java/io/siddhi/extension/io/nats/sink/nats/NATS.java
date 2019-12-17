@@ -58,12 +58,11 @@ public abstract class NATS {
         return new NATSCore();
     }
 
-
     public Option getDestination() {
         return destination;
     }
 
     public String[] getNatsUrl() {
-        return natsUrl;
+        return natsUrl.clone();
     }
 }

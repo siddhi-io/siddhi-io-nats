@@ -47,7 +47,7 @@ public class NATSMessageProcessor implements MessageHandler {
                                 AtomicInteger messageSequenceTracker) {
         this.sourceEventListener = sourceEventListener;
         this.messageSequenceTracker = messageSequenceTracker;
-        this.requestedTransportPropertyNames = requestedTransportPropertyNames;
+        this.requestedTransportPropertyNames = requestedTransportPropertyNames.clone();
         lock = new ReentrantLock();
         condition = lock.newCondition();
     }

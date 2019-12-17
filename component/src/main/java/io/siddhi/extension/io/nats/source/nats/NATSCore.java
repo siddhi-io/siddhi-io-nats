@@ -74,7 +74,7 @@ public class NATSCore extends NATS {
         this.options = optionBuilder.build();
         this.lock = new ReentrantLock();
         this.condition = lock.newCondition();
-        this.requestedTransportPropertyNames = requestedTransportPropertyNames;
+        this.requestedTransportPropertyNames = requestedTransportPropertyNames.clone();
         return null;
     }
 
