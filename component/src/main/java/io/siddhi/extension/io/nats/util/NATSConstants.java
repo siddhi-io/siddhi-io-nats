@@ -38,4 +38,11 @@ public class NATSConstants {
     public static final String RETRY_BUFFER_SIZE = "max.buffer.size";
     public static final String SERVER_URLS = "server.urls";
     public static final String STREAMING_CLUSTER_ID = "streaming.cluster.id";
+    public static final String ENABLE_SSL = "enable.ssl";
+    public static final String KEYSTORE_FILE = "keystore.file";
+    public static final String KEYSTORE_PASSWORD = "keystore.password";
+    public static final String KEYSTORE_ALGORITHM = "keystore.algorithm";
+    public static final String TRUSTSTORE_FILE = "truststore.file";
+    public static final String TRUSTSTORE_PASSWORD = "truststore.password";
+    public static final String TRUSTSTORE_ALGORITHM = "truststore.algorithm";
 }

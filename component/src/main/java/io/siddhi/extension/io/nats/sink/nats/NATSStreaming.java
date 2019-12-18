@@ -32,7 +32,7 @@ public class NATSStreaming extends NATS {
     @Override
     public void initiateClient(OptionHolder optionHolder, String siddhiAppName, String streamId) {
         super.initiateClient(optionHolder, siddhiAppName, streamId);
-        if (optionHolder.isOptionExists("cluster.id")) {
+        if (optionHolder.isOptionExists("cluster.id")) { // TODO: 12/17/19 replace with constants
             this.clusterId = optionHolder.validateAndGetStaticValue("cluster.id");
         } else if (optionHolder.isOptionExists("streaming.cluster.id")) {
             this.clusterId = optionHolder.validateAndGetStaticValue("streaming.cluster.id");

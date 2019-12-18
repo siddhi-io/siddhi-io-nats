@@ -120,14 +120,14 @@ public class NATSSink extends Sink {
     protected StateFactory init(StreamDefinition streamDefinition, OptionHolder optionHolder, ConfigReader configReader,
                                 SiddhiAppContext siddhiAppContext) {
         this.siddhiAppName = siddhiAppContext.getName();
-        if (optionHolder.isOptionExists("cluster.id") || optionHolder.isOptionExists(
-                "streaming.cluster.id")) {
+        if (optionHolder.isOptionExists(NATSConstants.CLUSTER_ID) || optionHolder.isOptionExists(
+                NATSConstants.STREAMING_CLUSTER_ID)) {
             nats = NATS.getNats(true);
+            nats.setNatsSink(this);
         } else {
             nats = NATS.getNats(false);
         }
         nats.initiateClient(optionHolder, siddhiAppName, streamDefinition.getId());
-        nats.setNatsSink(this);
         return null;
     }
 

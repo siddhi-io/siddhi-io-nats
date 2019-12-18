@@ -51,8 +51,8 @@ public abstract class NATS {
         this.natsSink = natsSink;
     }
 
-    public static NATS getNats(boolean isNATSStreaming) {
-        if (isNATSStreaming) {
+    public static NATS getNats(boolean isNatsStreaming) {
+        if (isNatsStreaming) {
             return new NATSStreaming();
         }
         return new NATSCore();
