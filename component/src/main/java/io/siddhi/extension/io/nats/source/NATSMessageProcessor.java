@@ -19,6 +19,7 @@ package io.siddhi.extension.io.nats.source;
 
 import io.nats.streaming.Message;
 import io.nats.streaming.MessageHandler;
+import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.stream.input.source.SourceEventListener;
 import io.siddhi.extension.io.nats.source.exception.NATSInputAdaptorRuntimeException;
 import org.apache.log4j.Logger;
@@ -76,15 +77,9 @@ public class NATSMessageProcessor implements MessageHandler {
             msg.ack();
         } catch (IOException e) {
             String message = new String(msg.getData(), StandardCharsets.UTF_8);
-            log.error("Error occurred while sending the ack for message : " + message + ".Received to the stream: "
-                    + sourceEventListener.getStreamDefinition().getId());
-            throw new NATSInputAdaptorRuntimeException("Error occurred while sending the ack for message : " + message
+            throw new SiddhiAppRuntimeException("Error occurred while sending the ack for message : " + message
                     + ".Received to the stream: " + sourceEventListener.getStreamDefinition().getId(), e);
         }
-    }
-
-    protected AtomicInteger getMessageSequenceTracker() {
-        return messageSequenceTracker;
     }
 
     public void pause() {

@@ -8,6 +8,7 @@ import io.nats.streaming.Subscription;
 import io.nats.streaming.SubscriptionOptions;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.stream.input.source.Source;
 import io.siddhi.core.stream.input.source.SourceEventListener;
 import io.siddhi.core.util.config.ConfigReader;
@@ -15,7 +16,6 @@ import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.extension.io.nats.source.NATSMessageProcessor;
-import io.siddhi.extension.io.nats.source.exception.NATSInputAdaptorRuntimeException;
 import io.siddhi.extension.io.nats.util.NATSConstants;
 import io.siddhi.extension.io.nats.util.NATSUtils;
 import org.apache.log4j.Logger;
@@ -107,24 +107,16 @@ public class NATSStreaming extends AbstractNats {
             }
 
         } catch (IOException e) {
-            log.error("Error occurred in initializing the NATS receiver for stream: "
-                    + sourceEventListener.getStreamDefinition().getId());
-            throw new NATSInputAdaptorRuntimeException("Error occurred in initializing the NATS receiver for stream: "
+            throw new SiddhiAppRuntimeException("Error occurred in initializing the NATS receiver for stream: "
                     + sourceEventListener.getStreamDefinition().getId(), e);
         } catch (InterruptedException e) {
-            log.error("Error occurred in initializing the NATS receiver for stream: " + sourceEventListener
-                    .getStreamDefinition().getId() + ".The calling thread is interrupted before the connection "
-                    + "completes.");
-            throw new NATSInputAdaptorRuntimeException("Error occurred in initializing the NATS receiver for stream: "
+            throw new SiddhiAppRuntimeException("Error occurred in initializing the NATS receiver for stream: "
                     + sourceEventListener.getStreamDefinition().getId() + ".The calling thread is interrupted before "
                     + "the connection completes.", e);
         } catch (TimeoutException e) {
-            log.error("Error occurred in initializing the NATS receiver for stream: " + sourceEventListener
-                    .getStreamDefinition().getId() + ".The server request cannot be completed within the subscription"
-                    + " timeout.");
-            throw new NATSInputAdaptorRuntimeException("Error occurred in initializing the NATS receiver for stream: "
+            throw new SiddhiAppRuntimeException("Error occurred in initializing the NATS receiver for stream: "
                     + sourceEventListener.getStreamDefinition().getId() + ".The server request cannot be completed "
-                    + "within the subscription timeout.", e); // TODO: 12/18/19 Remove the exception class
+                    + "within the subscription timeout.", e);
         }
     }
 
@@ -134,9 +126,8 @@ public class NATSStreaming extends AbstractNats {
             if (streamingConnection != null) {
                 streamingConnection.close();
             }
-
         } catch (IOException | TimeoutException | InterruptedException e) {
-            log.error("Error disconnecting the Stan receiver", e); // TODO: 12/18/19 use same message
+            log.error("Error disconnecting the nats streaming receiver", e);
         }
     }
 

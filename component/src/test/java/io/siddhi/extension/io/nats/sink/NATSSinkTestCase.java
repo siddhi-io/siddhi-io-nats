@@ -26,15 +26,19 @@ import io.siddhi.extension.io.nats.utils.NATSClient;
 import io.siddhi.extension.io.nats.utils.ResultContainer;
 import io.siddhi.extension.io.nats.utils.STANClient;
 import io.siddhi.extension.io.nats.utils.UnitTestAppender;
+import io.siddhi.extension.io.nats.utils.protobuf.Person;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.apache.log4j.Logger;
 import org.testcontainers.containers.GenericContainer;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -46,20 +50,57 @@ public class NATSSinkTestCase {
     private int port = 4222;
     private AtomicInteger eventCounter = new AtomicInteger(0);
 
-//    @BeforeMethod
+    @BeforeMethod
     private void setUp() {
         eventCounter.set(0);
     }
 
-//    @BeforeClass
+    @BeforeClass
     private void initializeDockerContainer() throws InterruptedException {
-        GenericContainer simpleWebServer
+
+        /*final DockerClient docker = DefaultDockerClient.builder()
+                .uri(URI.create("https://boot2docker:2376")).build();
+        // Bind container ports to host ports
+        final String[] ports = {"4222"};
+        final Map<String, List<PortBinding>> portBindings = new HashMap<>();
+        for (String port : ports) {
+            List<PortBinding> hostPorts = new ArrayList<>();
+            hostPorts.add(PortBinding.of("0.0.0.0", port));
+            portBindings.put(port, hostPorts);
+        }*/
+
+// Bind container port 443 to an automatically allocated available host port.
+  /*      List<PortBinding> randomPort = new ArrayList<>();
+        randomPort.add(PortBinding.randomPort("0.0.0.0"));
+        portBindings.put("443", randomPort);
+
+        final HostConfig hostConfig = HostConfig.builder().portBindings(portBindings).build();
+
+// Create container with exposed ports
+        final ContainerConfig containerConfig = ContainerConfig.builder()
+                .hostConfig(hostConfig)
+                .image("busybox").exposedPorts(ports)
+                .cmd("sh", "-c", "while :; do sleep 1; done")
+                .build();
+
+        final ContainerCreation creation = docker.createContainer(containerConfig);
+        final String id = creation.id();
+
+// Inspect container
+        final ContainerInfo info = docker.inspectContainer(id);
+
+// Start container
+        docker.startContainer(id);*/
+
+        /*GenericContainer simpleWebServer
                 = new GenericContainer("nats-streaming:0.11.2");
         simpleWebServer.setPrivilegedMode(true);
+        simpleWebServer.addEnv("registryUsername","amstrom");
+        simpleWebServer.addEnv("registryPassword","");
         eventCounter.set(0);
         simpleWebServer.start();
         port = simpleWebServer.getMappedPort(4222);
-        Thread.sleep(500);
+        Thread.sleep(500);*/
     }
 
     /**
@@ -455,6 +496,45 @@ public class NATSSinkTestCase {
         Assert.assertTrue(resultContainer.assertMessageContent("<events><event><name>MIKE</name><age>19</age>" +
                 "<country>Germany</country></event></events>"));
         siddhiManager.shutdown();
+    }
+
+    @Test
+    public void testNatsProtobuf2() throws InterruptedException, NoSuchMethodException,
+            InvocationTargetException, IllegalAccessException, TimeoutException, IOException {
+        ResultContainer resultContainer = new ResultContainer(2, 10);
+        NATSClient natsClient = new NATSClient("nats-test10", resultContainer, true);
+        natsClient.connectClient();
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "@App:name('Test-plan10')\n"
+                + "@sink(type='nats', " +
+                "@map(type='protobuf', class='io.siddhi.extension.io.nats.utils.protobuf.Person'), "
+                + "destination='nats-test10', "
+                + "bootstrap.servers='" + "nats://localhost:" + port + "'"
+                + ")"
+                + "define stream inputStream (nic long, name string);";
+
+        natsClient.subscribe();
+        SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
+        InputHandler inputStream = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+
+        long nic1 = 1222;
+        long nic2 = 1223;
+        inputStream.send(new Object[] {nic1, "Jimmy"});
+        inputStream.send(new Object[] {nic2, "Natalie"});
+
+        Thread.sleep(500);
+        AssertJUnit.assertEquals(resultContainer.getEventCount(), 2);
+        Person person = Person.newBuilder().setName("Jimmy").setNic(nic1).build();
+        AssertJUnit.assertTrue(resultContainer.asserProtobufContent(person));
+        siddhiManager.shutdown();
+    }
+
+    @Test
+    public void uuid() {
+        final String uuid = UUID.randomUUID().toString().replace("-", "");
+        System.out.println("uuid = " + uuid);
     }
 }
 

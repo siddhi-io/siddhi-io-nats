@@ -906,12 +906,10 @@ public class NATSSourceTestCase {
 
         long nic1 = 1222;
         Person person1 = Person.newBuilder().setNic(nic1).setName("Jimmy").build();
-        byte[] messageObjectByteArray1 = (byte[]) AbstractMessageLite.class
-                .getDeclaredMethod("toByteArray").invoke(person1);
+        byte[] messageObjectByteArray1 = person1.toByteArray();
         long nic2 = 1222;
         Person person2 = Person.newBuilder().setNic(nic2).setName("Natalie").build();
-        byte[] messageObjectByteArray2 = (byte[]) AbstractMessageLite.class
-                .getDeclaredMethod("toByteArray").invoke(person2);
+        byte[] messageObjectByteArray2 = person2.toByteArray();
         stanClient.publishProtobufMessage("nats-test15", messageObjectByteArray1);
         stanClient.publishProtobufMessage("nats-test15", messageObjectByteArray2);
 
@@ -1010,7 +1008,7 @@ public class NATSSourceTestCase {
             }
         });
         executionPlanRuntime.start();
-        Thread.sleep(10000);
+        Thread.sleep(1000);
 
         natsClient.publish("<events><event><name>JAMES</name><age>23</age>"
                 + "<country>US</country></event></events>");
@@ -1020,6 +1018,55 @@ public class NATSSourceTestCase {
 
         Assert.assertTrue(resultContainer.assertMessageContent("JAMES"));
         Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
+        siddhiManager.shutdown();
+        natsClient.close();
+    }
+
+    @Test
+    public void testNatsProtobuf2()
+            throws InterruptedException, TimeoutException,
+            IOException, NoSuchMethodException,
+            InvocationTargetException, IllegalAccessException {
+        ResultContainer resultContainer = new ResultContainer(2, 3);
+        NATSClient natsClient = new NATSClient("nats-test15", resultContainer, true);
+        natsClient.connectClient();
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String siddhiApp = "@App:name(\"Test-plan15\")"
+                + "@source(type='nats', " +
+                "@map(type='protobuf', class='io.siddhi.extension.io.nats.utils.protobuf.Person'), "
+                + "destination='nats-test15', "
+                + "bootstrap.servers='" + "nats://localhost:" + port + "' "
+                + ")"
+                + "define stream inputStream (nic long, name string);"
+                + "@info(name = 'query1') "
+                + "from inputStream "
+                + "select *  "
+                + "insert into outputStream;";
+
+        SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+        executionPlanRuntime.addCallback("inputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                for (int i = 0; i < events.length; i++) {
+                    eventCounter.incrementAndGet();
+                }
+            }
+        });
+        executionPlanRuntime.start();
+        Thread.sleep(100);
+
+        long nic1 = 1222;
+        Person person1 = Person.newBuilder().setNic(nic1).setName("Jimmy").build();
+        byte[] messageObjectByteArray1 = person1.toByteArray();
+        long nic2 = 1222;
+        Person person2 = Person.newBuilder().setNic(nic2).setName("Natalie").build();
+        byte[] messageObjectByteArray2 = person2.toByteArray();
+        natsClient.publishProtoBuf( messageObjectByteArray1);
+        natsClient.publishProtoBuf(messageObjectByteArray2);
+
+        Thread.sleep(100);
+        AssertJUnit.assertEquals(eventCounter.get(), 2);
         siddhiManager.shutdown();
         natsClient.close();
     }

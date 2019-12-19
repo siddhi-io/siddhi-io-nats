@@ -3,22 +3,18 @@ package io.siddhi.extension.io.nats.source.nats;
 import io.nats.client.Connection;
 import io.nats.client.Dispatcher;
 import io.nats.client.Nats;
-import io.nats.client.Options;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.stream.input.source.Source;
 import io.siddhi.core.stream.input.source.SourceEventListener;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.OptionHolder;
-import io.siddhi.extension.io.nats.source.exception.NATSInputAdaptorRuntimeException;
-import io.siddhi.extension.io.nats.util.NATSConstants;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -85,14 +81,10 @@ public class NATSCore extends AbstractNats {
                 dispatcher.subscribe(destination);
             }
         } catch (IOException e) {
-            log.error("Error occurred in initializing the NATS receiver in " + siddhiAppName + " for stream: " +
-                    streamId);
             throw new ConnectionUnavailableException("Error occurred in initializing the NATS receiver in " +
                     siddhiAppName + " for stream: " + streamId);
         } catch (InterruptedException e) {
-            log.error("Error occurred in initializing the NATS receiver in " + siddhiAppName + " for stream: " +
-                    streamId + ".The calling thread is interrupted before the connection completes.");
-            throw new NATSInputAdaptorRuntimeException("Error occurred in initializing the NATS receiver in " +
+            throw new SiddhiAppRuntimeException("Error occurred in initializing the NATS receiver in " +
                     siddhiAppName + " for stream: " + streamId + ".The calling thread is interrupted before the " +
                     "connection completes.");
         }

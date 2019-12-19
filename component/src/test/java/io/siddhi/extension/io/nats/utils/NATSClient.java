@@ -17,10 +17,17 @@ public class NATSClient {
     private Connection nc;
     private String subject;
     private ResultContainer resultContainer;
+    private boolean isProtobuf;
 
     public NATSClient(String subject, ResultContainer resultContainer) {
         this.subject = subject;
         this.resultContainer = resultContainer;
+    }
+
+    public NATSClient(String subject, ResultContainer resultContainer, boolean isProtobuf) {
+        this.subject = subject;
+        this.resultContainer = resultContainer;
+        this.isProtobuf = isProtobuf;
     }
 
     public void connectClient() {
@@ -33,13 +40,20 @@ public class NATSClient {
 
     public void subscribe() {
         Dispatcher d = nc.createDispatcher((msg) -> {
-            resultContainer.eventReceived(new String(msg.getData(), StandardCharsets.UTF_8));
+            if (isProtobuf) {
+                resultContainer.eventReceived(msg.getData());
+            } else {
+                resultContainer.eventReceived(new String(msg.getData(), StandardCharsets.UTF_8));
+            }
         });
         d.subscribe(subject);
     }
 
     public void publish(String message) {
         nc.publish(subject, message.getBytes());
+    }
+    public void publishProtoBuf(byte[] message) {
+        nc.publish(subject, message);
     }
 
     public void close() throws InterruptedException {
