@@ -4,27 +4,28 @@ import io.nats.streaming.ConnectionLostHandler;
 import io.nats.streaming.Options;
 import io.nats.streaming.StreamingConnection;
 import io.nats.streaming.StreamingConnectionFactory;
+import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.extension.io.nats.sink.AsyncAckHandler;
-import io.siddhi.extension.io.nats.sink.exception.NATSSinkAdaptorRuntimeException;
 import io.siddhi.extension.io.nats.util.NATSConstants;
 import io.siddhi.extension.io.nats.util.NATSUtils;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Class which extends NATS to create nats streaming client and publish messages to relevant subject.
  */
-public class NATSStreaming extends NATS {
+public class NATSStreaming extends AbstractNats {
 
-    private static final Logger log = Logger.getLogger(NATS.class);
-    private AtomicBoolean isConnectionClosed = new AtomicBoolean(false);
+    private static final Logger log = Logger.getLogger(AbstractNats.class);
+    private AtomicBoolean isConnectionClosed = new AtomicBoolean(false); //todo check other extension for isConnected attr
     private StreamingConnection streamingConnection;
     private Options options;
     private String clusterId;
@@ -32,18 +33,14 @@ public class NATSStreaming extends NATS {
     @Override
     public void initiateClient(OptionHolder optionHolder, String siddhiAppName, String streamId) {
         super.initiateClient(optionHolder, siddhiAppName, streamId);
-        if (optionHolder.isOptionExists("cluster.id")) { // TODO: 12/17/19 replace with constants
-            this.clusterId = optionHolder.validateAndGetStaticValue("cluster.id");
-        } else if (optionHolder.isOptionExists("streaming.cluster.id")) {
-            this.clusterId = optionHolder.validateAndGetStaticValue("streaming.cluster.id");
+        if (optionHolder.isOptionExists(NATSConstants.CLUSTER_ID)) {
+            this.clusterId = optionHolder.validateAndGetStaticValue(NATSConstants.CLUSTER_ID);
+        } else if (optionHolder.isOptionExists(NATSConstants.STREAMING_CLUSTER_ID)) {
+            this.clusterId = optionHolder.validateAndGetStaticValue(NATSConstants.STREAMING_CLUSTER_ID);
         }
-        this.clientId = optionHolder.validateAndGetStaticValue(NATSConstants.CLIENT_ID, NATSUtils.createClientId());
-        if (natsUrl.length > 1) {
-            log.warn("NATS streaming does not support for multiple urls, hence getting the first url: '" + natsUrl[0]
-                    + "'.");
-        }
-        this.options = new Options.Builder().natsUrl(natsUrl[0]).
-                clientId(this.clientId).clusterId(this.clusterId).
+        this.clientId = optionHolder.validateAndGetStaticValue(NATSConstants.CLIENT_ID, NATSUtils.createClientId(
+                siddhiAppName, streamId));
+        this.options = new Options.Builder().clientId(this.clientId).clusterId(this.clusterId).
                 connectionLostHandler(new NATSStreaming.NATSConnectionLostHandler()).build();
     }
 
@@ -72,16 +69,12 @@ public class NATSStreaming extends NATS {
             streamingConnection.publish(subjectName, messageBytes,
                     new AsyncAckHandler(siddhiAppName, natsUrl[0], payload, natsSink, dynamicOptions));
         } catch (IOException e) {
-            log.error("Error sending message to destination: " + subjectName);
-            throw new NATSSinkAdaptorRuntimeException("Error sending message to destination:" + subjectName, e);
+            throw new SiddhiAppRuntimeException("Error sending message to destination:" + subjectName, e);
         } catch (InterruptedException e) {
-            log.error("Error sending message to destination: " + subjectName + ".The calling thread is "
-                    + "interrupted before the call completes.");
-            throw new NATSSinkAdaptorRuntimeException("Error sending message to destination:" + subjectName
+            throw new SiddhiAppRuntimeException("Error sending message to destination:" + subjectName
                     + ".The calling thread is interrupted before the call completes.", e);
         } catch (TimeoutException e) {
-            log.error("Error sending message to destination: " + subjectName + ".Timeout occured while trying to ack.");
-            throw new NATSSinkAdaptorRuntimeException("Error sending message to destination:" + subjectName
+            throw new SiddhiAppRuntimeException("Error sending message to destination:" + subjectName
                     + ".Timeout occured while trying to ack.", e);
         }
 
@@ -98,7 +91,8 @@ public class NATSStreaming extends NATS {
         @Override
         public void connectionLost(StreamingConnection streamingConnection, Exception e) {
             log.error("Exception occurred in Siddhi App " + siddhiAppName +
-                    " when publishing messages to NATS endpoint " + natsUrl[0] + " . " + e.getMessage(), e);
+                    " when publishing messages to NATS endpoints " + Arrays.toString(natsUrl) + " . " + e.getMessage()
+                    , e);
             isConnectionClosed = new AtomicBoolean(true);
         }
     }

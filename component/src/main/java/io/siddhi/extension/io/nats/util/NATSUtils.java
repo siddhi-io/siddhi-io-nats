@@ -48,7 +48,7 @@ public class NATSUtils {
         }
     }
 
-    public static String createClientId() {
-        return new Date().getTime() + "_" + new Random().nextInt(99999) + "_" + new Random().nextInt(99999);
+    public static String createClientId(String siddhiAppName, String streamId) {
+        return siddhiAppName + "_" + streamId + "_" + new Random().nextInt(99999);
     }
 }

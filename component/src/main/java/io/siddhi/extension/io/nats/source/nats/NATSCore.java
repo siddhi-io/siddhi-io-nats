@@ -29,16 +29,15 @@ import static io.siddhi.extension.io.nats.util.NATSConstants.SEQUENCE_NUMBER;
 /**
  * Class which extends NATS to create nats client and receive messages from relevant subjects.
  */
-public class NATSCore extends NATS {
+public class NATSCore extends AbstractNats {
 
     private static final Logger log = Logger.getLogger(NATSCore.class);
-    private Options options;
     private Connection natsClient;
     private SourceEventListener sourceEventListener;
     private Lock lock;
     private Condition condition;
     private boolean pause;
-    private AtomicInteger messageSequenceTracker;
+    private AtomicInteger messageSequenceTracker; // TODO: 12/18/19 check a way to get the message number
     private String[] requestedTransportPropertyNames;
 
     @Override
@@ -49,29 +48,6 @@ public class NATSCore extends NATS {
                 siddhiAppContext);
         this.sourceEventListener = sourceEventListener;
         this.messageSequenceTracker = new AtomicInteger(0);
-        Options.Builder optionBuilder = new Options.Builder();
-        optionBuilder.servers(this.natsUrl);
-        if (optionHolder.isOptionExists(NATSConstants.CONNECTION_TIME_OUT)) {
-            optionBuilder.connectionTimeout(Duration.ofSeconds(Long.parseLong(optionHolder.validateAndGetStaticValue
-                    (NATSConstants.CONNECTION_TIME_OUT))));
-        }
-        if (optionHolder.isOptionExists(NATSConstants.PING_INTERVAL)) {
-            optionBuilder.pingInterval(Duration.ofSeconds(Long.parseLong(optionHolder.validateAndGetStaticValue
-                    (NATSConstants.PING_INTERVAL))));
-        }
-        if (optionHolder.isOptionExists(NATSConstants.MAX_PING_OUTS)) {
-            optionBuilder.pingInterval(Duration.ofSeconds(Long.parseLong(optionHolder.validateAndGetStaticValue
-                    (NATSConstants.MAX_PING_OUTS))));
-        }
-        if (optionHolder.isOptionExists(NATSConstants.MAX_RETRY_ATTEMPTS)) {
-            optionBuilder.pingInterval(Duration.ofSeconds(Long.parseLong(optionHolder.validateAndGetStaticValue
-                    (NATSConstants.MAX_RETRY_ATTEMPTS))));
-        }
-        if (optionHolder.isOptionExists(NATSConstants.RETRY_BUFFER_SIZE)) {
-            optionBuilder.pingInterval(Duration.ofSeconds(Long.parseLong(optionHolder.validateAndGetStaticValue
-                    (NATSConstants.RETRY_BUFFER_SIZE))));
-        }
-        this.options = optionBuilder.build();
         this.lock = new ReentrantLock();
         this.condition = lock.newCondition();
         this.requestedTransportPropertyNames = requestedTransportPropertyNames.clone();
@@ -82,7 +58,7 @@ public class NATSCore extends NATS {
     public void createConnection(Source.ConnectionCallback connectionCallback, State state)
             throws ConnectionUnavailableException {
         try {
-            natsClient = Nats.connect(options);
+            natsClient = Nats.connect(natsOptionBuilder.build());
             Dispatcher dispatcher = natsClient.createDispatcher((msg) -> {
                 if (pause) {
                     lock.lock();
@@ -100,12 +76,8 @@ public class NATSCore extends NATS {
                     if (requestedTransportPropertyNames[i].equalsIgnoreCase(SEQUENCE_NUMBER)) {
                         properties[i] = String.valueOf(messageSequenceTracker.get());
                     }
-                } // TODO: 12/16/19 can be removed
-                String str = new String(msg.getData(), StandardCharsets.UTF_8);
-                sourceEventListener.onEvent(str, properties); //todo are there any transport properties???
-                if (log.isDebugEnabled()) {
-                    log.debug("message: " + msg);
                 }
+                sourceEventListener.onEvent(msg.getData(), properties);
             });
             if (queueGroupName != null) {
                 dispatcher.subscribe(destination, queueGroupName);

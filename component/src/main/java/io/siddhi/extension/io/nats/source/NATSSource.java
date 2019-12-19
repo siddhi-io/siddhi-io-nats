@@ -33,7 +33,7 @@ import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.OptionHolder;
-import io.siddhi.extension.io.nats.source.nats.NATS;
+import io.siddhi.extension.io.nats.source.nats.AbstractNats;
 import io.siddhi.extension.io.nats.util.NATSConstants;
 
 import java.util.Map;
@@ -136,18 +136,13 @@ import java.util.Map;
 
 public class NATSSource extends Source {
 
-    private NATS nats;
+    private AbstractNats nats;
 
     @Override
     public StateFactory init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
                              String[] requestedTransportPropertyNames, ConfigReader configReader,
                              SiddhiAppContext siddhiAppContext) {
-        if (optionHolder.isOptionExists(NATSConstants.CLUSTER_ID) || optionHolder.isOptionExists(
-                NATSConstants.STREAMING_CLUSTER_ID)) {
-            nats = NATS.getNATS(true);
-        } else {
-            nats = NATS.getNATS(false);
-        }
+        nats = AbstractNats.getNATS(optionHolder);
         return nats.initiateNatsClient(sourceEventListener, optionHolder, requestedTransportPropertyNames, configReader,
                 siddhiAppContext);
     }

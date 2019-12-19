@@ -31,12 +31,13 @@ import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.core.util.transport.OptionHolder;
-import io.siddhi.extension.io.nats.sink.nats.NATS;
+import io.siddhi.extension.io.nats.sink.nats.AbstractNats;
 import io.siddhi.extension.io.nats.util.NATSConstants;
 import io.siddhi.query.api.definition.StreamDefinition;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
@@ -100,7 +101,7 @@ import java.util.concurrent.TimeoutException;
 public class NATSSink extends Sink {
     private static final Logger log = Logger.getLogger(NATSSink.class);
     private String siddhiAppName;
-    private NATS nats;
+    private AbstractNats nats;
 
     @Override
     public Class[] getSupportedInputEventClasses() {
@@ -120,13 +121,7 @@ public class NATSSink extends Sink {
     protected StateFactory init(StreamDefinition streamDefinition, OptionHolder optionHolder, ConfigReader configReader,
                                 SiddhiAppContext siddhiAppContext) {
         this.siddhiAppName = siddhiAppContext.getName();
-        if (optionHolder.isOptionExists(NATSConstants.CLUSTER_ID) || optionHolder.isOptionExists(
-                NATSConstants.STREAMING_CLUSTER_ID)) {
-            nats = NATS.getNats(true);
-            nats.setNatsSink(this);
-        } else {
-            nats = NATS.getNats(false);
-        }
+        nats = AbstractNats.getNats(optionHolder);
         nats.initiateClient(optionHolder, siddhiAppName, streamDefinition.getId());
         return null;
     }
@@ -143,13 +138,13 @@ public class NATSSink extends Sink {
             nats.createNATSClient();
         } catch (IOException e) {
             String errorMessage = "Error in Siddhi App " + siddhiAppName + " while connecting to NATS server " +
-                    "endpoint " + nats.getNatsUrl()[0] + " at destination: " + nats.getDestination();
+                    "endpoint " + Arrays.toString(nats.getNatsUrl()) + " at destination: " + nats.getDestination();
             log.error(errorMessage);
             throw new ConnectionUnavailableException(errorMessage, e);
         } catch (InterruptedException e) {
             String errorMessage = "Error in Siddhi App " + siddhiAppName + " while connecting to NATS server " +
-                    "endpoint " + nats.getNatsUrl()[0] + " at destination: " + nats.getDestination().getValue() +
-                    ". The calling thread is interrupted before the connection can be established.";
+                    "endpoint " + Arrays.toString(nats.getNatsUrl()) + " at destination: " + nats.getDestination()
+                    .getValue() + ". The calling thread is interrupted before the connection can be established.";
             log.error(errorMessage);
             throw new ConnectionUnavailableException(errorMessage, e);
         }
@@ -161,7 +156,8 @@ public class NATSSink extends Sink {
             nats.disconnect();
         } catch (IOException | TimeoutException | InterruptedException e) {
             log.error("Error disconnecting the Stan receiver in Siddhi App " + siddhiAppName +
-                    " when publishing messages to NATS endpoint " + nats.getNatsUrl()[0] + " . " + e.getMessage(), e);
+                    " when publishing messages to NATS endpoint " + Arrays.toString(nats.getNatsUrl()) + " . " +
+                    e.getMessage(), e);
         }
     }
 

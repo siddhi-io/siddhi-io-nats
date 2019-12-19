@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Class which extends NATS to create nats streaming client and receive messages from relevant subject.
  */
-public class NATSStreaming extends NATS {
+public class NATSStreaming extends AbstractNats {
 
     private static final Logger log = Logger.getLogger(NATSStreaming.class);
     private String durableName;
@@ -52,7 +52,8 @@ public class NATSStreaming extends NATS {
         this.reqTransportPropertyNames = requestedTransportPropertyNames.clone();
         this.clusterId = optionHolder.validateAndGetStaticValue(NATSConstants.CLUSTER_ID,
                 NATSConstants.DEFAULT_CLUSTER_ID);
-        this.clientId = optionHolder.validateAndGetStaticValue(NATSConstants.CLIENT_ID, NATSUtils.createClientId());
+        this.clientId = optionHolder.validateAndGetStaticValue(NATSConstants.CLIENT_ID, NATSUtils.createClientId(
+                siddhiAppName, streamId));
         if (optionHolder.isOptionExists(NATSConstants.DURABLE_NAME)) {
             this.durableName = optionHolder.validateAndGetStaticValue(NATSConstants.DURABLE_NAME);
         }
@@ -66,12 +67,7 @@ public class NATSStreaming extends NATS {
     public void createConnection(Source.ConnectionCallback connectionCallback, State state)
             throws ConnectionUnavailableException {
         try {
-            if (natsUrl.length > 1) {
-                log.warn("NATS streaming does not support for multiple urls, hence getting the first url: '"
-                        + natsUrl[0] + "'.");
-            }
-            Options options = new Options.Builder().natsUrl(this.natsUrl[0]).
-                    clientId(this.clientId).clusterId(this.clusterId).
+            Options options = new Options.Builder().clientId(this.clientId).clusterId(this.clusterId).
                     connectionLostHandler(new NATSConnectionLostHandler(connectionCallback)).build();
             StreamingConnectionFactory streamingConnectionFactory = new StreamingConnectionFactory(options);
             streamingConnection =  streamingConnectionFactory.createConnection();
@@ -128,7 +124,7 @@ public class NATSStreaming extends NATS {
                     + " timeout.");
             throw new NATSInputAdaptorRuntimeException("Error occurred in initializing the NATS receiver for stream: "
                     + sourceEventListener.getStreamDefinition().getId() + ".The server request cannot be completed "
-                    + "within the subscription timeout.", e);
+                    + "within the subscription timeout.", e); // TODO: 12/18/19 Remove the exception class
         }
     }
 
@@ -140,7 +136,7 @@ public class NATSStreaming extends NATS {
             }
 
         } catch (IOException | TimeoutException | InterruptedException e) {
-            log.error("Error disconnecting the Stan receiver", e);
+            log.error("Error disconnecting the Stan receiver", e); // TODO: 12/18/19 use same message
         }
     }
 
