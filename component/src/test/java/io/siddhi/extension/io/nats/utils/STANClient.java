@@ -18,7 +18,10 @@
 
 package io.siddhi.extension.io.nats.utils;
 
+import io.nats.client.Connection;
+import io.nats.client.Nats;
 import io.nats.streaming.Message;
+import io.nats.streaming.Options;
 import io.nats.streaming.StreamingConnection;
 import io.nats.streaming.StreamingConnectionFactory;
 import io.nats.streaming.Subscription;
@@ -26,12 +29,19 @@ import io.nats.streaming.SubscriptionOptions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyStore;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.TimeoutException;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 
 /**
  * Nats streaming client for running test cases.
@@ -44,8 +54,12 @@ public class STANClient {
     private StreamingConnection streamingConnection;
     private Subscription subscription;
     private static Log log = LogFactory.getLog(STANClient.class);
+    private Options.Builder optionBuilder;
+    private io.nats.client.Options.Builder natsOptionsBuilder;
 
     public STANClient(String clusterId, String clientId, String natsUrl, ResultContainer resultContainer) {
+        optionBuilder = new Options.Builder();
+        natsOptionsBuilder = new io.nats.client.Options.Builder();
         this.cluserId = clusterId;
         this.clientId = clientId;
         this.natsUrl = natsUrl;
@@ -56,12 +70,27 @@ public class STANClient {
         this.cluserId = clusterId;
         this.clientId = clientId;
         this.natsUrl = natsUrl;
+        optionBuilder = new Options.Builder();
+        natsOptionsBuilder = new io.nats.client.Options.Builder();
     }
 
-    public void connect() {
-        StreamingConnectionFactory streamingConnectionFactory = new StreamingConnectionFactory(this.cluserId, this
-                .clientId);
-        streamingConnectionFactory.setNatsUrl(this.natsUrl);
+    public void setUsernameAndPassword(char[] username, char[] password) {
+        natsOptionsBuilder.userInfo(username, password);
+    }
+
+    public void setToken(char[] token) {
+        natsOptionsBuilder.token(token);
+    }
+
+    public void addSslConnection() throws Exception {
+        natsOptionsBuilder.sslContext(createTestSSLContext());
+    }
+
+    public void connect() throws IOException, InterruptedException {
+        natsOptionsBuilder.server(this.natsUrl);
+        Connection con = Nats.connect(natsOptionsBuilder.build());
+        optionBuilder.natsConn(con).clientId(clientId).clusterId(cluserId);
+        StreamingConnectionFactory streamingConnectionFactory = new StreamingConnectionFactory(optionBuilder.build());
         try {
             streamingConnection =  streamingConnectionFactory.createConnection();
         } catch (IOException | InterruptedException e) {
@@ -142,5 +171,29 @@ public class STANClient {
 
     public void unsubscribe() throws IOException {
         subscription.unsubscribe();
+    }
+
+    public static KeyStore loadKeystore(String path) throws Exception {
+        KeyStore store = KeyStore.getInstance("JKS");
+        try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(path))) {
+            String storePassword = "password";
+            store.load(in, storePassword.toCharArray());
+        }
+        return store;
+    }
+
+    private static TrustManager[] createTestTrustManagers() throws Exception {
+        String truststorePath = "src/test/resources/truststore.jks";
+        KeyStore store = loadKeystore(truststorePath);
+        String algorithm = "SunX509";
+        TrustManagerFactory factory = TrustManagerFactory.getInstance(algorithm);
+        factory.init(store);
+        return factory.getTrustManagers();
+    }
+
+    private static SSLContext createTestSSLContext() throws Exception {
+        SSLContext ctx = SSLContext.getInstance(io.nats.client.Options.DEFAULT_SSL_PROTOCOL);
+        ctx.init(null, createTestTrustManagers(), new SecureRandom());
+        return ctx;
     }
 }

@@ -21,7 +21,9 @@
 <suite name="Siddhi-Io-Nats-Test-Suite">
     <test name="Siddhi-io-nats-tests" enabled="true" preserve-order="true" parallel="false">
         <classes>
+            <class name="io.siddhi.extension.io.nats.sink.STANSinkTestCase"/>
             <class name="io.siddhi.extension.io.nats.sink.NATSSinkTestCase"/>
+            <class name="io.siddhi.extension.io.nats.source.STANSourceTestCase"/>
             <class name="io.siddhi.extension.io.nats.source.NATSSourceTestCase"/>
         </classes>
     </test>
