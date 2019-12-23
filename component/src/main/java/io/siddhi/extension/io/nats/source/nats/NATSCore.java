@@ -33,7 +33,7 @@ public class NATSCore extends AbstractNats {
     private Lock lock;
     private Condition condition;
     private boolean pause;
-    private AtomicInteger messageSequenceTracker; // TODO: 12/18/19 check a way to get the message number
+    private AtomicInteger messageSequenceTracker;
     private String[] requestedTransportPropertyNames;
 
     @Override

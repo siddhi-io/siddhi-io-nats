@@ -52,22 +52,38 @@ import java.util.Map;
                         type = DataType.STRING
                 ),
                 @Parameter(name = NATSConstants.BOOTSTRAP_SERVERS,
-                        description = "The NATS based url of the NATS server.",
+                        description = "Deprecated, use `server.urls` instead, The NATS based urls of the NATS server." +
+                                " Can be provided multiple urls separated by commas(`,`).",
+                        type = DataType.STRING,
+                        optional = true,
+                        defaultValue = NATSConstants.DEFAULT_SERVER_URL
+                ),
+                @Parameter(name = NATSConstants.SERVER_URLS,
+                        description = "The NATS based urls of the NATS server. Can be provided multiple urls " +
+                                "separated by commas(`,`).",
                         type = DataType.STRING,
                         optional = true,
                         defaultValue = NATSConstants.DEFAULT_SERVER_URL
                 ),
                 @Parameter(name = NATSConstants.CLIENT_ID,
-                        description = "The identifier of the client subscribing/connecting to the NATS broker.",
+                        description = "The identifier of the client subscribing/connecting to the NATS streaming " +
+                                "broker. Should be unique for each client connecting to the server/cluster." +
+                                "(supported only for nats streaming connections).",
                         type = DataType.STRING,
                         optional = true,
                         defaultValue = "None"
                 ),
                 @Parameter(name = NATSConstants.CLUSTER_ID,
-                        description = "The identifier of the NATS server/cluster.",
+                        description = "Deprecated, use `" + NATSConstants.STREAMING_CLUSTER_ID + "` instead. The " +
+                                "identifier of the NATS server/cluster. Should be provided when using nats " +
+                                "streaming broker.",
                         type = DataType.STRING,
-                        optional = true,
-                        defaultValue = NATSConstants.DEFAULT_CLUSTER_ID
+                        defaultValue = "-"
+                ),
+                @Parameter(name = NATSConstants.STREAMING_CLUSTER_ID,
+                        description = "The identifier of the NATS server/cluster. Should be provided when using nats " +
+                                "streaming broker",
+                        type = DataType.STRING
                 ),
                 @Parameter(name = NATSConstants.QUEUE_GROUP_NAME,
                         description = "This can be used when there is a requirement to share the load of a NATS "
@@ -80,7 +96,7 @@ import java.util.Map;
                         description = "This can be used to subscribe to a subject from the last acknowledged message "
                                 + "when a client or connection failure happens. The client can be uniquely identified "
                                 + "using the tuple (" + NATSConstants.CLIENT_ID + ", " + NATSConstants.DURABLE_NAME
-                                + ").",
+                                + ").[supported only with nats streaming connections]",
                         type = DataType.STRING,
                         optional = true,
                         defaultValue = "None"
@@ -88,47 +104,160 @@ import java.util.Map;
                 @Parameter(name = NATSConstants.SUBSCRIPTION_SEQUENCE,
                         description = "This can be used to subscribe to a subject from a given number of message "
                                 + "sequence. All the messages from the given point of sequence number will be passed to"
-                                + " the client. If not provided then the either the persisted value or 0 will be used.",
+                                + " the client. If not provided then the either the persisted value or 0 will be " +
+                                "used. [supported only with nats streaming connection]",
                         type = DataType.STRING,
                         optional = true,
                         defaultValue = "None"
-                )
+                ),
+                @Parameter(name = NATSConstants.CONNECTION_TIME_OUT,
+                        description = "Configure the connection time out in seconds.",
+                        optional = true,
+                        type = DataType.LONG,
+                        defaultValue = "-"
+                ),
+                @Parameter(name = NATSConstants.PING_INTERVAL,
+                        description = "Configure the ping interval in seconds.",
+                        optional = true,
+                        type = DataType.LONG,
+                        defaultValue = "-"
+
+                ),
+                @Parameter(name = NATSConstants.MAX_PING_OUTS,
+                        description = "Configure the no of pings than can be cached.",
+                        optional = true,
+                        type = DataType.INT,
+                        defaultValue = "-"
+                ),
+                @Parameter(name = NATSConstants.MAX_RETRY_ATTEMPTS,
+                        description = "Configure the no of retry attempts.",
+                        optional = true,
+                        type = DataType.INT,
+                        defaultValue = "-"
+                ),
+                @Parameter(name = NATSConstants.RECONNECT_WAIT,
+                        description = "Set the no of seconds that should wait before the next reconnect attempt.",
+                        optional = true,
+                        type = DataType.LONG,
+                        defaultValue = "-"
+                ),
+                @Parameter(name = NATSConstants.RETRY_BUFFER_SIZE,
+                        description = "Configure the buffer size in bytes",
+                        optional = true,
+                        type = DataType.LONG,
+                        defaultValue = "-"
+                ),
+                @Parameter(name = NATSConstants.AUTH_TYPE,
+                        description = "Set the authentication type. Should be provided when using secure connection." +
+                                " Supported authentication types: `user, token, tls`",
+                        optional = true,
+                        type = DataType.STRING,
+                        defaultValue = "-"
+                ),
+                @Parameter(name = NATSConstants.USERNAME,
+                        description = "Set the username, should be provided if `auth.type` is set as `user`",
+                        optional = true,
+                        type = DataType.STRING,
+                        defaultValue = "-"
+                ),
+                @Parameter(name = NATSConstants.PASSWORD,
+                        description = "Set the password, should be provided if `auth.type` is set as `user`",
+                        optional = true,
+                        type = DataType.STRING,
+                        defaultValue = "-"
+                ),
+                @Parameter(name = NATSConstants.TOKEN,
+                        description = "Set the token, should be provided if `auth.type` is set as `token`",
+                        optional = true,
+                        type = DataType.STRING,
+                        defaultValue = "-"
+                ),
+                @Parameter(name = NATSConstants.TRUSTSTORE_FILE,
+                        description = "Configure the truststore file",
+                        optional = true,
+                        type = DataType.STRING,
+                        defaultValue = "`${carbon.home}/resources/security/client-truststore.jks`"
+                ),
+                @Parameter(name = NATSConstants.STORE_TYPE,
+                        description = "TLS store type.",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "JKS"
+                ),
+                @Parameter(name = NATSConstants.TRUSTSTORE_PASSWORD,
+                        description = "The password for the client truststore",
+                        optional = true,
+                        type = DataType.STRING,
+                        defaultValue = "wso2carbon"
+                ),
+                @Parameter(name = NATSConstants.TRUSTSTORE_ALGORITHM,
+                        description = "The encryption algorithm of the truststore.",
+                        optional = true,
+                        type = DataType.STRING,
+                        defaultValue = "SunX509"
+                ),
+                @Parameter(name = NATSConstants.CLIENT_VERIFY,
+                        description = "Enable the client verification, should be set to `true` if client needs to be " +
+                                "verify by the server.",
+                        optional = true,
+                        type = DataType.BOOL,
+                        defaultValue = "false"
+                ),
+                @Parameter(name = NATSConstants.KEYSTORE_FILE,
+                        description = "Configure the Keystore file, only if client verification is needed.",
+                        optional = true,
+                        type = DataType.STRING,
+                        defaultValue = "`${carbon.home}/resources/security/wso2carbon.jks`"
+                ),
+                @Parameter(name = NATSConstants.KEYSTORE_ALGORITHM,
+                        description = "The encryption algorithm of the keystore.",
+                        optional = true,
+                        type = DataType.STRING,
+                        defaultValue = "SunX509"
+                ),
+                @Parameter(name = NATSConstants.KEYSTORE_PASSWORD,
+                        description = "The password for the keystore.",
+                        optional = true,
+                        type = DataType.STRING,
+                        defaultValue = "wso2carbon"
+                ),
         },
         examples = {
-                @Example(description = "This example shows how to subscribe to a NATS subject with all supporting "
-                        + "configurations.With the following configuration the source identified as 'nats-client' will "
-                        + "subscribes to a subject named as 'SP_NATS_INPUT_TEST' which resides in a nats instance "
-                        + "with a cluster id of 'test-cluster', running in localhost and listening to the port 4222 for"
-                        + " client connection. This subscription will receive all the messages from 100th in the "
-                        + "subject.",
-                        syntax = "@source(type='nats', @map(type='text'), "
+                @Example(syntax = "@source(type='nats', @map(type='text'), "
                                 + "destination='SP_NATS_INPUT_TEST', "
-                                + "bootstrap.servers='nats://localhost:4222',"
+                                + "server.urls='nats://localhost:4222',"
                                 + "client.id='nats_client',"
-                                + "server.id='test-cluster',"
+                                + "streaming.cluster.id='test-cluster',"
                                 + "queue.group.name = 'group_nats',"
                                 + "durable.name = 'nats-durable',"
                                 + "subscription.sequence = '100'"
                                 + ")\n"
-                                + "define stream inputStream (name string, age int, country string);"),
+                                + "define stream inputStream (name string, age int, country string);",
+                        description = "This example shows how to subscribe to a NATS subject in nats streaming " +
+                                "broker with some basic configurations.With the above configuration the source " +
+                                "identified as 'nats-client' will subscribes to a subject named as " +
+                                "'SP_NATS_INPUT_TEST' which resides in a nats instance with a cluster id of " +
+                                "'test-cluster', running in localhost and listening to the port 4222 for client " +
+                                "connection. This subscription will receive all the messages from 100th in the " +
+                                "subject. Since this is using a nats streaming broker it's mandatory to provide the " +
+                                "`streaming.cluster.id` parameter."),
 
-                @Example(description = "This example shows how to subscribe to a NATS subject with mandatory "
-                        + "configurations.With the following configuration the source identified with an auto generated"
-                        + " client id will subscribes to a subject named as 'SP_NATS_INTPUT_TEST' which resides in a "
-                        + "nats instance with a cluster id of 'test-cluster', running in localhost and listening to"
-                        + " the port 4222 for client connection. This will receive all available messages in the "
-                        + "subject",
-                        syntax = "@source(type='nats', @map(type='text'), "
-                                + "destination='SP_NATS_INPUT_TEST', "
-                                + ")\n"
-                                + "define stream inputStream (name string, age int, country string);"),
-                @Example(description = "This example shows how to pass NATS Streaming sequence number to the event.",
+                @Example(syntax = "@source(type='nats', @map(type='xml'), "
+                                + "destination='nats-test', "
+                                + "server.urls='" + "nats://localhost:4222')\n"
+                                + "define stream inputStream1 (name string, age int, country string);",
+                        description = "This will subscribe to a Nats subject in nats broker with some basic " +
+                                "configurations. Nats server should be running on the `localhost:4222` address and " +
+                                "this source will keep listening to messages which receives into the `nats-test` " +
+                                "subject"),
+
+                @Example(description = "This example shows how to pass Nats sequence number to the event.",
                         syntax = "@source(type='nats', @map(type='json', @attributes(name='$.name', age='$.age', " +
                                 "country='$.country', sequenceNum='trp:sequenceNumber')), " +
                                 "destination='SIDDHI_NATS_SOURCE_TEST_DEST', " +
                                 "client.id='nats_client', " +
-                                "bootstrap.servers='nats://localhost:4222', " +
-                                "cluster.id='test-cluster'" +
+                                "server.urls='nats://localhost:4222', " +
+                                "streaming.cluster.id='test-cluster'" +
                                 ")\n" +
                                 "define stream inputStream (name string, age int, country string, sequenceNum string);")
         }

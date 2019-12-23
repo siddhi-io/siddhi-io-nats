@@ -1,5 +1,7 @@
 package io.siddhi.extension.io.nats.source.nats;
 
+import io.nats.client.Connection;
+import io.nats.client.Nats;
 import io.nats.streaming.ConnectionLostHandler;
 import io.nats.streaming.Options;
 import io.nats.streaming.StreamingConnection;
@@ -50,8 +52,7 @@ public class NATSStreaming extends AbstractNats {
                 siddhiAppContext);
         this.sourceEventListener = sourceEventListener;
         this.reqTransportPropertyNames = requestedTransportPropertyNames.clone();
-        this.clusterId = optionHolder.validateAndGetStaticValue(NATSConstants.CLUSTER_ID,
-                NATSConstants.DEFAULT_CLUSTER_ID);
+        this.clusterId = optionHolder.validateAndGetStaticValue(NATSConstants.CLUSTER_ID);
         this.clientId = optionHolder.validateAndGetStaticValue(NATSConstants.CLIENT_ID, NATSUtils.createClientId(
                 siddhiAppName, streamId));
         if (optionHolder.isOptionExists(NATSConstants.DURABLE_NAME)) {
@@ -67,7 +68,8 @@ public class NATSStreaming extends AbstractNats {
     public void createConnection(Source.ConnectionCallback connectionCallback, State state)
             throws ConnectionUnavailableException {
         try {
-            Options options = new Options.Builder().clientId(this.clientId).clusterId(this.clusterId).
+            Connection con = Nats.connect(natsOptionBuilder.build());
+            Options options = new Options.Builder().clientId(this.clientId).clusterId(this.clusterId).natsConn(con).
                     connectionLostHandler(new NATSConnectionLostHandler(connectionCallback)).build();
             StreamingConnectionFactory streamingConnectionFactory = new StreamingConnectionFactory(options);
             streamingConnection =  streamingConnectionFactory.createConnection();

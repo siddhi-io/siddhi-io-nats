@@ -21,7 +21,6 @@ import io.nats.streaming.Message;
 import io.nats.streaming.MessageHandler;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.stream.input.source.SourceEventListener;
-import io.siddhi.extension.io.nats.source.exception.NATSInputAdaptorRuntimeException;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
