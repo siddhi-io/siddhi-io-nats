@@ -23,6 +23,8 @@ import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.util.transport.DynamicOptions;
 import org.apache.log4j.Logger;
 
+import java.util.Arrays;
+
 /**
  * Handle the acknowledgement for the published messages in an asynchronous manner.
  */
@@ -30,15 +32,15 @@ public class AsyncAckHandler implements AckHandler {
 
     private static final Logger log = Logger.getLogger(AsyncAckHandler.class);
     private String siddhiAppName;
-    private String natsURL;
+    private String[] natsURL;
     private Object payload;
     private NATSSink natsSink;
     private DynamicOptions dynamicOptions;
 
-    public AsyncAckHandler(String siddhiAppName, String natsURL, Object payload, NATSSink natsSink,
+    public AsyncAckHandler(String siddhiAppName, String[] natsURL, Object payload, NATSSink natsSink,
                     DynamicOptions dynamicOptions) {
         this.siddhiAppName = siddhiAppName;
-        this.natsURL = natsURL;
+        this.natsURL = natsURL.clone();
         this.payload = payload;
         this.natsSink = natsSink;
         this.dynamicOptions = dynamicOptions;
@@ -48,13 +50,13 @@ public class AsyncAckHandler implements AckHandler {
     public void onAck(String nuid, Exception e) {
         if (e != null) {
             log.error("Exception occurred in Siddhi App " + siddhiAppName +
-                    " when publishing message " + nuid + " to NATS endpoint " + natsURL + " . " +
+                    " when publishing message " + nuid + " to NATS endpoint " + Arrays.toString(natsURL) + " . " +
                     e.getMessage(), e);
             natsSink.onError(payload, dynamicOptions, new ConnectionUnavailableException(e.getMessage(), e));
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("Received ack for msg id " + nuid + " in Siddhi App " + siddhiAppName +
-                        " when publishing message to NATS endpoint " + natsURL + " . ");
+                        " when publishing message to NATS endpoint " + Arrays.toString(natsURL) + " . ");
             }
         }
     }

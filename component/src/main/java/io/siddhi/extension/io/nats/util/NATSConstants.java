@@ -17,6 +17,10 @@
  */
 package io.siddhi.extension.io.nats.util;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Contains the property key values of NATS connection.
  */
@@ -26,7 +30,6 @@ public class NATSConstants {
     public static final String CLIENT_ID = "client.id";
     public static final String CLUSTER_ID = "cluster.id";
     public static final String DEFAULT_SERVER_URL = "nats://localhost:4222";
-    public static final String DEFAULT_CLUSTER_ID = "test-cluster";
     public static final String QUEUE_GROUP_NAME = "queue.group.name";
     public static final String DURABLE_NAME = "durable.name";
     public static final String SUBSCRIPTION_SEQUENCE = "subscription.sequence";
@@ -35,14 +38,22 @@ public class NATSConstants {
     public static final String PING_INTERVAL  = "ping.interval";
     public static final String MAX_PING_OUTS  = "max.ping.outs";
     public static final String MAX_RETRY_ATTEMPTS  = "max.retry.attempts";
+    public static final String RECONNECT_WAIT  = "reconnect.wait";
     public static final String RETRY_BUFFER_SIZE = "max.buffer.size";
     public static final String SERVER_URLS = "server.urls";
     public static final String STREAMING_CLUSTER_ID = "streaming.cluster.id";
-    public static final String ENABLE_SSL = "enable.ssl";
+    public static final String AUTH_TYPE = "auth.type";
+    public static final String USERNAME = "username";
+    public static final String PASSWORD = "password";
+    public static final String TOKEN = "token";
     public static final String KEYSTORE_FILE = "keystore.file";
     public static final String KEYSTORE_PASSWORD = "keystore.password";
     public static final String KEYSTORE_ALGORITHM = "keystore.algorithm";
     public static final String TRUSTSTORE_FILE = "truststore.file";
     public static final String TRUSTSTORE_PASSWORD = "truststore.password";
     public static final String TRUSTSTORE_ALGORITHM = "truststore.algorithm";
+    public static final String STORE_TYPE = "tls.store.type";
+    public static final String CLIENT_VERIFY = "client.verify";
+    public static final List<String> AUTH_TYPE_LIST = Collections.unmodifiableList(Arrays.asList
+            ("user", "token", "tls"));
 }

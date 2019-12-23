@@ -2,7 +2,6 @@ package io.siddhi.extension.io.nats.sink.nats;
 
 import io.nats.client.Connection;
 import io.nats.client.Nats;
-import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.transport.DynamicOptions;
 import org.apache.log4j.Logger;
@@ -35,18 +34,18 @@ public class NATSCore extends AbstractNats {
             String message = (String) payload;
             messageBytes = message.getBytes(StandardCharsets.UTF_8);
         }
-        try {
-            if (isClientConnected()) {
+        connection.publish(subjectName, messageBytes);
+        /*try {
+            if (!isClientConnected()) {
                 createNATSClient();
             }
             connection.publish(subjectName, messageBytes);
         } catch (IOException e) {
-            throw new SiddhiAppRuntimeException("Error sending message to destination:" + subjectName, e); //
+            throw new SiddhiAppRuntimeException("Error sending message to destination:" + subjectName, e);
         } catch (InterruptedException e) {
             throw new SiddhiAppRuntimeException("Error sending message to destination:" + subjectName
                     + ".The calling thread is interrupted before the call completes.", e);
-        }
-
+        }*/
     }
 
     @Override
@@ -63,4 +62,5 @@ public class NATSCore extends AbstractNats {
          return connection.getStatus() != Connection.Status.DISCONNECTED && connection.getStatus() != Connection.Status
                  .CLOSED;
      }
+
 }

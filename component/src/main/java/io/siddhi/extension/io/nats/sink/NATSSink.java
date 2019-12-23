@@ -47,7 +47,7 @@ import java.util.concurrent.TimeoutException;
 @Extension(
         name = "nats",
         namespace = "sink",
-        description = "NATS Sink allows users to subscribe to a NATS broker and publish messages.",
+        description = "NATS Sink allows users to subscribe to a Nats or Nats streaming broker and publish messages.",
         parameters = {
                 @Parameter(name = NATSConstants.DESTINATION,
                         description = "Subject name which NATS sink should publish to.",
@@ -55,46 +55,180 @@ import java.util.concurrent.TimeoutException;
                         dynamic = true
                 ),
                 @Parameter(name = NATSConstants.BOOTSTRAP_SERVERS,
-                        description = "The NATS based url of the NATS server.",
+                        description = "Deprecated, use `server.urls` instead, The NATS based urls of the NATS server." +
+                                " Can be provided multiple urls separated by commas(`,`).",
+                        type = DataType.STRING,
+                        optional = true,
+                        defaultValue = NATSConstants.DEFAULT_SERVER_URL
+                ),
+                @Parameter(name = NATSConstants.SERVER_URLS,
+                        description = "The NATS based urls of the NATS server. Can be provided multiple urls " +
+                                "separated by commas(`,`).",
                         type = DataType.STRING,
                         optional = true,
                         defaultValue = NATSConstants.DEFAULT_SERVER_URL
                 ),
                 @Parameter(name = NATSConstants.CLIENT_ID,
-                        description = "The identifier of the client publishing/connecting to the NATS broker. Should " +
-                                "be unique for each client connecting to the server/cluster.",
+                        description = "The identifier of the client publishing/connecting to the NATS streaming " +
+                                "broker. Should be unique for each client connecting to the server/cluster." +
+                                "(supported only for nats streaming connections).",
                         type = DataType.STRING,
                         optional = true,
                         defaultValue = "None"
                 ),
                 @Parameter(name = NATSConstants.CLUSTER_ID,
-                        description = "The identifier of the NATS server/cluster.",
+                        description = "Deprecated, use `" + NATSConstants.STREAMING_CLUSTER_ID + "` instead. The " +
+                                "identifier of the NATS server/cluster. Should be provided when using nats " +
+                                "streaming broker.",
+                        type = DataType.STRING
+                ),
+                @Parameter(name = NATSConstants.STREAMING_CLUSTER_ID,
+                        description = "The identifier of the NATS server/cluster. Should be provided when using nats " +
+                                "streaming broker",
+                        type = DataType.STRING
+                ),
+                @Parameter(name = NATSConstants.CONNECTION_TIME_OUT,
+                        description = "Configure the connection time out in seconds.",
+                        optional = true,
+                        type = DataType.LONG,
+                        defaultValue = "-"
+                ),
+                @Parameter(name = NATSConstants.PING_INTERVAL,
+                        description = "Configure the ping interval in seconds.",
+                        optional = true,
+                        type = DataType.LONG,
+                        defaultValue = "-"
+
+                ),
+                @Parameter(name = NATSConstants.MAX_PING_OUTS,
+                        description = "Configure the no of pings than can be cached.",
+                        optional = true,
+                        type = DataType.INT,
+                        defaultValue = "-"
+                ),
+                @Parameter(name = NATSConstants.MAX_RETRY_ATTEMPTS,
+                        description = "Configure the no of retry attempts.",
+                        optional = true,
+                        type = DataType.INT,
+                        defaultValue = "-"
+                ),
+                @Parameter(name = NATSConstants.RECONNECT_WAIT,
+                        description = "Set the no of seconds that should wait before the next reconnect attempt.",
+                        optional = true,
+                        type = DataType.LONG,
+                        defaultValue = "-"
+                ),
+                @Parameter(name = NATSConstants.RETRY_BUFFER_SIZE,
+                        description = "Configure the buffer size in bytes",
+                        optional = true,
+                        type = DataType.LONG,
+                        defaultValue = "-"
+                ),
+                @Parameter(name = NATSConstants.AUTH_TYPE,
+                        description = "Set the authentication type. Should be provided when using secure connection." +
+                                " Supported authentication types: `user, token, tls`",
+                        optional = true,
                         type = DataType.STRING,
-                        defaultValue = NATSConstants.DEFAULT_CLUSTER_ID
+                        defaultValue = "-"
+                ),
+                @Parameter(name = NATSConstants.USERNAME,
+                        description = "Set the username, should be provided if `auth.type` is set as `user`",
+                        optional = true,
+                        type = DataType.STRING,
+                        defaultValue = "-"
+                ),
+                @Parameter(name = NATSConstants.PASSWORD,
+                        description = "Set the password, should be provided if `auth.type` is set as `user`",
+                        optional = true,
+                        type = DataType.STRING,
+                        defaultValue = "-"
+                ),
+                @Parameter(name = NATSConstants.TOKEN,
+                        description = "Set the token, should be provided if `auth.type` is set as `token`",
+                        optional = true,
+                        type = DataType.STRING,
+                        defaultValue = "-"
+                ),
+                @Parameter(name = NATSConstants.TRUSTSTORE_FILE,
+                        description = "Configure the truststore file",
+                        optional = true,
+                        type = DataType.STRING,
+                        defaultValue = "`${carbon.home}/resources/security/client-truststore.jks`"
+                ),
+                @Parameter(name = NATSConstants.STORE_TYPE,
+                        description = "TLS store type.",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "JKS"
+                ),
+                @Parameter(name = NATSConstants.TRUSTSTORE_PASSWORD,
+                        description = "The password for the client truststore",
+                        optional = true,
+                        type = DataType.STRING,
+                        defaultValue = "wso2carbon"
+                ),
+                @Parameter(name = NATSConstants.TRUSTSTORE_ALGORITHM,
+                        description = "The encryption algorithm of the truststore.",
+                        optional = true,
+                        type = DataType.STRING,
+                        defaultValue = "SunX509"
+                ),
+                @Parameter(name = NATSConstants.CLIENT_VERIFY,
+                        description = "Enable the client verification, should be set to `true` if client needs to be " +
+                                "verify by the server.",
+                        optional = true,
+                        type = DataType.BOOL,
+                        defaultValue = "false"
+                ),
+                @Parameter(name = NATSConstants.KEYSTORE_FILE,
+                        description = "Configure the Keystore file, only if client verification is needed.",
+                        optional = true,
+                        type = DataType.STRING,
+                        defaultValue = "`${carbon.home}/resources/security/wso2carbon.jks`"
+                ),
+                @Parameter(name = NATSConstants.KEYSTORE_ALGORITHM,
+                        description = "The encryption algorithm of the keystore.",
+                        optional = true,
+                        type = DataType.STRING,
+                        defaultValue = "SunX509"
+                ),
+                @Parameter(name = NATSConstants.KEYSTORE_PASSWORD,
+                        description = "The password for the keystore.",
+                        optional = true,
+                        type = DataType.STRING,
+                        defaultValue = "wso2carbon"
                 ),
         },
         examples = {
-                @Example(description = "This example shows how to publish to a NATS subject with all supporting "
-                        + "configurations. With the following configuration the sink identified as 'nats-client' will "
-                        + "publish to a subject named as 'SP_NATS_OUTPUT_TEST' which resides in a nats instance with "
-                        + "a cluster id of 'test-cluster', running in localhost and listening to the port 4222 for "
-                        + "client connection.",
-                        syntax = "@sink(type='nats', @map(type='xml'), "
-                                + "destination='SP_NATS_OUTPUT_TEST', "
-                                + "bootstrap.servers='nats://localhost:4222',"
-                                + "client.id='nats_client',"
-                                + "server.id='test-cluster'"
-                                + ")\n"
-                                + "define stream outputStream (name string, age int, country string);"),
-
-                @Example(description = "This example shows how to publish to a NATS subject with mandatory "
-                        + "configurations. With the following configuration the sink identified with an auto generated "
-                        + "client id will publish to a subject named as 'SP_NATS_OUTPUT_TEST' which resides in a "
-                        + "nats instance with a cluster id of 'test-cluster', running in localhost and listening to "
-                        + "the port 4222 for client connection.",
-                        syntax = "@sink(type='nats', @map(type='xml'), "
-                                + "destination='SP_NATS_OUTPUT_TEST')\n"
-                                + "define stream outputStream (name string, age int, country string);")
+                @Example(syntax = "@sink(type='nats', @map(type='xml'), "
+                        + "destination='SP_NATS_OUTPUT_TEST', "
+                        + "server.urls='nats://localhost:4222',"
+                        + "client.id='nats_client',"
+                        + "streaming.cluster.id='test-cluster'"
+                        + ")\n"
+                        + "define stream outputStream (name string, age int, country string);",
+                        description = "This example shows how to publish events to a `nats streaming` broker with " +
+                                "basic configurations. Here the nats sink will publish events into the " +
+                                "`SP_NATS_OUTPUT_TEST` subject. Nats streaming server should be runs on the " +
+                                "`localhost:4222` address. `streaming.cluster.id` should be provided if wer want to " +
+                                "publish events into a nats streaming broker."
+                ),
+                @Example(syntax = "@sink(type='nats', @map(type='xml'), "
+                                + "destination='nats-test1', "
+                                + "server.urls='nats://localhost:4222')\n"
+                                + "define stream inputStream (name string, age int, country string)",
+                        description = "This example shows how to publish events into a nats broker with basic " +
+                                "configurations. Nats server should be running on `localhost:4222` and this sink will" +
+                                " publish events to the `nats-test1` subject."
+                ),
+                @Example(syntax = "@sink(type='nats',@map(type='protobuf', class='io.siddhi.extension.io.nats.utils."
+                                + "protobuf.Person'),\n "
+                                + "destination='nats-test1', "
+                                + "server.urls='nats://localhost:4222')\n"
+                                + "define stream inputStream (nic long, name string)",
+                        description = "Above query shows how to use nats sink to publish protobuf messages into a " +
+                                "nats broker."
+                )
         }
 )
 
@@ -114,7 +248,7 @@ public class NATSSink extends Sink {
 
     @Override
     public String[] getSupportedDynamicOptions() {
-            return new String[]{NATSConstants.DESTINATION};
+        return new String[]{NATSConstants.DESTINATION};
     }
 
     @Override
@@ -129,7 +263,7 @@ public class NATSSink extends Sink {
     @Override
     public void publish(Object payload, DynamicOptions dynamicOptions, State state) throws
             ConnectionUnavailableException  {
-            nats.publishMessages(payload, dynamicOptions, state);
+        nats.publishMessages(payload, dynamicOptions, state);
     }
 
     @Override
@@ -137,16 +271,14 @@ public class NATSSink extends Sink {
         try {
             nats.createNATSClient();
         } catch (IOException e) {
-            String errorMessage = "Error in Siddhi App " + siddhiAppName + " while connecting to NATS server " +
-                    "endpoint " + Arrays.toString(nats.getNatsUrl()) + " at destination: " + nats.getDestination();
-            log.error(errorMessage);
-            throw new ConnectionUnavailableException(errorMessage, e);
+            throw new ConnectionUnavailableException("Error in Siddhi App " + siddhiAppName + " while connecting to " +
+                    "NATS server endpoint " + Arrays.toString(nats.getNatsUrl()) + " at destination: " +
+                    nats.getDestination(), e);
         } catch (InterruptedException e) {
-            String errorMessage = "Error in Siddhi App " + siddhiAppName + " while connecting to NATS server " +
-                    "endpoint " + Arrays.toString(nats.getNatsUrl()) + " at destination: " + nats.getDestination()
-                    .getValue() + ". The calling thread is interrupted before the connection can be established.";
-            log.error(errorMessage);
-            throw new ConnectionUnavailableException(errorMessage, e);
+            throw new ConnectionUnavailableException("Error in Siddhi App " + siddhiAppName + " while connecting to" +
+                    " NATS server endpoint " + Arrays.toString(nats.getNatsUrl()) + " at destination: " +
+                    nats.getDestination().getValue() + ". The calling thread is interrupted before the connection " +
+                    "can be established.", e);
         }
     }
 

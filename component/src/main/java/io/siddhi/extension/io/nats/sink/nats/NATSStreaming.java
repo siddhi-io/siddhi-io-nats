@@ -1,5 +1,7 @@
 package io.siddhi.extension.io.nats.sink.nats;
 
+import io.nats.client.Connection;
+import io.nats.client.Nats;
 import io.nats.streaming.ConnectionLostHandler;
 import io.nats.streaming.Options;
 import io.nats.streaming.StreamingConnection;
@@ -25,9 +27,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class NATSStreaming extends AbstractNats {
 
     private static final Logger log = Logger.getLogger(AbstractNats.class);
-    private AtomicBoolean isConnectionClosed = new AtomicBoolean(false); //todo check other extension for isConnected attr
+    private AtomicBoolean isConnectionClosed = new AtomicBoolean(false);
     private StreamingConnection streamingConnection;
-    private Options options;
+    private Options.Builder optionsBuilder;
     private String clusterId;
 
     @Override
@@ -40,13 +42,15 @@ public class NATSStreaming extends AbstractNats {
         }
         this.clientId = optionHolder.validateAndGetStaticValue(NATSConstants.CLIENT_ID, NATSUtils.createClientId(
                 siddhiAppName, streamId));
-        this.options = new Options.Builder().clientId(this.clientId).clusterId(this.clusterId).
-                connectionLostHandler(new NATSStreaming.NATSConnectionLostHandler()).build();
+        this.optionsBuilder = new Options.Builder().clientId(this.clientId).clusterId(this.clusterId).
+                connectionLostHandler(new NATSStreaming.NATSConnectionLostHandler());
     }
 
     @Override
     public void createNATSClient() throws IOException, InterruptedException {
-        StreamingConnectionFactory streamingConnectionFactory = new StreamingConnectionFactory(options);
+        Connection con = Nats.connect(natsOptionBuilder.build());
+        optionsBuilder.natsConn(con);
+        StreamingConnectionFactory streamingConnectionFactory = new StreamingConnectionFactory(optionsBuilder.build());
         streamingConnection = streamingConnectionFactory.createConnection();
         isConnectionClosed.set(false);
     }
@@ -67,7 +71,7 @@ public class NATSStreaming extends AbstractNats {
                 createNATSClient();
             }
             streamingConnection.publish(subjectName, messageBytes,
-                    new AsyncAckHandler(siddhiAppName, natsUrl[0], payload, natsSink, dynamicOptions));
+                    new AsyncAckHandler(siddhiAppName, natsUrl, payload, natsSink, dynamicOptions));
         } catch (IOException e) {
             throw new SiddhiAppRuntimeException("Error sending message to destination:" + subjectName, e);
         } catch (InterruptedException e) {
