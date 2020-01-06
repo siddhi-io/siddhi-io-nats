@@ -26,6 +26,7 @@ import io.siddhi.core.stream.input.source.Source;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.persistence.InMemoryPersistenceStore;
+import io.siddhi.core.util.persistence.PersistenceStore;
 import io.siddhi.extension.io.nats.utils.NATSClient;
 import io.siddhi.extension.io.nats.utils.ResultContainer;
 import io.siddhi.extension.io.nats.utils.UnitTestAppender;
@@ -976,6 +977,79 @@ public class NATSSourceTestCase {
         Assert.assertTrue(eventsAtSource.assertMessageContent("MIKE"));
         Assert.assertTrue(eventReceived.get());
 
+        siddhiManager.shutdown();
+        natsClient.close();
+    }
+
+    /**
+     * Test passing NATS Streaming sequence number as an event attribute.
+     */
+    @Test
+    public void testStatePersistence() throws InterruptedException, TimeoutException, IOException {
+        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+        NATSClient natsClient = new NATSClient("test-cluster", "nats-source-test1",
+                "nats://localhost:" + port);
+        natsClient.connect();
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+        String siddhiApp = "@App:name(\"Test-plan1\")"
+                + "@source(type='nats', @map(type='xml'), "
+                + "destination='nats-test1', "
+                + "client.id='nats-source-test1-siddhi', "
+                + "bootstrap.servers='" + "nats://localhost:" + port + "', "
+                + "cluster.id='test-cluster'"
+                + ") "
+                + "define stream inputStream (name string, age int, country string);";
+
+        SiddhiAppRuntime siddhiRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+        siddhiRuntime.addCallback("inputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                eventCounter.incrementAndGet();
+            }
+        });
+
+        natsClient.publish("nats-test1", "<events><event><name>JAMES</name><age>22</age>"
+                + "<country>US</country></event></events>");
+        natsClient.publish("nats-test1", "<events><event><name>MIKE</name><age>25</age>"
+                + "<country>GERMANY</country></event></events>");
+        Thread.sleep(1000);
+
+        siddhiRuntime.start();
+
+        //persisting
+        Thread.sleep(2000);
+        siddhiRuntime.persist();
+        Thread.sleep(1000);
+        siddhiRuntime.shutdown();
+
+        natsClient.publish("nats-test1", "<events><event><name>JAKE</name><age>19</age>"
+                + "<country>US</country></event></events>");
+        natsClient.publish("nats-test1", "<events><event><name>CHARLIE</name><age>30</age>"
+                + "<country>GERMANY</country></event></events>");
+        Thread.sleep(2000);
+
+        siddhiRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+        siddhiRuntime.addCallback("inputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                eventCounter.incrementAndGet();
+            }
+        });
+
+        //loading
+        try {
+            siddhiRuntime.restoreLastRevision();
+        } catch (CannotRestoreSiddhiAppStateException e) {
+            Assert.fail("Restoring of Siddhi app " + siddhiRuntime.getName() + " failed", e);
+        }
+        siddhiRuntime.start();
+        Thread.sleep(3000);
+
+        AssertJUnit.assertTrue(eventCounter.get() == 4);
         siddhiManager.shutdown();
         natsClient.close();
     }
