@@ -247,7 +247,7 @@ public class NATSSource extends Source<NATSSource.NATSSourceState> {
                 Integer.parseInt(sequenceNumber)) {
             natsSourceState.lastSentSequenceNo.set(Integer.parseInt(sequenceNumber));
         }
-        subscriptionOptionsBuilder.startAtSequence(natsSourceState.lastSentSequenceNo.get());
+        subscriptionOptionsBuilder.startAtSequence(natsSourceState.lastSentSequenceNo.get() + 1);
         try {
 
             if (durableName != null) {
