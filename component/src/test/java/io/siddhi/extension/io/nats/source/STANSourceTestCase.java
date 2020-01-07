@@ -58,7 +58,8 @@ public class STANSourceTestCase {
 
     @BeforeMethod
     private void setUp() {
-        eventCounter.set(0);
+        eventCounter = new AtomicInteger(0);
+
     }
 
     @BeforeClass
@@ -522,7 +523,7 @@ public class STANSourceTestCase {
                 + "client.id='nats-source-test11-siddhi', "
                 + "bootstrap.servers='" + "nats://localhost:" + port + "', "
                 + "cluster.id='test-cluster',"
-                + "subscription.sequence = '5'"
+                + "subscription.sequence = '4'"
                 + ")"
                 + "define stream inputStream (name string, age int, country string);"
                 + "@info(name = 'query1') "
@@ -587,7 +588,7 @@ public class STANSourceTestCase {
                 + "bootstrap.servers='" + "nats://localhost:" + port + "', "
                 + "client.id='" + clientId +  "', "
                 + "cluster.id='test-cluster',"
-                + "subscription.sequence = '4',"
+                + "subscription.sequence = '3',"
                 + "queue.group.name = 'test-plan12'"
                 + ")"
                 + "define stream inputStream1 (name string, age int, country string);";
@@ -599,7 +600,7 @@ public class STANSourceTestCase {
                 + "bootstrap.servers='" + "nats://localhost:" + port + "', "
                 + "client.id='" + clientId +  "', "
                 + "cluster.id='test-cluster',"
-                + "subscription.sequence = '4',"
+                + "subscription.sequence = '3',"
                 + "queue.group.name = 'test-plan12'"
                 + ")"
                 + "define stream inputStream2 (name string, age int, country string);";
@@ -937,15 +938,15 @@ public class STANSourceTestCase {
     @Test
     public void testStatePersistence() throws InterruptedException, TimeoutException, IOException {
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
-        STANClient stanClient = new STANClient("test-cluster", "nats-source-test1",
+        STANClient stanClient = new STANClient("test-cluster", "nats-source-test16",
                 "nats://localhost:" + port);
         stanClient.connect();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
         String siddhiApp = "@App:name(\"Test-plan1\")"
                 + "@source(type='nats', @map(type='xml'), "
-                + "destination='nats-test1', "
-                + "client.id='nats-source-test1-siddhi', "
+                + "destination='nats-test16', "
+                + "client.id='nats-source-test16-siddhi', "
                 + "bootstrap.servers='" + "nats://localhost:" + port + "', "
                 + "cluster.id='test-cluster'"
                 + ") "
@@ -960,9 +961,9 @@ public class STANSourceTestCase {
             }
         });
 
-        stanClient.publish("nats-test1", "<events><event><name>JAMES</name><age>22</age>"
+        stanClient.publish("nats-test16", "<events><event><name>JAMES</name><age>22</age>"
                 + "<country>US</country></event></events>");
-        stanClient.publish("nats-test1", "<events><event><name>MIKE</name><age>25</age>"
+        stanClient.publish("nats-test16", "<events><event><name>MIKE</name><age>25</age>"
                 + "<country>GERMANY</country></event></events>");
         Thread.sleep(1000);
 
@@ -974,9 +975,9 @@ public class STANSourceTestCase {
         Thread.sleep(1000);
         siddhiRuntime.shutdown();
 
-        stanClient.publish("nats-test1", "<events><event><name>JAKE</name><age>19</age>"
+        stanClient.publish("nats-test16", "<events><event><name>JAKE</name><age>19</age>"
                 + "<country>US</country></event></events>");
-        stanClient.publish("nats-test1", "<events><event><name>CHARLIE</name><age>30</age>"
+        stanClient.publish("nats-test16", "<events><event><name>CHARLIE</name><age>30</age>"
                 + "<country>GERMANY</country></event></events>");
         Thread.sleep(2000);
 
@@ -999,7 +1000,7 @@ public class STANSourceTestCase {
         siddhiRuntime.start();
         Thread.sleep(3000);
 
-        AssertJUnit.assertTrue(eventCounter.get() == 4);
+        AssertJUnit.assertEquals(eventCounter.get(), 4);
         siddhiManager.shutdown();
         stanClient.close();
     }
