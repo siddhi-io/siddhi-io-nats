@@ -17,8 +17,6 @@
  */
 package io.siddhi.extension.io.nats.source;
 
-//import com.google.protobuf.GeneratedMessageV3;
-
 import com.google.protobuf.GeneratedMessageV3;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
