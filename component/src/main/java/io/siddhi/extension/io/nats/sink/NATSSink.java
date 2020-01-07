@@ -31,15 +31,13 @@ import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.core.util.transport.OptionHolder;
-import io.siddhi.extension.io.nats.sink.nats.AbstractNats;
+import io.siddhi.extension.io.nats.sink.nats.NATSCore;
+import io.siddhi.extension.io.nats.sink.nats.NATSStreaming;
 import io.siddhi.extension.io.nats.util.NATSConstants;
 import io.siddhi.query.api.definition.StreamDefinition;
-import org.apache.log4j.Logger;
 
-import java.io.IOException;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
 
 /**
  * NATS output transport(Handle the publishing process) class.
@@ -87,41 +85,12 @@ import java.util.concurrent.TimeoutException;
                                 "streaming broker",
                         type = DataType.STRING
                 ),
-                @Parameter(name = NATSConstants.CONNECTION_TIME_OUT,
-                        description = "Configure the connection time out in seconds.",
+                @Parameter(name = NATSConstants.OPTIONAL_CONFIGURATION,
+                        description = "This parameter contains all the other possible configurations that the nats" +
+                                " client can be created with. \n `io.nats.client.reconnect.max:1, io.nats.client." +
+                                "timeout:1000`",
                         optional = true,
-                        type = DataType.LONG,
-                        defaultValue = "-"
-                ),
-                @Parameter(name = NATSConstants.PING_INTERVAL,
-                        description = "Configure the ping interval in seconds.",
-                        optional = true,
-                        type = DataType.LONG,
-                        defaultValue = "-"
-
-                ),
-                @Parameter(name = NATSConstants.MAX_PING_OUTS,
-                        description = "Configure the no of pings than can be cached.",
-                        optional = true,
-                        type = DataType.INT,
-                        defaultValue = "-"
-                ),
-                @Parameter(name = NATSConstants.MAX_RETRY_ATTEMPTS,
-                        description = "Configure the no of retry attempts.",
-                        optional = true,
-                        type = DataType.INT,
-                        defaultValue = "-"
-                ),
-                @Parameter(name = NATSConstants.RECONNECT_WAIT,
-                        description = "Set the no of seconds that should wait before the next reconnect attempt.",
-                        optional = true,
-                        type = DataType.LONG,
-                        defaultValue = "-"
-                ),
-                @Parameter(name = NATSConstants.RETRY_BUFFER_SIZE,
-                        description = "Configure the buffer size in bytes",
-                        optional = true,
-                        type = DataType.LONG,
+                        type = DataType.STRING,
                         defaultValue = "-"
                 ),
                 @Parameter(name = NATSConstants.AUTH_TYPE,
@@ -233,9 +202,7 @@ import java.util.concurrent.TimeoutException;
 )
 
 public class NATSSink extends Sink {
-    private static final Logger log = Logger.getLogger(NATSSink.class);
-    private String siddhiAppName;
-    private AbstractNats nats;
+    private NATSCore nats;
 
     @Override
     public Class[] getSupportedInputEventClasses() {
@@ -254,43 +221,38 @@ public class NATSSink extends Sink {
     @Override
     protected StateFactory init(StreamDefinition streamDefinition, OptionHolder optionHolder, ConfigReader configReader,
                                 SiddhiAppContext siddhiAppContext) {
-        this.siddhiAppName = siddhiAppContext.getName();
-        nats = AbstractNats.getNats(optionHolder);
-        nats.initiateClient(optionHolder, siddhiAppName, streamDefinition.getId());
+        if (optionHolder.isOptionExists(NATSConstants.CLUSTER_ID) || optionHolder.isOptionExists(
+                NATSConstants.STREAMING_CLUSTER_ID)) {
+            nats = new NATSStreaming(this);
+        } else {
+            nats = new NATSCore();
+        }
+        nats.initiateClient(optionHolder, siddhiAppContext.getName(), streamDefinition.getId());
         return null;
     }
 
     @Override
     public void publish(Object payload, DynamicOptions dynamicOptions, State state) throws
             ConnectionUnavailableException  {
-        nats.publishMessages(payload, dynamicOptions, state);
+        byte[] messageBytes;
+        if (payload instanceof byte[]) {
+            messageBytes = (byte[]) payload;
+        } else {
+            String message = (String) payload;
+            messageBytes = message.getBytes(StandardCharsets.UTF_8);
+        }
+        nats.publishMessages(payload, messageBytes, dynamicOptions);
     }
 
     @Override
     public void connect() throws ConnectionUnavailableException {
-        try {
-            nats.createNATSClient();
-        } catch (IOException e) {
-            throw new ConnectionUnavailableException("Error in Siddhi App " + siddhiAppName + " while connecting to " +
-                    "NATS server endpoint " + Arrays.toString(nats.getNatsUrl()) + " at destination: " +
-                    nats.getDestination(), e);
-        } catch (InterruptedException e) {
-            throw new ConnectionUnavailableException("Error in Siddhi App " + siddhiAppName + " while connecting to" +
-                    " NATS server endpoint " + Arrays.toString(nats.getNatsUrl()) + " at destination: " +
-                    nats.getDestination().getValue() + ". The calling thread is interrupted before the connection " +
-                    "can be established.", e);
-        }
+        nats.createNATSClient();
     }
 
     @Override
     public void disconnect() {
-        try {
-            nats.disconnect();
-        } catch (IOException | TimeoutException | InterruptedException e) {
-            log.error("Error disconnecting the Stan receiver in Siddhi App " + siddhiAppName +
-                    " when publishing messages to NATS endpoint " + Arrays.toString(nats.getNatsUrl()) + " . " +
-                    e.getMessage(), e);
-        }
+        nats.disconnect();
+
     }
 
     @Override
