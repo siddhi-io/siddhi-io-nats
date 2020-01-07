@@ -33,7 +33,8 @@ import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.OptionHolder;
-import io.siddhi.extension.io.nats.source.nats.AbstractNats;
+import io.siddhi.extension.io.nats.source.nats.NATSCore;
+import io.siddhi.extension.io.nats.source.nats.NATSStreaming;
 import io.siddhi.extension.io.nats.util.NATSConstants;
 
 import java.util.Map;
@@ -110,41 +111,12 @@ import java.util.Map;
                         optional = true,
                         defaultValue = "None"
                 ),
-                @Parameter(name = NATSConstants.CONNECTION_TIME_OUT,
-                        description = "Configure the connection time out in seconds.",
+                @Parameter(name = NATSConstants.OPTIONAL_CONFIGURATION,
+                        description = "This parameter contains all the other possible configurations that the nats" +
+                                " client can be created with. \n `io.nats.client.reconnect.max:8, io.nats.client." +
+                                "timeout:5000`",
                         optional = true,
-                        type = DataType.LONG,
-                        defaultValue = "-"
-                ),
-                @Parameter(name = NATSConstants.PING_INTERVAL,
-                        description = "Configure the ping interval in seconds.",
-                        optional = true,
-                        type = DataType.LONG,
-                        defaultValue = "-"
-
-                ),
-                @Parameter(name = NATSConstants.MAX_PING_OUTS,
-                        description = "Configure the no of pings than can be cached.",
-                        optional = true,
-                        type = DataType.INT,
-                        defaultValue = "-"
-                ),
-                @Parameter(name = NATSConstants.MAX_RETRY_ATTEMPTS,
-                        description = "Configure the no of retry attempts.",
-                        optional = true,
-                        type = DataType.INT,
-                        defaultValue = "-"
-                ),
-                @Parameter(name = NATSConstants.RECONNECT_WAIT,
-                        description = "Set the no of seconds that should wait before the next reconnect attempt.",
-                        optional = true,
-                        type = DataType.LONG,
-                        defaultValue = "-"
-                ),
-                @Parameter(name = NATSConstants.RETRY_BUFFER_SIZE,
-                        description = "Configure the buffer size in bytes",
-                        optional = true,
-                        type = DataType.LONG,
+                        type = DataType.STRING,
                         defaultValue = "-"
                 ),
                 @Parameter(name = NATSConstants.AUTH_TYPE,
@@ -265,13 +237,18 @@ import java.util.Map;
 
 public class NATSSource extends Source {
 
-    private AbstractNats nats;
+    private NATSCore nats;
 
     @Override
     public StateFactory init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
                              String[] requestedTransportPropertyNames, ConfigReader configReader,
                              SiddhiAppContext siddhiAppContext) {
-        nats = AbstractNats.getNATS(optionHolder);
+        if (optionHolder.isOptionExists(NATSConstants.CLUSTER_ID) || optionHolder.isOptionExists(
+                NATSConstants.STREAMING_CLUSTER_ID)) {
+            nats = new NATSStreaming();
+        } else {
+            nats = new NATSCore();
+        }
         return nats.initiateNatsClient(sourceEventListener, optionHolder, requestedTransportPropertyNames, configReader,
                 siddhiAppContext);
     }

@@ -21,7 +21,6 @@ import io.nats.streaming.Message;
 import io.nats.streaming.MessageHandler;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.stream.input.source.SourceEventListener;
-import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -35,21 +34,20 @@ import static io.siddhi.extension.io.nats.util.NATSConstants.SEQUENCE_NUMBER;
  * Process the NATS subject subscription channel in concurrent safe manner.
  */
 public class NATSMessageProcessor implements MessageHandler {
-    private static final Logger log = Logger.getLogger(NATSMessageProcessor.class);
     private SourceEventListener sourceEventListener;
-    private boolean paused;
+    private volatile boolean paused;
     private ReentrantLock lock;
     private Condition condition;
     private AtomicInteger messageSequenceTracker;
     private String[] requestedTransportPropertyNames;
 
     public NATSMessageProcessor(SourceEventListener sourceEventListener, String[] requestedTransportPropertyNames,
-                                AtomicInteger messageSequenceTracker) {
+                                AtomicInteger messageSequenceTracker, ReentrantLock lock, Condition condition) {
         this.sourceEventListener = sourceEventListener;
         this.messageSequenceTracker = messageSequenceTracker;
         this.requestedTransportPropertyNames = requestedTransportPropertyNames.clone();
-        lock = new ReentrantLock();
-        condition = lock.newCondition();
+        this.lock = lock;
+        this.condition = condition;
     }
 
     @Override
@@ -65,7 +63,7 @@ public class NATSMessageProcessor implements MessageHandler {
             }
         }
         messageSequenceTracker.incrementAndGet();
-        String[] properties = new String[requestedTransportPropertyNames.length];
+        Object[] properties = new String[requestedTransportPropertyNames.length];
         for (int i = 0; i < requestedTransportPropertyNames.length; i++) {
             if (requestedTransportPropertyNames[i].equalsIgnoreCase(SEQUENCE_NUMBER)) {
                 properties[i] = String.valueOf(messageSequenceTracker.get());

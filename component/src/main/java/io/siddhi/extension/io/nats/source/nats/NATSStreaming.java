@@ -25,24 +25,24 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class which extends NATS to create nats streaming client and receive messages from relevant subject.
  */
-public class NATSStreaming extends AbstractNats {
+public class NATSStreaming extends NATSCore {
 
     private static final Logger log = Logger.getLogger(NATSStreaming.class);
     private String durableName;
     private String  sequenceNumber;
     private Subscription subscription;
     private NATSMessageProcessor natsMessageProcessor;
-    private String[] reqTransportPropertyNames;
     private String clusterId;
     private String clientId;
     private StreamingConnection streamingConnection;
-    private SourceEventListener sourceEventListener;
 
     @Override
     public StateFactory<NATSSourceState> initiateNatsClient(SourceEventListener sourceEventListener
@@ -50,9 +50,11 @@ public class NATSStreaming extends AbstractNats {
             , SiddhiAppContext siddhiAppContext) {
         super.initiateNatsClient(sourceEventListener, optionHolder, requestedTransportPropertyNames, configReader,
                 siddhiAppContext);
-        this.sourceEventListener = sourceEventListener;
-        this.reqTransportPropertyNames = requestedTransportPropertyNames.clone();
-        this.clusterId = optionHolder.validateAndGetStaticValue(NATSConstants.CLUSTER_ID);
+        if (optionHolder.isOptionExists(NATSConstants.CLUSTER_ID)) {
+            this.clusterId = optionHolder.validateAndGetStaticValue(NATSConstants.CLUSTER_ID);
+        } else if (optionHolder.isOptionExists(NATSConstants.STREAMING_CLUSTER_ID)) {
+            this.clusterId = optionHolder.validateAndGetStaticValue(NATSConstants.STREAMING_CLUSTER_ID);
+        }
         this.clientId = optionHolder.validateAndGetStaticValue(NATSConstants.CLIENT_ID, NATSUtils.createClientId(
                 siddhiAppName, streamId));
         if (optionHolder.isOptionExists(NATSConstants.DURABLE_NAME)) {
@@ -74,12 +76,9 @@ public class NATSStreaming extends AbstractNats {
             StreamingConnectionFactory streamingConnectionFactory = new StreamingConnectionFactory(options);
             streamingConnection =  streamingConnectionFactory.createConnection();
         } catch (IOException e) {
-            log.error("Error while connecting to NATS server at destination: " + destination);
             throw new ConnectionUnavailableException("Error while connecting to NATS server at destination: "
                     + destination, e);
         } catch (InterruptedException e) {
-            log.error("Error while connecting to NATS server at destination: " + destination + ".The calling thread "
-                    + "is interrupted before the connection can be established.");
             throw new ConnectionUnavailableException("Error while connecting to NATS server at destination: "
                     + destination + " .The calling thread is interrupted before the connection can be established.", e);
         }
@@ -94,12 +93,11 @@ public class NATSStreaming extends AbstractNats {
         }
         subscriptionOptionsBuilder.startAtSequence(natsSourceState.lastSentSequenceNo.get());
         try {
-
             if (durableName != null) {
                 subscriptionOptionsBuilder.durableName(durableName);
             }
-            natsMessageProcessor = new NATSMessageProcessor(sourceEventListener, reqTransportPropertyNames,
-                    natsSourceState.lastSentSequenceNo);
+            natsMessageProcessor = new NATSMessageProcessor(sourceEventListener, requestedTransportPropertyNames,
+                    natsSourceState.lastSentSequenceNo, lock, condition);
             if (queueGroupName != null) {
                 subscription =  streamingConnection.subscribe(destination , queueGroupName, natsMessageProcessor,
                         subscriptionOptionsBuilder.build());
@@ -138,7 +136,7 @@ public class NATSStreaming extends AbstractNats {
         if (natsMessageProcessor != null) {
             natsMessageProcessor.pause();
             if (log.isDebugEnabled()) {
-                log.debug("Nats source paused for destination: " + destination);
+                log.debug("Nats streaming source paused for destination: " + destination);
             }
         }
     }
@@ -148,7 +146,7 @@ public class NATSStreaming extends AbstractNats {
         if (natsMessageProcessor != null) {
             natsMessageProcessor.resume();
             if (log.isDebugEnabled()) {
-                log.debug("Nats source resumed for destination: " + destination);
+                log.debug("Nats streaming source resumed for destination: " + destination);
             }
         }
     }
@@ -193,14 +191,10 @@ public class NATSStreaming extends AbstractNats {
         @Override
         public void connectionLost(StreamingConnection streamingConnection, Exception e) {
             log.error("Exception occurred in Siddhi App" + siddhiAppName +
-                    " when consuming messages from NATS endpoint " + natsUrl[0] + " . " + e.getMessage(), e);
-            Thread thread = new Thread() {
-                public void run() {
-                    connectionCallback.onError(new ConnectionUnavailableException(e));
-                }
-            };
-
-            thread.start();
+                    " when consuming messages from NATS endpoint " + natsUrls[0] + " . " + e.getMessage(), e);
+            Runnable thread = () -> connectionCallback.onError(new ConnectionUnavailableException(e));
+            ExecutorService executorService = Executors.newFixedThreadPool(1);
+            executorService.execute(thread);
         }
     }
 }
