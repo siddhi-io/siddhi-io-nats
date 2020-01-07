@@ -54,6 +54,16 @@ public class NATSConstants {
     public static final String TRUSTSTORE_ALGORITHM = "truststore.algorithm";
     public static final String STORE_TYPE = "tls.store.type";
     public static final String CLIENT_VERIFY = "client.verify";
+    public static final String OPTIONAL_CONFIGURATION = "optional.configuration";
     public static final List<String> AUTH_TYPE_LIST = Collections.unmodifiableList(Arrays.asList
             ("user", "token", "tls"));
+
+    public static final String DEFAULT_KEYSTORE_PATH = "${carbon.home}/resources/security/wso2carbon.jks";
+    public static final String DEFAULT_TRUSTSTORE_PATH = "${carbon.home}/resources/security/client-truststore.jks";
+    public static final String DEFAULT_STORE_PASSWORD = "wso2carbon";
+    public static final String DEFAULT_KEY_PASSWORD = "wso2carbon";
+    public static final String DEFAULT_KEYSTORE_ALGORITHM = "SunX509";
+    public static final String DEFAULT_TRUSTSTORE_ALGORITHM = "SunX509";
+    public static final String DEFAULT_STORE_TYPE = "JKS";
+
 }
