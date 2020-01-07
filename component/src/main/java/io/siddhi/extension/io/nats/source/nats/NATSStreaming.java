@@ -1,3 +1,4 @@
+
 package io.siddhi.extension.io.nats.source.nats;
 
 import io.nats.client.Connection;
@@ -91,7 +92,7 @@ public class NATSStreaming extends NATSCore {
                 Integer.parseInt(sequenceNumber)) {
             natsSourceState.lastSentSequenceNo.set(Integer.parseInt(sequenceNumber));
         }
-        subscriptionOptionsBuilder.startAtSequence(natsSourceState.lastSentSequenceNo.get());
+        subscriptionOptionsBuilder.startAtSequence(natsSourceState.lastSentSequenceNo.get() + 1);
         try {
             if (durableName != null) {
                 subscriptionOptionsBuilder.durableName(durableName);
