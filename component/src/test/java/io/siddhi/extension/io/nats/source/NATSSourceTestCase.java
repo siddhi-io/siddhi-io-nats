@@ -3,6 +3,7 @@ package io.siddhi.extension.io.nats.source;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
+import io.siddhi.core.stream.input.source.Source;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.extension.io.nats.utils.NATSClient;
@@ -16,6 +17,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -43,7 +46,7 @@ public class NATSSourceTestCase {
     }
 
     @Test
-    public void testNatsBasicSubscribtion1() throws InterruptedException, TimeoutException, IOException {
+    public void testNatsBasicSubscribtion() throws InterruptedException, TimeoutException, IOException {
         ResultContainer resultContainer = new ResultContainer(2, 3);
         NATSClient natsClient = new NATSClient("nats-test1", resultContainer, port);
         natsClient.connectClient();
@@ -85,7 +88,7 @@ public class NATSSourceTestCase {
     }
 
     @Test
-    public void testNatsProtobuf2()
+    public void testNatsProtobuf()
             throws InterruptedException {
         ResultContainer resultContainer = new ResultContainer(2, 3);
         NATSClient natsClient = new NATSClient("nats-test15", resultContainer, port, true);
@@ -204,7 +207,53 @@ public class NATSSourceTestCase {
 
         Assert.assertTrue(instream1Count.get() != 0, "Total events should be shared between clients");
         Assert.assertTrue(instream2Count.get() != 0, "Total events should be shared between clients");
-        Assert.assertEquals(instream1Count.get() + instream2Count.get(), 9);
+        Assert.assertEquals(instream1Count.get() + instream2Count.get(), 10);
+        siddhiManager.shutdown();
+        natsClient.close();
+    }
+
+    @Test
+    public void testNatsSourcePause() throws InterruptedException, TimeoutException, IOException {
+        ResultContainer resultContainer = new ResultContainer(2, 3);
+        NATSClient natsClient = new NATSClient("nats-test7", resultContainer, port);
+        natsClient.connectClient();
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String siddhiApp = "@App:name(\"Test-plan7\")"
+                + "@source(type='nats', @map(type='xml'), "
+                + "destination='nats-test7', "
+                + "bootstrap.servers='" + "nats://localhost:" + port + "' "
+                + ")"
+                + "define stream inputStream (name string, age int, country string);"
+                + "@info(name = 'query1') "
+                + "from inputStream "
+                + "select *  "
+                + "insert into outputStream;";
+
+        SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+        executionPlanRuntime.addCallback("inputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                for (Event event : events) {
+                    resultContainer.eventReceived(event.toString());
+                }
+            }
+        });
+
+        Collection<List<Source>> sources = executionPlanRuntime.getSources();
+        executionPlanRuntime.start();
+        sources.forEach(e -> e.forEach(Source::pause));
+        Thread.sleep(300);
+
+        natsClient.publish("<events><event><name>JAMES</name><age>22</age>"
+                + "<country>US</country></event></events>");
+        sources.forEach(e -> e.forEach(Source::resume));
+        natsClient.publish("<events><event><name>MIKE</name><age>22</age>"
+                + "<country>GERMANY</country></event></events>");
+        Thread.sleep(300);
+
+        Assert.assertTrue(resultContainer.assertMessageContent("JAMES"));
+        Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
         siddhiManager.shutdown();
         natsClient.close();
     }

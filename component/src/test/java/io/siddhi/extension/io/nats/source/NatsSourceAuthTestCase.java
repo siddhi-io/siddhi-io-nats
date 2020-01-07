@@ -8,6 +8,8 @@ import io.siddhi.core.util.EventPrinter;
 import io.siddhi.extension.io.nats.utils.NATSClient;
 import io.siddhi.extension.io.nats.utils.ResultContainer;
 import io.siddhi.extension.io.nats.utils.STANClient;
+import org.testcontainers.containers.BindMode;
+import org.testcontainers.containers.GenericContainer;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -19,12 +21,27 @@ import java.util.concurrent.TimeoutException;
  */
 public class NatsSourceAuthTestCase {
 
+    GenericContainer simpleWebServer;
     private int port = 4222;
 
+    private void startDocker(boolean isTls, String dockerImgName, String... commands) throws InterruptedException {
+        simpleWebServer = new GenericContainer(dockerImgName);
+        simpleWebServer.setPrivilegedMode(true);
+        if (isTls) {
+            simpleWebServer.addFileSystemBind("src/test/resources/certs", "/certs", BindMode.READ_WRITE);
+        }
+        simpleWebServer.setCommand(commands);
+        simpleWebServer.start();
+        port = simpleWebServer.getMappedPort(4222);
+        Thread.sleep(500);
+    }
+
     @Test
-    public void natsSubscribeWithUsernameAndPassword() throws InterruptedException, TimeoutException, IOException {
+    public void natsSubscribeWithUsernameAndPassword() throws InterruptedException {
+        startDocker(false, "nats", "--user", "test", "--pass", "1234");
         ResultContainer resultContainer = new ResultContainer(2, 3);
         NATSClient natsClient = new NATSClient("nats-test1", resultContainer, port);
+        natsClient.setUsernameAndPassword("test".toCharArray(), "1234".toCharArray());
         natsClient.connectClient();
         SiddhiManager siddhiManager = new SiddhiManager();
         String siddhiApp = "@App:name(\"Test-plan1\")"
@@ -61,10 +78,12 @@ public class NatsSourceAuthTestCase {
         Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
         siddhiManager.shutdown();
         natsClient.close();
+        simpleWebServer.close();
     }
 
-    @Test
-    public void natsSubscribeWithToken() throws InterruptedException, TimeoutException, IOException {
+    @Test(dependsOnMethods = "natsSubscribeWithUsernameAndPassword")
+    public void natsSubscribeWithToken() throws InterruptedException {
+        startDocker(false, "nats", "--auth", "test");
         ResultContainer resultContainer = new ResultContainer(2, 3);
         NATSClient natsClient = new NATSClient("nats-test1", resultContainer, port);
         natsClient.setToken("test".toCharArray());
@@ -104,10 +123,12 @@ public class NatsSourceAuthTestCase {
         Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
         siddhiManager.shutdown();
         natsClient.close();
+        simpleWebServer.close();
     }
 
-    @Test
+    @Test(dependsOnMethods = "natsSubscribeWithToken")
     public void natsSubscribeWithTLS() throws Exception {
+        startDocker(true, "nats", "--tls", "--tlscert", "certs/server.pem", "--tlskey", "certs/key.pem");
         ResultContainer resultContainer = new ResultContainer(2, 3);
         NATSClient natsClient = new NATSClient("nats-test1", resultContainer, port);
         natsClient.addSSL();
@@ -148,14 +169,16 @@ public class NatsSourceAuthTestCase {
         Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
         siddhiManager.shutdown();
         natsClient.close();
+        simpleWebServer.close();
     }
 
-    @Test
+    @Test(dependsOnMethods = "natsSubscribeWithTLS")
     public void testStanWithUsernameAndPassword() throws InterruptedException, TimeoutException, IOException {
+        startDocker(true, "nats-streaming", "--user", "test", "--pass", "1234");
         ResultContainer resultContainer = new ResultContainer(2, 3);
         STANClient stanClient = new STANClient("test-cluster", "nats-source-test1",
                 "nats://localhost:" + port);
-        stanClient.setUsernameAndPassword("user".toCharArray(), "1234".toCharArray());
+        stanClient.setUsernameAndPassword("test".toCharArray(), "1234".toCharArray());
         stanClient.connect();
         SiddhiManager siddhiManager = new SiddhiManager();
         String siddhiApp = "@App:name(\"Test-plan1\")"
@@ -163,7 +186,7 @@ public class NatsSourceAuthTestCase {
                 + "destination='nats-test1', "
                 + "client.id='nats-source-test1-siddhi', "
                 + "server.urls='" + "nats://localhost:" + port + "', "
-                + "auth.type='user', username='user', password='1234',"
+                + "auth.type='user', username='test', password='1234',"
                 + "cluster.id='test-cluster'"
                 + ")"
                 + "define stream inputStream (name string, age int, country string);"
@@ -195,14 +218,16 @@ public class NatsSourceAuthTestCase {
         Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
         siddhiManager.shutdown();
         stanClient.close();
+        simpleWebServer.close();
     }
 
-    @Test
+    @Test(dependsOnMethods = "testStanWithUsernameAndPassword")
     public void testStanWithToken() throws InterruptedException, TimeoutException, IOException {
+        startDocker(true, "nats-streaming", "--auth", "test");
         ResultContainer resultContainer = new ResultContainer(2, 3);
         STANClient stanClient = new STANClient("test-cluster", "nats-source-test1",
                 "nats://localhost:" + port);
-        stanClient.setToken("1234".toCharArray());
+        stanClient.setToken("test".toCharArray());
         stanClient.connect();
         SiddhiManager siddhiManager = new SiddhiManager();
         String siddhiApp = "@App:name(\"Test-plan1\")"
@@ -210,7 +235,7 @@ public class NatsSourceAuthTestCase {
                 + "destination='nats-test1', "
                 + "client.id='nats-source-test1-siddhi', "
                 + "server.urls='" + "nats://localhost:" + port + "', "
-                + "auth.type='token', token='1234',"
+                + "auth.type='token', token='test',"
                 + "cluster.id='test-cluster'"
                 + ")"
                 + "define stream inputStream (name string, age int, country string);"
@@ -242,6 +267,7 @@ public class NatsSourceAuthTestCase {
         Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
         siddhiManager.shutdown();
         stanClient.close();
+        simpleWebServer.close();
     }
 
 }

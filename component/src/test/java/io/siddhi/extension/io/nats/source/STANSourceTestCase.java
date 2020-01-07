@@ -418,56 +418,10 @@ public class STANSourceTestCase {
     }
 
     /**
-     * Test subscription to a NATS topic based on sequence number with mandatory configurations only.
-     */
-    @Test(dependsOnMethods = "testNatsSourcePause")
-    public void testNatsSequenceSubscribtionWithMandatoryConfigs() throws InterruptedException, IOException,
-            TimeoutException {
-        ResultContainer resultContainer = new ResultContainer(2, 3);
-        STANClient stanClient = new STANClient("test-cluster", "nats-source-test8",
-                "nats://localhost:" + port);
-        stanClient.connect();
-        SiddhiManager siddhiManager = new SiddhiManager();
-        String siddhiApp = "@App:name(\"Test-plan8\")"
-                + "@source(type='nats', @map(type='xml'), "
-                + "bootstrap.servers='" + "nats://localhost:" + port + "', "
-                + "destination='nats-test8' "
-                + ")"
-                + "define stream inputStream (name string, age int, country string);"
-                + "@info(name = 'query1') "
-                + "from inputStream "
-                + "select *  "
-                + "insert into outputStream;";
-
-        SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
-        executionPlanRuntime.addCallback("inputStream", new StreamCallback() {
-            @Override
-            public void receive(Event[] events) {
-                EventPrinter.print(events);
-                for (Event event : events) {
-                    resultContainer.eventReceived(event.toString());
-                }
-            }
-        });
-        executionPlanRuntime.start();
-        Thread.sleep(300);
-
-        stanClient.publish("nats-test8", "<events><event><name>JAMES</name><age>22</age>"
-                + "<country>US</country></event></events>");
-        stanClient.publish("nats-test8", "<events><event><name>MIKE</name><age>22</age>"
-                + "<country>GERMANY</country></event></events>");
-        Thread.sleep(300);
-        Assert.assertTrue(resultContainer.assertMessageContent("JAMES"));
-        Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
-        siddhiManager.shutdown();
-        stanClient.close();
-    }
-
-    /**
      * If invalid cluster name is provided in NATS source configurations then ConnectionUnavailableException
      * should have been thrown. Here incorrect cluster id provided hence the connection will fail.
      */
-    @Test(dependsOnMethods = "testNatsSequenceSubscribtionWithMandatoryConfigs")
+    @Test(dependsOnMethods = "testNatsSourcePause")
     public void testInvalidClusterName() throws InterruptedException {
         log.info("Test with connection unavailable exception");
         log = Logger.getLogger(Source.class);
@@ -865,7 +819,7 @@ public class STANSourceTestCase {
     /**
      * Test the checks the capability of the NATS source to send protobuf events.
      */
-    @Test
+    @Test(dependsOnMethods = "testDurableSubscription")
     public void testNatsProtobuf()
             throws InterruptedException, TimeoutException,
             IOException {
@@ -898,7 +852,7 @@ public class STANSourceTestCase {
             }
         });
         executionPlanRuntime.start();
-        Thread.sleep(100);
+        Thread.sleep(1000);
 
         long nic1 = 1222;
         Person person1 = Person.newBuilder().setNic(nic1).setName("Jimmy").build();
@@ -918,7 +872,7 @@ public class STANSourceTestCase {
     /**
      * Test passing NATS Streaming sequence number as an event attribute.
      */
-    @Test
+    @Test(dependsOnMethods = "testNatsProtobuf")
     public void testUsingSeqNumber() throws InterruptedException, TimeoutException, IOException {
         AtomicBoolean eventReceived = new AtomicBoolean(false);
         ResultContainer eventsAtSource = new ResultContainer(2, 3);

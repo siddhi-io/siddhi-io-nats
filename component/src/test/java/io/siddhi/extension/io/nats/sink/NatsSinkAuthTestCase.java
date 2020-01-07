@@ -6,6 +6,8 @@ import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.extension.io.nats.utils.NATSClient;
 import io.siddhi.extension.io.nats.utils.ResultContainer;
 import io.siddhi.extension.io.nats.utils.STANClient;
+import org.testcontainers.containers.BindMode;
+import org.testcontainers.containers.GenericContainer;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -17,10 +19,25 @@ import java.util.concurrent.TimeoutException;
  */
 public class NatsSinkAuthTestCase {
 
+    GenericContainer simpleWebServer;
     private int port = 4222;
+
+    private void startDocker(boolean isTls, String dockerImgName, String... commands) throws InterruptedException {
+        simpleWebServer = new GenericContainer(dockerImgName);
+        simpleWebServer.setPrivilegedMode(true);
+        if (isTls) {
+            simpleWebServer.addFileSystemBind("src/test/resources/certs", "/certs", BindMode.READ_WRITE);
+        }
+        simpleWebServer.setCommand(commands);
+        simpleWebServer.start();
+        port = simpleWebServer.getMappedPort(4222);
+        Thread.sleep(500);
+    }
+
 
     @Test
     public void natsCorePublishWithUserNameAndPass() throws InterruptedException, TimeoutException, IOException {
+        startDocker(false, "nats", "--user", "test", "--pass", "1234");
         ResultContainer resultContainer = new ResultContainer(20, 8);
         NATSClient natsClient = new NATSClient("nats-test1", resultContainer, port);
         natsClient.setUsernameAndPassword("test".toCharArray(), "1234".toCharArray());
@@ -47,10 +64,12 @@ public class NatsSinkAuthTestCase {
         Assert.assertTrue(resultContainer.assertMessageContent("<events><event><name>MIKE</name><age>19</age>" +
                 "<country>Germany</country></event></events>"));
         siddhiManager.shutdown();
+        simpleWebServer.close();
     }
 
-    @Test
+    @Test(dependsOnMethods = "natsCorePublishWithUserNameAndPass")
     public void natsStreamingWithUserNameAndPassword() throws InterruptedException, TimeoutException, IOException {
+        startDocker(false, "nats-streaming", "--user", "test", "--pass", "1234");
         ResultContainer resultContainer = new ResultContainer(2, 3);
         STANClient stanClient = new STANClient("test-cluster", "stan_test1", "nats://localhost:"
                 + port, resultContainer);
@@ -79,10 +98,12 @@ public class NatsSinkAuthTestCase {
         Assert.assertTrue(resultContainer.assertMessageContent("JAMES"));
         Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
         siddhiManager.shutdown();
+        simpleWebServer.close();
     }
 
-    @Test
+    @Test(dependsOnMethods = "natsStreamingWithUserNameAndPassword")
     public void natsCorePublishWithToken() throws InterruptedException, TimeoutException, IOException {
+        startDocker(false, "nats", "--auth", "test");
         ResultContainer resultContainer = new ResultContainer(20, 8);
         NATSClient natsClient = new NATSClient("nats-test2", resultContainer, port);
         natsClient.setToken("test".toCharArray());
@@ -109,10 +130,12 @@ public class NatsSinkAuthTestCase {
         Assert.assertTrue(resultContainer.assertMessageContent("<events><event><name>MIKE</name><age>19</age>" +
                 "<country>Germany</country></event></events>"));
         siddhiManager.shutdown();
+        simpleWebServer.close();
     }
 
-    @Test
+    @Test(dependsOnMethods = "natsCorePublishWithToken")
     public void natsStreamingWithToken() throws InterruptedException, TimeoutException, IOException {
+        startDocker(false, "nats-streaming", "--auth", "test");
         ResultContainer resultContainer = new ResultContainer(2, 3);
         STANClient stanClient = new STANClient("test-cluster", "stan_test1", "nats://localhost:"
                 + port, resultContainer);
@@ -141,10 +164,12 @@ public class NatsSinkAuthTestCase {
         Assert.assertTrue(resultContainer.assertMessageContent("JAMES"));
         Assert.assertTrue(resultContainer.assertMessageContent("MIKE"));
         siddhiManager.shutdown();
+        simpleWebServer.close();
     }
 
-    @Test
+    @Test(dependsOnMethods = "natsStreamingWithToken")
     public void natsCorePublishWithTLS() throws Exception {
+        startDocker(true, "nats", "--tls", "--tlscert", "certs/server.pem", "--tlskey", "certs/key.pem");
         ResultContainer resultContainer = new ResultContainer(20, 8);
         NATSClient natsClient = new NATSClient("nats-test2", resultContainer, port);
         natsClient.addSSL();
@@ -172,6 +197,7 @@ public class NatsSinkAuthTestCase {
         Assert.assertTrue(resultContainer.assertMessageContent("<events><event><name>MIKE</name><age>19</age>" +
                 "<country>Germany</country></event></events>"));
         siddhiManager.shutdown();
+        simpleWebServer.close();
     }
 
 }

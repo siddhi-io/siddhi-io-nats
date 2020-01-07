@@ -31,13 +31,10 @@ import org.testcontainers.containers.GenericContainer;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Contains test cases for Nats Streaming sink.
@@ -45,19 +42,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class STANSinkTestCase {
     private Logger log = Logger.getLogger(STANSinkTestCase.class);
     private int port;
-    private AtomicInteger eventCounter = new AtomicInteger(0);
 
-    @BeforeMethod
-    private void setUp() {
-        eventCounter.set(0);
-    }
 
     @BeforeClass
     private void initializeDockerContainer() throws InterruptedException {
         GenericContainer simpleWebServer
                 = new GenericContainer("nats-streaming:0.11.2");
         simpleWebServer.setPrivilegedMode(true);
-        eventCounter.set(0);
         simpleWebServer.start();
         port = simpleWebServer.getMappedPort(4222);
         Thread.sleep(500);
@@ -101,7 +92,8 @@ public class STANSinkTestCase {
      * if a property missing from the siddhi stan sink which defined as mandatory in the extension definition, then
      * {@link SiddhiAppValidationException} will be thrown.
      */
-    @Test(expectedExceptions = SiddhiAppValidationException.class, dependsOnMethods = "natsSimplePublishTest")
+    @Test(expectedExceptions = SiddhiAppValidationException.class,
+            dependsOnMethods = "natsSimplePublishTest")
     public void testMissingNatsMandatoryProperty() {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inStreamDefinition = "@App:name('Test-plan2')\n"
@@ -340,9 +332,8 @@ public class STANSinkTestCase {
     /**
      * Test for configure the NATS Sink to publish the message to a NATS-streaming subject.
      */
-    @Test
-    public void testNatsProtobuf() throws InterruptedException, NoSuchMethodException,
-            InvocationTargetException, IllegalAccessException, TimeoutException, IOException {
+    @Test(dependsOnMethods = "testMissingMappingAnnotation")
+    public void testNatsProtobuf() throws InterruptedException, TimeoutException, IOException {
         ResultContainer resultContainer = new ResultContainer(2, 10);
         STANClient stanClient = new STANClient("test-cluster", "stan-test10",
                 "nats://localhost:" + port, resultContainer);
@@ -374,7 +365,7 @@ public class STANSinkTestCase {
         siddhiManager.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = "testNatsProtobuf")
     public void testDistributedSink() throws InterruptedException, TimeoutException, IOException {
         log.info("Test distributed Nats Sink");
         ResultContainer topic1ResultContainer = new ResultContainer(2, 20);
