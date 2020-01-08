@@ -75,7 +75,7 @@ public class NATSMessageProcessor implements MessageHandler {
         } catch (IOException e) {
             String message = new String(msg.getData(), StandardCharsets.UTF_8);
             throw new SiddhiAppRuntimeException("Error occurred while sending the ack for message : " + message
-                    + ".Received to the stream: " + sourceEventListener.getStreamDefinition().getId(), e);
+                    + ". Received to the stream: '" + sourceEventListener.getStreamDefinition().getId() + "'.", e);
         }
     }
 

@@ -158,8 +158,8 @@ public class NATSUtils {
                 break;
             }
             default: {
-                log.warn("Found unknown authentication type, siddhi-io-nats only supports for " +
-                        NATSConstants.AUTH_TYPE_LIST + " types. Given 'user.auth' type: '" + authType + "'. Hence " +
+                log.warn("Found unknown authentication type, siddhi-io-nats only supports for ['user', 'token'," +
+                        " 'tls'] authentication types. Given 'user.auth' type: '" + authType + "'. Hence " +
                         "creating the connection without authentication");
             }
         }

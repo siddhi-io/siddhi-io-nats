@@ -130,11 +130,11 @@ public class NATSCore {
                 dispatcher.subscribe(destination);
             }
         } catch (IOException e) {
-            throw new ConnectionUnavailableException("Error occurred in initializing the NATS receiver in " +
-                    siddhiAppName + " for stream: " + streamId);
+            throw new ConnectionUnavailableException("Error occurred in initializing the NATS receiver in '" +
+                    siddhiAppName + "' for stream: " + streamId);
         } catch (InterruptedException e) {
-            throw new SiddhiAppRuntimeException("Error occurred in initializing the NATS receiver in " +
-                    siddhiAppName + " for stream: " + streamId + ".The calling thread is interrupted before the " +
+            throw new SiddhiAppRuntimeException("Error occurred in initializing the NATS receiver in '" +
+                    siddhiAppName + "' for stream: '" + streamId + "'.The calling thread is interrupted before the " +
                     "connection completes.");
         }
     }

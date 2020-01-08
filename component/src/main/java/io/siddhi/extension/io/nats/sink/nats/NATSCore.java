@@ -106,8 +106,8 @@ public class NATSCore {
                     connection.flush(Duration.ofMillis(50));
                     connection.close();
                 } catch (TimeoutException | InterruptedException e) {
-                    log.error("Error disconnecting the nats receiver in Siddhi App " + siddhiAppName +
-                            " when publishing messages to NATS endpoint " + Arrays.toString(natsUrls) + " . " +
+                    log.error("Error disconnecting the nats receiver in Siddhi App '" + siddhiAppName +
+                            "' when publishing messages to NATS endpoint " + Arrays.toString(natsUrls) + " . " +
                             e.getMessage(), e);
                 }
             }
@@ -118,11 +118,11 @@ public class NATSCore {
         try {
             return Nats.connect(natsOptionBuilder.build());
         } catch (IOException e) {
-            throw new ConnectionUnavailableException("Error in Siddhi App " + siddhiAppName + " while connecting to " +
-                    "NATS server endpoint " + Arrays.toString(natsUrls) + " at destination: " + destination.getValue()
+            throw new ConnectionUnavailableException("Error in Siddhi App '" + siddhiAppName + "' while connecting to "
+                    + "NATS server endpoint " + Arrays.toString(natsUrls) + " at destination: " + destination.getValue()
                     , e);
         } catch (InterruptedException e) {
-            throw new ConnectionUnavailableException("Error in Siddhi App " + siddhiAppName + " while connecting to" +
+            throw new ConnectionUnavailableException("Error in Siddhi App '" + siddhiAppName + "' while connecting to" +
                     " NATS server endpoint " + Arrays.toString(natsUrls) + " at destination: " +
                     destination.getValue() + ". The calling thread is interrupted before the connection " +
                     "can be established.", e);

@@ -74,11 +74,11 @@ public class NATSStreaming extends NATSCore {
                     optionsBuilder.build());
             streamingConnection = streamingConnectionFactory.createConnection();
         } catch (IOException e) {
-            throw new ConnectionUnavailableException("Error in Siddhi App " + siddhiAppName + " while connecting to " +
-                    "NATS server endpoint " + Arrays.toString(natsUrls) + " at destination: " + destination.getValue()
+            throw new ConnectionUnavailableException("Error in Siddhi App '" + siddhiAppName + "' while connecting to "
+                    + "NATS server endpoint " + Arrays.toString(natsUrls) + " at destination: " + destination.getValue()
                     , e);
         } catch (InterruptedException e) {
-            throw new ConnectionUnavailableException("Error in Siddhi App " + siddhiAppName + " while connecting to" +
+            throw new ConnectionUnavailableException("Error in Siddhi App '" + siddhiAppName + "' while connecting to" +
                     " NATS server endpoint " + Arrays.toString(natsUrls) + " at destination: " +
                     destination.getValue() + ". The calling thread is interrupted before the connection " +
                     "can be established.", e);
@@ -116,8 +116,8 @@ public class NATSStreaming extends NATSCore {
             try {
                 streamingConnection.close();
             } catch (IOException | TimeoutException | InterruptedException e) {
-                log.error("Error disconnecting the Stan receiver in Siddhi App " + siddhiAppName +
-                        " when publishing messages to NATS endpoint " + Arrays.toString(natsUrls) + " . " +
+                log.error("Error disconnecting the Stan receiver in Siddhi App '" + siddhiAppName +
+                        "' when publishing messages to NATS endpoint " + Arrays.toString(natsUrls) + " . " +
                         e.getMessage(), e);
             }
         }
@@ -127,7 +127,7 @@ public class NATSStreaming extends NATSCore {
 
         @Override
         public void connectionLost(StreamingConnection streamingConnection, Exception e) {
-            log.error("Exception occurred in Siddhi" + " App " + siddhiAppName + " when publishing messages " +
+            log.error("Exception occurred in Siddhi" + " App '" + siddhiAppName + "' when publishing messages " +
                     "to NATS endpoints " + Arrays.toString(natsUrls) + " . " + e.getMessage(), e);
             isConnected = new AtomicBoolean(false);
         }

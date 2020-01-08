@@ -40,6 +40,7 @@ import io.siddhi.extension.io.nats.util.NATSUtils;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -124,15 +125,15 @@ public class NATSStreaming extends NATSCore {
             }
 
         } catch (IOException e) {
-            throw new SiddhiAppRuntimeException("Error occurred in initializing the NATS receiver for stream: "
-                    + sourceEventListener.getStreamDefinition().getId(), e);
+            throw new SiddhiAppRuntimeException("Error occurred in initializing the NATS receiver for stream: '"
+                    + sourceEventListener.getStreamDefinition().getId() + "'.", e);
         } catch (InterruptedException e) {
-            throw new SiddhiAppRuntimeException("Error occurred in initializing the NATS receiver for stream: "
-                    + sourceEventListener.getStreamDefinition().getId() + ".The calling thread is interrupted before "
+            throw new SiddhiAppRuntimeException("Error occurred in initializing the NATS receiver for stream: '"
+                    + sourceEventListener.getStreamDefinition().getId() + "'.The calling thread is interrupted before "
                     + "the connection completes.", e);
         } catch (TimeoutException e) {
-            throw new SiddhiAppRuntimeException("Error occurred in initializing the NATS receiver for stream: "
-                    + sourceEventListener.getStreamDefinition().getId() + ".The server request cannot be completed "
+            throw new SiddhiAppRuntimeException("Error occurred in initializing the NATS receiver for stream: '"
+                    + sourceEventListener.getStreamDefinition().getId() + "'.The server request cannot be completed "
                     + "within the subscription timeout.", e);
         }
     }
@@ -207,8 +208,9 @@ public class NATSStreaming extends NATSCore {
 
         @Override
         public void connectionLost(StreamingConnection streamingConnection, Exception e) {
-            log.error("Exception occurred in Siddhi App" + siddhiAppName +
-                    " when consuming messages from NATS endpoint " + natsUrls[0] + " . " + e.getMessage(), e);
+            log.error("Exception occurred in Siddhi App '" + siddhiAppName +
+                    "' when consuming messages from NATS endpoint " + Arrays.toString(natsUrls) + " . " +
+                    e.getMessage(), e);
             Runnable thread = () -> connectionCallback.onError(new ConnectionUnavailableException(e));
             ExecutorService executorService = Executors.newFixedThreadPool(1);
             executorService.execute(thread);

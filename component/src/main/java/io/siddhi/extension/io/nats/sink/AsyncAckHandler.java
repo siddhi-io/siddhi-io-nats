@@ -49,14 +49,14 @@ public class AsyncAckHandler implements AckHandler {
     @Override
     public void onAck(String nuid, Exception e) {
         if (e != null) {
-            log.error("Exception occurred in Siddhi App " + siddhiAppName +
-                    " when publishing message " + nuid + " to NATS endpoint " + Arrays.toString(natsURL) + " . " +
+            log.error("Exception occurred in Siddhi App '" + siddhiAppName +
+                    "' when publishing message " + nuid + " to NATS endpoint " + Arrays.toString(natsURL) + " . " +
                     e.getMessage(), e);
             natsSink.onError(payload, dynamicOptions, new ConnectionUnavailableException(e.getMessage(), e));
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("Received ack for msg id " + nuid + " in Siddhi App " + siddhiAppName +
-                        " when publishing message to NATS endpoint " + Arrays.toString(natsURL) + " . ");
+                log.debug("Received ack for msg id " + nuid + " in Siddhi App '" + siddhiAppName +
+                        "' when publishing message to NATS endpoint " + Arrays.toString(natsURL) + " . ");
             }
         }
     }
