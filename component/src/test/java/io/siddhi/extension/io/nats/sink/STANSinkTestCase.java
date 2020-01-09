@@ -100,7 +100,7 @@ public class STANSinkTestCase {
                 + "@sink(type='nats', @map(type='xml'), "
                 + "server.urls='" + "nats://localhost:" + port + "', "
                 + "client.id='test-plan2',"
-                + "cluster.id='test-cluster'"
+                + "streaming.cluster.id='test-cluster'"
                 + ")"
                 + "define stream inputStream (name string, age int, country string);";
 
@@ -118,9 +118,9 @@ public class STANSinkTestCase {
         String inStreamDefinition = "@App:name('Test-plan3')\n"
                 + "@sink(type='nats', @map(type='xml'), "
                 + "destination='nats-test3', "
-                + "bootstrap.servers='natss://localhost:4222',"
+                + "server.urls='natss://localhost:4222',"
                 + "client.id='stan_client',"
-                + "cluster.id='test-cluster'"
+                + "streaming.cluster.id='test-cluster'"
                 + ")"
                 + "define stream inputStream (name string, age int, country string);";
 
@@ -143,8 +143,8 @@ public class STANSinkTestCase {
         String inStreamDefinition = "@App:name('Test-plan1')\n"
                 + "@sink(type='nats', @map(type='xml'), "
                 + "destination='test-plan4', "
-                + "bootstrap.servers='" + "nats://localhost:" + port + "', "
-                + "cluster.id='test-cluster'"
+                + "server.urls='" + "nats://localhost:" + port + "', "
+                + "streaming.cluster.id='test-cluster'"
                 + ")"
                 + "define stream inputStream (name string, age int, country string);";
 
@@ -178,14 +178,14 @@ public class STANSinkTestCase {
                 + "@sink(type='nats', @map(type='xml'), "
                 + "destination='nats-source-test-siddhi-1', "
                 + "client.id='test-plan5-siddhi-sink-pub1',"
-                + "bootstrap.servers='" + "nats://localhost:" + port + "', "
-                + "cluster.id='test-cluster'"
+                + "server.urls='" + "nats://localhost:" + port + "', "
+                + "streaming.cluster.id='test-cluster'"
                 + ")"
                 + "@sink(type='nats', @map(type='xml'), "
                 + "destination='nats-source-test-siddhi-2', "
                 + "client.id='test-plan5-siddhi-sink-pub2',"
-                + "bootstrap.servers='" + "nats://localhost:" + port + "', "
-                + "cluster.id='test-cluster'"
+                + "server.urls='" + "nats://localhost:" + port + "', "
+                + "streaming.cluster.id='test-cluster'"
                 + ")"
                 + "define stream inputStream (name string, age int, country string);";
 
@@ -222,7 +222,7 @@ public class STANSinkTestCase {
 
         String inStreamDefinition = "@App:name('Test-plan6')\n"
                 + "@sink(type='nats', @map(type='xml'), "
-                + "bootstrap.servers='" + "nats://localhost:" + port + "', streaming.cluster.id='test-cluster',"
+                + "server.urls='" + "nats://localhost:" + port + "', streaming.cluster.id='test-cluster',"
                 + "destination='nats-test6' "
                 + ")"
                 + "define stream inputStream (name string, age int, country string);";
@@ -257,15 +257,15 @@ public class STANSinkTestCase {
                 + "@sink(type='nats', @map(type='xml'), "
                 + "destination='nats-test7', "
                 + "client.id='test-plan7-siddhi',"
-                + "bootstrap.servers='" + "nats://localhost:" + port + "', "
-                + "cluster.id='nats-cluster'"
+                + "server.urls='" + "nats://localhost:" + port + "', "
+                + "streaming.cluster.id='nats-cluster'"
                 + ")"
                 + "define stream inputStream (name string, age int, country string);";
 
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
         executionPlanRuntime.start();
         Thread.sleep(500);
-        Assert.assertTrue(appender.getMessages().contains("Error in Siddhi App Test-plan7 while " +
+        Assert.assertTrue(appender.getMessages().contains("Error in Siddhi App 'Test-plan7' while " +
                 "connecting to NATS server "));
         siddhiManager.shutdown();
     }
@@ -286,8 +286,8 @@ public class STANSinkTestCase {
                 + "@sink(type='nats', @map(type='xml'), "
                 + "destination='nats-test8', "
                 + "client.id='nats-source-test8-siddhi', "
-                + "bootstrap.servers='nats://localhost:5223', "
-                + "cluster.id='test-cluster'"
+                + "server.urls='nats://localhost:5223', "
+                + "streaming.cluster.id='test-cluster'"
                 + ")"
                 + "define stream inputStream (name string, age int, country string);"
                 + "@info(name = 'query1') "
@@ -298,7 +298,7 @@ public class STANSinkTestCase {
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
         executionPlanRuntime.start();
         Thread.sleep(500);
-        Assert.assertTrue(appender.getMessages().contains("Error in Siddhi App Test-plan8 while connecting to NATS " +
+        Assert.assertTrue(appender.getMessages().contains("Error in Siddhi App 'Test-plan8' while connecting to NATS " +
                 "server endpoint [nats://localhost:5223]"));
         siddhiManager.shutdown();
     }
@@ -316,8 +316,8 @@ public class STANSinkTestCase {
                     + "@sink(type='nats',"
                     + "destination='nats-sink-test9', "
                     + "client.id='test-plan9-siddhi',"
-                    + "bootstrap.servers='nats://localhost:4222',"
-                    + "cluster.id='test-cluster'"
+                    + "server.urls='nats://localhost:4222',"
+                    + "streaming.cluster.id='test-cluster'"
                     + ")"
                     + "define stream inputStream (name string, age int, country string);";
 
@@ -345,8 +345,8 @@ public class STANSinkTestCase {
                 "@map(type='protobuf', class='io.siddhi.extension.io.nats.utils.protobuf.Person'), "
                 + "destination='nats-test10', "
                 + "client.id='test-plan10-siddhi',"
-                + "bootstrap.servers='" + "nats://localhost:" + port + "', "
-                + "cluster.id='test-cluster'"
+                + "server.urls='" + "nats://localhost:" + port + "', "
+                + "streaming.cluster.id='test-cluster'"
                 + ")"
                 + "define stream inputStream (nic long, name string);";
 
@@ -386,7 +386,7 @@ public class STANSinkTestCase {
                 + "@distribution(strategy='partitioned', partitionKey='symbol', "
                 + "@destination(destination = 'nats-topic1'), @destination(destination = 'nats-topic2')), "
                 + "server.urls='" + "nats://localhost:" + port + "', "
-                + "cluster.id='test-cluster', "
+                + "streaming.cluster.id='test-cluster', "
                 + "@map(type='json')) " +
                 "define stream BarStream (symbol string, price float, volume long); ";
         String query = "" +

@@ -135,7 +135,7 @@ public class NATSSinkTestCase {
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
         executionPlanRuntime.start();
         Thread.sleep(500);
-        Assert.assertTrue(appender.getMessages().contains("Error in Siddhi App Test-plan8 while connecting to NATS " +
+        Assert.assertTrue(appender.getMessages().contains("Error in Siddhi App 'Test-plan8' while connecting to NATS " +
                 "server endpoint [nats://localhost:5223]"));
         siddhiManager.shutdown();
     }
