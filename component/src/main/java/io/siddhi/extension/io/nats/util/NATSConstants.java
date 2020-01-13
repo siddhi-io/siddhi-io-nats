@@ -26,9 +26,32 @@ public class NATSConstants {
     public static final String CLIENT_ID = "client.id";
     public static final String CLUSTER_ID = "cluster.id";
     public static final String DEFAULT_SERVER_URL = "nats://localhost:4222";
-    public static final String DEFAULT_CLUSTER_ID = "test-cluster";
     public static final String QUEUE_GROUP_NAME = "queue.group.name";
     public static final String DURABLE_NAME = "durable.name";
     public static final String SUBSCRIPTION_SEQUENCE = "subscription.sequence";
     public static final String SEQUENCE_NUMBER  = "sequenceNumber";
+    public static final String SERVER_URLS = "server.urls";
+    public static final String STREAMING_CLUSTER_ID = "streaming.cluster.id";
+    public static final String AUTH_TYPE = "auth.type";
+    public static final String USERNAME = "username";
+    public static final String PASSWORD = "password";
+    public static final String TOKEN = "token";
+    public static final String KEYSTORE_FILE = "keystore.file";
+    public static final String KEYSTORE_PASSWORD = "keystore.password";
+    public static final String KEYSTORE_ALGORITHM = "keystore.algorithm";
+    public static final String TRUSTSTORE_FILE = "truststore.file";
+    public static final String TRUSTSTORE_PASSWORD = "truststore.password";
+    public static final String TRUSTSTORE_ALGORITHM = "truststore.algorithm";
+    public static final String STORE_TYPE = "tls.store.type";
+    public static final String CLIENT_VERIFY = "client.verify";
+    public static final String OPTIONAL_CONFIGURATION = "optional.configuration";
+
+    public static final String DEFAULT_KEYSTORE_PATH = "${carbon.home}/resources/security/wso2carbon.jks";
+    public static final String DEFAULT_TRUSTSTORE_PATH = "${carbon.home}/resources/security/client-truststore.jks";
+    public static final String DEFAULT_STORE_PASSWORD = "wso2carbon";
+    public static final String DEFAULT_KEY_PASSWORD = "wso2carbon";
+    public static final String DEFAULT_KEYSTORE_ALGORITHM = "SunX509";
+    public static final String DEFAULT_TRUSTSTORE_ALGORITHM = "SunX509";
+    public static final String DEFAULT_STORE_TYPE = "JKS";
+
 }

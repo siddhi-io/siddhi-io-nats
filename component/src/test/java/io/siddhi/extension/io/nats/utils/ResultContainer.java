@@ -17,6 +17,8 @@
  */
 package io.siddhi.extension.io.nats.utils;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import io.siddhi.extension.io.nats.utils.protobuf.Person;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -31,13 +33,9 @@ import java.util.concurrent.TimeUnit;
 public class ResultContainer {
     private static Log log = LogFactory.getLog(ResultContainer.class);
     private int eventCount;
-    private List<String> results;
+    private List<Object> results;
     private CountDownLatch latch;
     private int timeout = 90;
-
-    public int getEventCount() {
-        return eventCount;
-    }
 
     public ResultContainer(int expectedEventCount) {
         eventCount = 0;
@@ -52,7 +50,17 @@ public class ResultContainer {
         timeout = timeoutInSeconds;
     }
 
+    public int getEventCount() {
+        return eventCount;
+    }
+
     public void eventReceived(String message) {
+        eventCount++;
+        results.add(message);
+        latch.countDown();
+    }
+
+    public void eventReceived(byte[] message) {
         eventCount++;
         results.add(message);
         latch.countDown();
@@ -69,8 +77,8 @@ public class ResultContainer {
     public Boolean assertMessageContent(String content) {
         try {
             if (latch.await(timeout, TimeUnit.SECONDS)) {
-                for (String message : results) {
-                    if (message.contains(content)) {
+                for (Object message : results) {
+                    if (((String) message).contains(content)) {
                         return true;
                     }
                 }
@@ -82,6 +90,15 @@ public class ResultContainer {
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        }
+        return false;
+    }
+
+    public boolean asserProtobufContent(Person person) throws InvalidProtocolBufferException {
+        for (Object message : results) {
+            if (person.equals(Person.parseFrom((byte[]) message))) {
+                return true;
+            }
         }
         return false;
     }

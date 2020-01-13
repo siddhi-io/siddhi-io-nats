@@ -52,6 +52,10 @@
             <artifactId>java-nats-streaming</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.nats</groupId>
+            <artifactId>jnats</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
         </dependency>
@@ -167,6 +171,7 @@
                                 </Export-Package>
                                 <Import-Package>
                                     io.nats.streaming;version="0.0.0",
+                                    io.nats.client;version="0.0.0",
                                     io.siddhi.annotation.*;version="${siddhi.version}",
                                     io.siddhi.core.*;version="${siddhi.version}",
                                     io.siddhi.query.*;version="${siddhi.version}",
