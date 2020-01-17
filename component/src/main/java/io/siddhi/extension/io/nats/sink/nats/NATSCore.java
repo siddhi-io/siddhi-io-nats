@@ -43,7 +43,6 @@ public class NATSCore {
 
     private static final Logger log = Logger.getLogger(NATSCore.class);
     protected Option destination;
-    protected String clientId;
     protected String[] natsUrls;
     protected String streamId;
     protected String siddhiAppName;
