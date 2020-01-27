@@ -40,6 +40,7 @@ import io.siddhi.extension.io.nats.util.NATSUtils;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,6 +62,7 @@ public class NATSStreaming extends NATSCore {
     private String clusterId;
     private String clientId;
     private StreamingConnection streamingConnection;
+    private long ackWait;
 
     @Override
     public StateFactory<NATSSourceState> initiateNatsClient(SourceEventListener sourceEventListener
@@ -80,6 +82,9 @@ public class NATSStreaming extends NATSCore {
         }
         if (optionHolder.isOptionExists(NATSConstants.SUBSCRIPTION_SEQUENCE)) {
             this.sequenceNumber = optionHolder.validateAndGetStaticValue(NATSConstants.SUBSCRIPTION_SEQUENCE);
+        }
+        if (optionHolder.isOptionExists(NATSConstants.ACK_WAIT)) {
+            this.ackWait = Long.parseLong(optionHolder.validateAndGetStaticValue(NATSConstants.ACK_WAIT));
         }
         return NATSSourceState::new;
     }
@@ -110,12 +115,15 @@ public class NATSStreaming extends NATSCore {
             natsSourceState.lastSentSequenceNo.set(Integer.parseInt(sequenceNumber));
         }
         subscriptionOptionsBuilder.startAtSequence(natsSourceState.lastSentSequenceNo.get() + 1);
+        if (ackWait != 0) {
+            subscriptionOptionsBuilder.manualAcks().ackWait(Duration.ofSeconds(ackWait));
+        }
         try {
             if (durableName != null) {
                 subscriptionOptionsBuilder.durableName(durableName);
             }
             natsMessageProcessor = new NATSMessageProcessor(sourceEventListener, requestedTransportPropertyNames,
-                    natsSourceState.lastSentSequenceNo, lock, condition);
+                    natsSourceState.lastSentSequenceNo, lock, condition, ackWait);
             if (queueGroupName != null) {
                 subscription =  streamingConnection.subscribe(destination , queueGroupName, natsMessageProcessor,
                         subscriptionOptionsBuilder.build());

@@ -65,8 +65,8 @@ public class NATSStreaming extends NATSCore {
                 siddhiAppName, streamId));
         this.optionsBuilder = new Options.Builder().clientId(clientId).clusterId(this.clusterId).
                 connectionLostHandler(new NATSStreaming.NATSConnectionLostHandler());
-        if (optionHolder.isOptionExists(NATSConstants.ACK_TIMEOUT)) {
-            long ackWait = Long.parseLong(optionHolder.validateAndGetStaticValue(NATSConstants.ACK_TIMEOUT));
+        if (optionHolder.isOptionExists(NATSConstants.ACK_WAIT)) {
+            long ackWait = Long.parseLong(optionHolder.validateAndGetStaticValue(NATSConstants.ACK_WAIT));
             this.optionsBuilder.pubAckWait(Duration.ofSeconds(ackWait));
         }
     }

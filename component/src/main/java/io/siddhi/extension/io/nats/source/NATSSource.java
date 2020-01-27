@@ -117,6 +117,13 @@ import java.util.Map;
                         type = DataType.STRING,
                         defaultValue = "-"
                 ),
+                @Parameter(name = NATSConstants.ACK_WAIT,
+                        description = "Add `ack wait` interval for nats subscriptions in seconds. Supported only with" +
+                                " nats streaming brokers.",
+                        optional = true,
+                        type = DataType.LONG,
+                        defaultValue = "-"
+                ),
                 @Parameter(name = NATSConstants.AUTH_TYPE,
                         description = "Set the authentication type. Should be provided when using secure connection." +
                                 " Supported authentication types: `user, token, tls`",

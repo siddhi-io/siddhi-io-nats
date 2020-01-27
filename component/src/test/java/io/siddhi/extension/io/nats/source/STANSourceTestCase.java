@@ -933,9 +933,9 @@ public class STANSourceTestCase {
     }
 
     /**
-     * Test passing NATS Streaming sequence number as an event attribute.
+     * Test state persistence in nats.
      */
-    @Test
+    @Test(dependsOnMethods = "testUsingSeqNumber")
     public void testStatePersistence() throws InterruptedException, TimeoutException, IOException {
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         STANClient stanClient = new STANClient("test-cluster", "nats-source-test16",
@@ -1000,6 +1000,70 @@ public class STANSourceTestCase {
         siddhiRuntime.start();
         Thread.sleep(3000);
 
+        AssertJUnit.assertEquals(eventCounter.get(), 4);
+        siddhiManager.shutdown();
+        stanClient.close();
+    }
+
+    /**
+     * Test manual ack option in nats.
+     */
+    @Test(dependsOnMethods = "testStatePersistence")
+    public void testNatsWithAckTimewait()
+            throws InterruptedException, TimeoutException,
+            IOException {
+        STANClient stanClient = new STANClient("test-cluster", "nats-source-test1",
+                "nats://localhost:" + port);
+        stanClient.connect();
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String siddhiApp = "@App:name(\"Test-plan15\")"
+                + "@source(type='nats', " +
+                "@map(type='protobuf', class='io.siddhi.extension.io.nats.utils.protobuf.Person'), "
+                + "destination='nats-test17', "
+                + "client.id='nats-source-test17-siddhi', "
+                + "bootstrap.servers='" + "nats://localhost:" + port + "', "
+                + "streaming.cluster.id='test-cluster', ack.wait='3'"
+                + ")"
+                + "define stream inputStream (nic long, name string);"
+                + "@info(name = 'query1') "
+                + "from inputStream "
+                + "select *  "
+                + "insert into outputStream;";
+
+        SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+        executionPlanRuntime.addCallback("inputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                for (int i = 0; i < events.length; i++) {
+                    eventCounter.incrementAndGet();
+                }
+            }
+        });
+        executionPlanRuntime.start();
+        Thread.sleep(1000);
+
+        long nic1 = 1222;
+        Person person1 = Person.newBuilder().setNic(nic1).setName("Jimmy").build();
+        byte[] messageObjectByteArray1 = person1.toByteArray();
+        long nic2 = 1222;
+        Person person2 = Person.newBuilder().setNic(nic2).setName("Natalie").build();
+        byte[] messageObjectByteArray2 = person2.toByteArray();
+        stanClient.publishProtobufMessage("nats-test17", messageObjectByteArray1);
+        stanClient.publishProtobufMessage("nats-test17", messageObjectByteArray2);
+
+        Collection<List<Source>> sources = executionPlanRuntime.getSources();
+        sources.forEach(sources1 -> {
+            sources1.get(0).pause();
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException ignored) {
+
+            }
+            sources1.get(0).resume();
+        });
+
+        Thread.sleep(100);
         AssertJUnit.assertEquals(eventCounter.get(), 4);
         siddhiManager.shutdown();
         stanClient.close();
