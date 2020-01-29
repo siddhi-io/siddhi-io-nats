@@ -40,14 +40,17 @@ public class NATSMessageProcessor implements MessageHandler {
     private Condition condition;
     private AtomicInteger messageSequenceTracker;
     private String[] requestedTransportPropertyNames;
+    private long ackWait;
 
     public NATSMessageProcessor(SourceEventListener sourceEventListener, String[] requestedTransportPropertyNames,
-                                AtomicInteger messageSequenceTracker, ReentrantLock lock, Condition condition) {
+                                AtomicInteger messageSequenceTracker, ReentrantLock lock, Condition condition,
+                                long ackWait) {
         this.sourceEventListener = sourceEventListener;
         this.messageSequenceTracker = messageSequenceTracker;
         this.requestedTransportPropertyNames = requestedTransportPropertyNames.clone();
         this.lock = lock;
         this.condition = condition;
+        this.ackWait = ackWait;
     }
 
     @Override
@@ -70,12 +73,14 @@ public class NATSMessageProcessor implements MessageHandler {
             }
         }
         sourceEventListener.onEvent(msg.getData(), properties);
-        try {
-            msg.ack();
-        } catch (IOException e) {
-            String message = new String(msg.getData(), StandardCharsets.UTF_8);
-            throw new SiddhiAppRuntimeException("Error occurred while sending the ack for message : " + message
-                    + ". Received to the stream: '" + sourceEventListener.getStreamDefinition().getId() + "'.", e);
+        if (ackWait != 0) {
+            try {
+                msg.ack();
+            } catch (IOException e) {
+                String message = new String(msg.getData(), StandardCharsets.UTF_8);
+                throw new SiddhiAppRuntimeException("Error occurred while sending the ack for message : " + message
+                        + ". Received to the stream: '" + sourceEventListener.getStreamDefinition().getId() + "'.", e);
+            }
         }
     }
 

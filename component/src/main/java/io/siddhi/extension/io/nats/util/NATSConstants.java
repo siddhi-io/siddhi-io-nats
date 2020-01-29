@@ -45,6 +45,7 @@ public class NATSConstants {
     public static final String STORE_TYPE = "tls.store.type";
     public static final String CLIENT_VERIFY = "client.verify";
     public static final String OPTIONAL_CONFIGURATION = "optional.configuration";
+    public static final String ACK_WAIT = "ack.wait";
 
     public static final String DEFAULT_KEYSTORE_PATH = "${carbon.home}/resources/security/wso2carbon.jks";
     public static final String DEFAULT_TRUSTSTORE_PATH = "${carbon.home}/resources/security/client-truststore.jks";

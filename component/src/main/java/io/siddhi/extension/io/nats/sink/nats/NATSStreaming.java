@@ -33,6 +33,7 @@ import io.siddhi.extension.io.nats.util.NATSUtils;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -60,10 +61,14 @@ public class NATSStreaming extends NATSCore {
         } else if (optionHolder.isOptionExists(NATSConstants.STREAMING_CLUSTER_ID)) {
             this.clusterId = optionHolder.validateAndGetStaticValue(NATSConstants.STREAMING_CLUSTER_ID);
         }
-        this.clientId = optionHolder.validateAndGetStaticValue(NATSConstants.CLIENT_ID, NATSUtils.createClientId(
+        String clientId = optionHolder.validateAndGetStaticValue(NATSConstants.CLIENT_ID, NATSUtils.createClientId(
                 siddhiAppName, streamId));
-        this.optionsBuilder = new Options.Builder().clientId(this.clientId).clusterId(this.clusterId).
+        this.optionsBuilder = new Options.Builder().clientId(clientId).clusterId(this.clusterId).
                 connectionLostHandler(new NATSStreaming.NATSConnectionLostHandler());
+        if (optionHolder.isOptionExists(NATSConstants.ACK_WAIT)) {
+            long ackWait = Long.parseLong(optionHolder.validateAndGetStaticValue(NATSConstants.ACK_WAIT));
+            this.optionsBuilder.pubAckWait(Duration.ofSeconds(ackWait));
+        }
     }
 
     @Override

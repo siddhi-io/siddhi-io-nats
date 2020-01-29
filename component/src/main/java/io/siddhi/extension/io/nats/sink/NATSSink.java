@@ -85,6 +85,11 @@ import java.util.Map;
                                 "streaming broker",
                         type = DataType.STRING
                 ),
+                @Parameter(name = NATSConstants.ACK_WAIT,
+                        description = "Ack timeout in seconds for nats publisher, Supported only with nats streaming " +
+                                "broker.",
+                        type = DataType.LONG
+                ),
                 @Parameter(name = NATSConstants.OPTIONAL_CONFIGURATION,
                         description = "This parameter contains all the other possible configurations that the nats" +
                                 " client can be created with. \n `io.nats.client.reconnect.max:1, io.nats.client." +
