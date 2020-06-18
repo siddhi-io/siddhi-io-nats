@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -55,6 +56,7 @@ public class STANSourceTestCase {
     private String clientId;
     private AtomicInteger eventCounter = new AtomicInteger(0);
     private int port = 4222;
+    private GenericContainer simpleWebServer;
 
     @BeforeMethod
     private void setUp() {
@@ -64,7 +66,7 @@ public class STANSourceTestCase {
 
     @BeforeClass
     private void initializeDockerContainer() throws InterruptedException {
-        GenericContainer simpleWebServer
+        simpleWebServer
                 = new GenericContainer("nats-streaming:0.11.2");
         eventCounter.set(0);
         simpleWebServer.setPrivilegedMode(true);
@@ -1009,9 +1011,8 @@ public class STANSourceTestCase {
      * Test manual ack option in nats.
      */
     @Test(dependsOnMethods = "testStatePersistence")
-    public void testNatsWithAckTimewait()
-            throws InterruptedException, TimeoutException,
-            IOException {
+    public void testNatsWithAckTimewait() throws InterruptedException, TimeoutException, IOException {
+
         STANClient stanClient = new STANClient("test-cluster", "nats-source-test1",
                 "nats://localhost:" + port);
         stanClient.connect();
@@ -1022,7 +1023,7 @@ public class STANSourceTestCase {
                 + "destination='nats-test17', "
                 + "client.id='nats-source-test17-siddhi', "
                 + "bootstrap.servers='" + "nats://localhost:" + port + "', "
-                + "streaming.cluster.id='test-cluster', ack.wait='3'"
+                + "streaming.cluster.id='test-cluster', ack.wait='2'"
                 + ")"
                 + "define stream inputStream (nic long, name string);"
                 + "@info(name = 'query1') "
@@ -1049,21 +1050,22 @@ public class STANSourceTestCase {
         long nic2 = 1222;
         Person person2 = Person.newBuilder().setNic(nic2).setName("Natalie").build();
         byte[] messageObjectByteArray2 = person2.toByteArray();
+        Executors.newFixedThreadPool(1).execute(() -> {
+            Collection<List<Source>> sources = executionPlanRuntime.getSources();
+            sources.forEach(sources1 -> {
+                sources1.get(0).pause();
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException ignored) {
+
+                }
+                sources1.get(0).resume();
+            });
+        });
+        Thread.sleep(100);
         stanClient.publishProtobufMessage("nats-test17", messageObjectByteArray1);
         stanClient.publishProtobufMessage("nats-test17", messageObjectByteArray2);
-
-        Collection<List<Source>> sources = executionPlanRuntime.getSources();
-        sources.forEach(sources1 -> {
-            sources1.get(0).pause();
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException ignored) {
-
-            }
-            sources1.get(0).resume();
-        });
-
-        Thread.sleep(100);
+        Thread.sleep(5000);
         AssertJUnit.assertEquals(eventCounter.get(), 4);
         siddhiManager.shutdown();
         stanClient.close();
