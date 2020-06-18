@@ -367,6 +367,18 @@
 
 
   <li class="md-nav__item">
+    <a href="api/2.0.11/" title="2.0.11" class="md-nav__link">
+      2.0.11
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="api/2.0.10/" title="2.0.10" class="md-nav__link">
       2.0.10
     </a>
@@ -629,32 +641,35 @@
                 
                 <h1 id="siddhi-io-nats">Siddhi IO NATS</h1>
 <p><a href="https://wso2.org/jenkins/job/siddhi/job/siddhi-io-nats/"><img alt="Jenkins Build Status" src="https://wso2.org/jenkins/job/siddhi/job/siddhi-io-nats/badge/icon" /></a>
-  <a href="https://github.com/siddhi-io/siddhi-io-nats/releases"><img alt="GitHub (pre-)Release" src="https://img.shields.io/github/release/siddhi-io/siddhi-io-nats/all.svg" /></a>
-  <a href="https://github.com/siddhi-io/siddhi-io-nats/releases"><img alt="GitHub (Pre-)Release Date" src="https://img.shields.io/github/release-date-pre/siddhi-io/siddhi-io-nats.svg" /></a>
+  <a href="https://github.com/siddhi-io/siddhi-io-nats/releases"><img alt="GitHub Release" src="https://img.shields.io/github/release/siddhi-io/siddhi-io-nats.svg" /></a>
+  <a href="https://github.com/siddhi-io/siddhi-io-nats/releases"><img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/siddhi-io/siddhi-io-nats.svg" /></a>
   <a href="https://github.com/siddhi-io/siddhi-io-nats/issues"><img alt="GitHub Open Issues" src="https://img.shields.io/github/issues-raw/siddhi-io/siddhi-io-nats.svg" /></a>
   <a href="https://github.com/siddhi-io/siddhi-io-nats/commits/master"><img alt="GitHub Last Commit" src="https://img.shields.io/github/last-commit/siddhi-io/siddhi-io-nats.svg" /></a>
   <a href="https://opensource.org/licenses/Apache-2.0"><img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" /></a></p>
-<p>The <strong>siddhi-io-nats extension</strong> is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a> that receives and publishes events via NATS and HTTPS transports, calls external services, and serves incoming requests and provide synchronous responses.</p>
+<p>The <strong>siddhi-io-nats extension</strong> is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a> that receives and publishes events from and to NATS.</p>
 <p>For information on <a target="_blank" href="https://siddhi.io/">Siddhi</a> and it's features refer <a target="_blank" href="https://siddhi.io/redirect/docs.html">Siddhi Documentation</a>. </p>
 <h2 id="download">Download</h2>
 <ul>
 <li>Versions 2.x and above with group id <code>io.siddhi.extension.*</code> from <a target="_blank" href="https://mvnrepository.com/artifact/io.siddhi.extension.io.nats/siddhi-io-nats/">here</a>.</li>
-<li>Versions 1.x and lower with group id <code>org.wso2.extension.siddhi.*</code> from <a target="_blank" href="https://mvnrepository.com/artifact/org.wso2.extension.siddhi.execution.string/siddhi-io-nats">here</a>.</li>
+<li>Versions 1.x and lower with group id <code>org.wso2.extension.siddhi.*</code> from <a target="_blank" href="https://mvnrepository.com/artifact/org.wso2.extension.siddhi.io.nats/siddhi-io-nats">here</a>.</li>
 </ul>
 <h2 id="latest-api-docs">Latest API Docs</h2>
-<p>Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-io-nats/api/2.0.10">2.0.10</a>.</p>
+<p>Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-io-nats/api/2.0.11">2.0.11</a>.</p>
 <h2 id="features">Features</h2>
 <ul>
-<li><a target="_blank" href="https://siddhi-io.github.io/siddhi-io-nats/api/2.0.10/#nats-sink">nats</a> <em>(<a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#sink">Sink</a>)</em><br> <div style="padding-left: 1em;"><p><p style="word-wrap: break-word;margin: 0;">NATS Sink allows users to subscribe to a NATS broker and publish messages.</p></p></div></li>
-<li><a target="_blank" href="https://siddhi-io.github.io/siddhi-io-nats/api/2.0.10/#nats-source">nats</a> <em>(<a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#source">Source</a>)</em><br> <div style="padding-left: 1em;"><p><p style="word-wrap: break-word;margin: 0;">NATS Source allows users to subscribe to a NATS broker and receive messages. It has the ability to receive all the message types supported by NATS.</p></p></div></li>
+<li><a target="_blank" href="https://siddhi-io.github.io/siddhi-io-nats/api/2.0.11/#nats-sink">nats</a> <em>(<a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#sink">Sink</a>)</em><br> <div style="padding-left: 1em;"><p><p style="word-wrap: break-word;margin: 0;">NATS Sink allows users to subscribe to a Nats or Nats streaming broker and publish messages.</p></p></div></li>
+<li><a target="_blank" href="https://siddhi-io.github.io/siddhi-io-nats/api/2.0.11/#nats-source">nats</a> <em>(<a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#source">Source</a>)</em><br> <div style="padding-left: 1em;"><p><p style="word-wrap: break-word;margin: 0;">NATS Source allows users to subscribe to a NATS broker and receive messages. It has the ability to receive all the message types supported by NATS.</p></p></div></li>
 </ul>
 <h2 id="dependencies">Dependencies</h2>
-<p>Add necessary NATS client jars and related dependencies. </p>
+<p>Add following jars when using nats,</p>
 <ul>
-<li>java-nats-streaming-2.2.2.jar (Add to <SIDDHI_HOME>/jars)</li>
-<li>jnats-2.6.5.jar (Add to <SIDDHI_HOME>/jars)</li>
-<li>protobuf-java-3.9.1.jar (Add to <SIDDHI_HOME>/bundles)</li>
+<li><a href="https://repo1.maven.org/maven2/io/nats/jnats/2.6.5/jnats-2.6.5.jar">jnats-2.6.5.jar</a> (Add to <code>{SIDDHI_HOME}/jars</code>)</li>
+<li><a href="https://repo1.maven.org/maven2/com/google/protobuf/protobuf-java/3.9.1/protobuf-java-3.9.1.jar">protobuf-java-3.9.1.jar</a> (Add to <code>{SIDDHI_HOME}/bundles</code>)</li>
 </ul>
+<p>Add following jars when using nats streaming
+* <a href="https://repo1.maven.org/maven2/io/nats/jnats/2.6.5/jnats-2.6.5.jar">jnats-2.6.5.jar</a> (Add to <code>{SIDDHI_HOME}/jars</code>)
+* <a href="https://repo1.maven.org/maven2/io/nats/java-nats-streaming/2.2.2/java-nats-streaming-2.2.2.jar">java-nats-streaming-2.2.2.jar</a> (Add to <code>{SIDDHI_HOME}/jars</code>)
+* <a href="https://repo1.maven.org/maven2/com/google/protobuf/protobuf-java/3.9.1/protobuf-java-3.9.1.jar">protobuf-java-3.9.1.jar</a> (Add to <code>{SIDDHI_HOME}/bundles</code>)</p>
 <h2 id="installation">Installation</h2>
 <p>For installing this extension on various siddhi execution environments refer Siddhi documentation section on <a target="_blank" href="https://siddhi.io/redirect/add-extensions.html">adding extensions</a>.</p>
 <h2 id="support-and-contribution">Support and Contribution</h2>
