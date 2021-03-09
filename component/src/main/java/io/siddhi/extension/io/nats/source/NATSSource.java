@@ -76,8 +76,7 @@ import java.util.Map;
                         description = "Deprecated, use `" + NATSConstants.STREAMING_CLUSTER_ID + "` instead. The " +
                                 "identifier of the NATS server/cluster. Should be provided when using nats " +
                                 "streaming broker.",
-                        type = DataType.STRING,
-                        defaultValue = "-"
+                        type = DataType.STRING
                 ),
                 @Parameter(name = NATSConstants.STREAMING_CLUSTER_ID,
                         description = "The identifier of the NATS server/cluster. Should be provided when using nats " +
