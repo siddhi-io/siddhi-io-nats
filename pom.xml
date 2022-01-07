@@ -188,7 +188,7 @@
         <mavan.findbugsplugin.exclude.file>findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
         <testng.version>6.11</testng.version>
         <org.testcontainers.version>1.8.0</org.testcontainers.version>
-        <com.google.protobuf.java.version>3.9.1</com.google.protobuf.java.version>
+        <com.google.protobuf.java.version>3.16.1</com.google.protobuf.java.version>
         <siddhi.execution.math.version>5.0.4</siddhi.execution.math.version>
         <argLine>-Xmx1024m</argLine>
     </properties>
