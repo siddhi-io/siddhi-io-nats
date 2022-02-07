@@ -21,7 +21,8 @@ package io.siddhi.extension.io.nats.sink;
 import io.nats.streaming.AckHandler;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.util.transport.DynamicOptions;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 
@@ -30,7 +31,7 @@ import java.util.Arrays;
  */
 public class AsyncAckHandler implements AckHandler {
 
-    private static final Logger log = Logger.getLogger(AsyncAckHandler.class);
+    private static final Logger log = LogManager.getLogger(AsyncAckHandler.class);
     private String siddhiAppName;
     private String[] natsURL;
     private Object payload;

@@ -64,8 +64,8 @@
                 <version>${nats.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.log4j.wso2</groupId>
-                <artifactId>log4j</artifactId>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
                 <version>${log4j.version}</version>
                 <exclusions>
                     <exclusion>
@@ -173,13 +173,13 @@
         </plugins>
     </build>
     <properties>
-        <siddhi.version>5.1.13</siddhi.version>
+        <siddhi.version>5.1.21</siddhi.version>
         <siddhi.version.range>[5.0.0, 6.0.0)</siddhi.version.range>
-        <log4j.version>1.2.17.wso2v1</log4j.version>
+        <log4j.version>2.17.1</log4j.version>
         <carbon.transport.version>4.4.15</carbon.transport.version>
-        <siddhi.map.json.version>5.0.7</siddhi.map.json.version>
-        <siddhi.map.xml.version>5.0.4</siddhi.map.xml.version>
-        <siddhi.map.protobuf.version>1.0.5</siddhi.map.protobuf.version>
+        <siddhi.map.json.version>5.2.2-SNAPSHOT</siddhi.map.json.version>
+        <siddhi.map.xml.version>5.2.2-SNAPSHOT</siddhi.map.xml.version>
+        <siddhi.map.protobuf.version>1.1.1-SNAPSHOT</siddhi.map.protobuf.version>
         <jacoco.plugin.version>0.7.9</jacoco.plugin.version>
         <nats.streaming.version>2.2.2</nats.streaming.version>
         <nats.version>2.6.6</nats.version>
