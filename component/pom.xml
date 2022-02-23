@@ -44,8 +44,8 @@
             <artifactId>siddhi-query-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.log4j.wso2</groupId>
-            <artifactId>log4j</artifactId>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
         </dependency>
         <dependency>
             <groupId>io.nats</groupId>
@@ -174,8 +174,7 @@
                                     io.nats.client;version="0.0.0",
                                     io.siddhi.annotation.*;version="${siddhi.version}",
                                     io.siddhi.core.*;version="${siddhi.version}",
-                                    io.siddhi.query.*;version="${siddhi.version}",
-                                    org.apache.log4j
+                                    io.siddhi.query.*;version="${siddhi.version}"
                                 </Import-Package>
                                 <Include-Resource>
                                     META-INF=target/classes/META-INF,
@@ -248,8 +247,7 @@
                             io.nats.streaming;version="0.0.0";resolution:=optional,
                             io.siddhi.annotation.*;version="${siddhi.version.range}",
                             io.siddhi.core.*;version="${siddhi.version.range}",
-                            io.siddhi.query.*;version="${siddhi.version.range}",
-                            org.apache.log4j
+                            io.siddhi.query.*;version="${siddhi.version.range}"
                         </Import-Package>
                         <Include-Resource>
                             META-INF=target/classes/META-INF,

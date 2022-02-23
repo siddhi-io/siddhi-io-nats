@@ -21,12 +21,13 @@ import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.stream.input.InputHandler;
-import io.siddhi.core.stream.output.sink.Sink;
 import io.siddhi.extension.io.nats.utils.ResultContainer;
 import io.siddhi.extension.io.nats.utils.STANClient;
 import io.siddhi.extension.io.nats.utils.UnitTestAppender;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
 import org.testcontainers.containers.GenericContainer;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
@@ -40,7 +41,7 @@ import java.util.concurrent.TimeoutException;
  * Contains test cases for Nats Streaming sink.
  */
 public class STANSinkTestCase {
-    private Logger log = Logger.getLogger(STANSinkTestCase.class);
+    private Logger log = (Logger) LogManager.getLogger(STANSinkTestCase.class);
     private int port;
 
 
@@ -248,9 +249,11 @@ public class STANSinkTestCase {
     @Test(dependsOnMethods = "testNatsSinkWithMandatoryConfigurations")
     public void testIncorrectClusterName() throws InterruptedException {
         log.info("Test with connection unavailable exception");
-        log = Logger.getLogger(Sink.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        log.addAppender(appender);
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
+        logger.addAppender(appender);
+        appender.start();
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "@App:name('Test-plan7')\n"
@@ -265,9 +268,11 @@ public class STANSinkTestCase {
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
         executionPlanRuntime.start();
         Thread.sleep(500);
-        Assert.assertTrue(appender.getMessages().contains("Error in Siddhi App 'Test-plan7' while " +
+        AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                get("UnitTestAppender")).getMessages().contains("Error in Siddhi App 'Test-plan7' while " +
                 "connecting to NATS server "));
         siddhiManager.shutdown();
+        logger.removeAppender(appender);
     }
 
     /**
@@ -278,9 +283,11 @@ public class STANSinkTestCase {
     @Test(dependsOnMethods = "testIncorrectClusterName")
     public void testIncorrectNatsServerUrl() throws InterruptedException {
         log.info("Test with connection unavailable exception");
-        log = Logger.getLogger(Sink.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        log.addAppender(appender);
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
+        logger.addAppender(appender);
+        appender.start();
         SiddhiManager siddhiManager = new SiddhiManager();
         String siddhiApp = "@App:name(\"Test-plan8\")"
                 + "@sink(type='nats', @map(type='xml'), "
@@ -298,9 +305,11 @@ public class STANSinkTestCase {
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
         executionPlanRuntime.start();
         Thread.sleep(500);
-        Assert.assertTrue(appender.getMessages().contains("Error in Siddhi App 'Test-plan8' while connecting to NATS " +
-                "server endpoint [nats://localhost:5223]"));
+        AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                get("UnitTestAppender")).getMessages().contains("Error in Siddhi App 'Test-plan8' while " +
+                "connecting to NATS server endpoint [nats://localhost:5223]"));
         siddhiManager.shutdown();
+        logger.removeAppender(appender);
     }
 
     /**

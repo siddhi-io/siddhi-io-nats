@@ -31,7 +31,9 @@ import io.siddhi.extension.io.nats.utils.STANClient;
 import io.siddhi.extension.io.nats.utils.UnitTestAppender;
 import io.siddhi.extension.io.nats.utils.protobuf.Person;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
 import org.testcontainers.containers.GenericContainer;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
@@ -52,7 +54,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Contains test cases for NATS Streaming source.
  */
 public class STANSourceTestCase {
-    private Logger log = Logger.getLogger(STANSourceTestCase.class);
+    private Logger log = (Logger) LogManager.getLogger(STANSourceTestCase.class);
     private String clientId;
     private AtomicInteger eventCounter = new AtomicInteger(0);
     private int port = 4222;
@@ -428,9 +430,11 @@ public class STANSourceTestCase {
     @Test(dependsOnMethods = "testNatsSourcePause")
     public void testInvalidClusterName() throws InterruptedException {
         log.info("Test with connection unavailable exception");
-        log = Logger.getLogger(Source.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        log.addAppender(appender);
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
+        logger.addAppender(appender);
+        appender.start();
         SiddhiManager siddhiManager = new SiddhiManager();
         String siddhiApp = "@App:name(\"Test-plan9\")"
                 + "@source(type='nats', @map(type='xml'), "
@@ -448,9 +452,11 @@ public class STANSourceTestCase {
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
         executionPlanRuntime.start();
         Thread.sleep(300);
-        Assert.assertTrue(appender.getMessages().contains("Error while connecting to NATS server at destination: "
+        AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                get("UnitTestAppender")).getMessages().contains("Error while connecting to NATS server at destination: "
                 + "nats-test9"));
         siddhiManager.shutdown();
+        logger.removeAppender(appender);
     }
 
     /**
@@ -461,9 +467,11 @@ public class STANSourceTestCase {
     @Test(dependsOnMethods = "testInvalidClusterName")
     public void testIncorrectNatsServerUrl() throws InterruptedException {
         log.info("Test with connection unavailable exception");
-        log = Logger.getLogger(Source.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        log.addAppender(appender);
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
+        logger.addAppender(appender);
+        appender.start();
         SiddhiManager siddhiManager = new SiddhiManager();
         String siddhiApp = "@App:name(\"Test-plan10\")"
                 + "@source(type='nats', @map(type='xml'), "
@@ -481,9 +489,11 @@ public class STANSourceTestCase {
         SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
         executionPlanRuntime.start();
         Thread.sleep(300);
-        Assert.assertTrue(appender.getMessages().contains("Error while connecting to NATS server at destination: "
+        AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                get("UnitTestAppender")).getMessages().contains("Error while connecting to NATS server at destination: "
                 + "nats-test10"));
         siddhiManager.shutdown();
+        logger.removeAppender(appender);
     }
 
     /**

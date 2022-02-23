@@ -30,7 +30,8 @@ import io.siddhi.extension.io.nats.sink.AsyncAckHandler;
 import io.siddhi.extension.io.nats.sink.NATSSink;
 import io.siddhi.extension.io.nats.util.NATSConstants;
 import io.siddhi.extension.io.nats.util.NATSUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -43,7 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class NATSStreaming extends NATSCore {
 
-    private static final Logger log = Logger.getLogger(NATSStreaming.class);
+    private static final Logger log = LogManager.getLogger(NATSStreaming.class);
     private StreamingConnection streamingConnection;
     private Options.Builder optionsBuilder;
     private String clusterId;

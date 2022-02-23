@@ -18,12 +18,12 @@
 
 package io.siddhi.extension.io.nats.util;
 
-
 import io.nats.client.Options;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -54,7 +54,7 @@ import javax.net.ssl.TrustManagerFactory;
 public class NATSUtils {
 
     private static final Pattern varPattern = Pattern.compile("\\$\\{([^}]*)}");
-    private static final Logger log = Logger.getLogger(NATSUtils.class);
+    private static final Logger log = LogManager.getLogger(NATSUtils.class);
 
     public static void validateNatsUrl(String natsServerUrl, String siddhiStreamName) {
         try {
